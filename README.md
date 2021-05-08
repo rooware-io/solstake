@@ -44,3 +44,15 @@ You don’t have to ever use `eject`. The curated feature set is suitable for sm
 You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
 To learn React, check out the [React documentation](https://reactjs.org/).
+
+### Solstake
+
+https://github.com/solana-labs/solana/blob/8a3135d17bbc5ca901c0b401fdfbb453eb07a7d3/stake-accounts/src/stake_accounts.rs#L12-L14
+
+https://github.com/solana-labs/solana/tree/master/programs/stake
+
+web3
+
+getAccountInfo to get the stake account stuff
+
+https://solana-labs.github.io/solana-web3.js/classes/connection.html#getstakeactivation
