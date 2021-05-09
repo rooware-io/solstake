@@ -19,7 +19,7 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
       const stakeAccountPublicKey = await PublicKey.createWithSeed(walletAddress, seed, STAKE_PROGRAM_ID);
       console.log(stakeAccountPublicKey.toBase58());
       const accountInfo = await connection.getAccountInfo(stakeAccountPublicKey);
-      const {context, value} = await connection.getParsedAccountInfo(stakeAccountPublicKey);
+      const {value} = await connection.getParsedAccountInfo(stakeAccountPublicKey);
 
       if (value?.data && 'parsed' in value?.data) {
         console.log(value?.data.parsed);

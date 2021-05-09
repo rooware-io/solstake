@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import logo from './logo.svg';
+//import logo from './logo.svg';
 import './App.css';
-import { AppBar, Button, Card, CardActions, CardContent, Container, IconButton, Link as L2, List, ListItem, ListItemText, Menu, MenuItem, TextField, Toolbar, Typography } from '@material-ui/core';
-import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
+import { AppBar, Button, Card, CardContent, Container, Link as L2, Menu, MenuItem, TextField, Toolbar, Typography } from '@material-ui/core';
+import Skeleton from '@material-ui/lab/Skeleton';
+import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 import { OpenInNew, Sync } from '@material-ui/icons';
-import { STAKE_PROGRAM_ID } from './utils/ids';
 import { findStakeAccountMetas, StakeAccountMeta } from './utils/stakeAccounts';
 
 const demoStakeAccounts: StakeAccountMeta[] = [
@@ -13,24 +13,23 @@ const demoStakeAccounts: StakeAccountMeta[] = [
   {address: new PublicKey(0), seed: 'stake:2', balance: 1}
 ];
 
-async function getStakeAccounts(basePubKey: PublicKey, index: number) {
-  PublicKey.createWithSeed(basePubKey, index.toString(), STAKE_PROGRAM_ID);
-}
-
 const connection = new Connection(clusterApiUrl('mainnet-beta'))
 
 function App() {
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[]>(demoStakeAccounts);
 
   async function fetchStakeAccounts(pk: PublicKey) {
     setStakeAccounts(await findStakeAccountMetas(connection, pk));
+    setLoading(false);
   }
 
   useEffect(() => {
     setStakeAccounts([]);
     if (publicKey !== null) {
+      setLoading(true);
       fetchStakeAccounts(publicKey);
     }
   }, [publicKey]);
@@ -82,7 +81,7 @@ function App() {
             <Sync />
           </Button>
           <Container>
-          {stakeAccounts.map(stakeAccount => (
+          {loading ? (<Skeleton height={200}></Skeleton>): stakeAccounts.map(stakeAccount => (
             <Card variant="outlined">
               <CardContent>
                 <Typography color="textSecondary" gutterBottom>
