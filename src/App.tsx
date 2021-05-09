@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { AppBar, Button, Container, IconButton, Link as L2, List, ListItem, ListItemText, Menu, MenuItem, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Button, Card, CardActions, CardContent, Container, IconButton, Link as L2, List, ListItem, ListItemText, Menu, MenuItem, TextField, Toolbar, Typography } from '@material-ui/core';
 import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { OpenInNew, Sync } from '@material-ui/icons';
 import { STAKE_PROGRAM_ID } from './utils/ids';
@@ -23,6 +23,17 @@ function App() {
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[]>(demoStakeAccounts);
+
+  async function fetchStakeAccounts(pk: PublicKey) {
+    setStakeAccounts(await findStakeAccountMetas(connection, pk));
+  }
+
+  useEffect(() => {
+    setStakeAccounts([]);
+    if (publicKey !== null) {
+      fetchStakeAccounts(publicKey);
+    }
+  }, [publicKey]);
   
   return (
     <>
@@ -49,47 +60,50 @@ function App() {
         <Container maxWidth="sm">
           <TextField
             id="standard-basic"
-            label="Public key"
+            label="Wallet public key"
             value={publicKey?.toBase58()}
             error={errorInfo !== null}
             helperText={errorInfo}
             onChange={async function(e) {
-              let walletAddress: PublicKey | null;
               try {
-                walletAddress = new PublicKey(e.target.value);
+                const walletAddress = new PublicKey(e.target.value);
+                setErrorInfo(null);
+                setPublicKey(walletAddress);
               }
               catch {
                 console.log(`${e.target.value} is not a valid PublicKey input`);
 
                 setErrorInfo('Invalid public key');
                 setPublicKey(null);
-                setStakeAccounts([]);
-                return;
               }
-              
-              setErrorInfo(null);
-              setPublicKey(walletAddress);
-              setStakeAccounts([]);
-              setStakeAccounts(await findStakeAccountMetas(connection, walletAddress));
             }}
           />
           <Button>
             <Sync />
           </Button>
-          <List>
-            {stakeAccounts.map(stakeAccount => (
-              <ListItem>
+          <Container>
+          {stakeAccounts.map(stakeAccount => (
+            <Card variant="outlined">
+              <CardContent>
+                <Typography color="textSecondary" gutterBottom>
+                  {`${stakeAccount.seed}`}
+                </Typography>
+                <Typography variant="h5" component="h2">
+                  {`Balance: ${stakeAccount.balance} SOL`} 
+                </Typography>
+                <Typography color="textSecondary">
+                  { stakeAccount.stakeAccount ? `Type: ${stakeAccount.stakeAccount.type}, activation epoch: ${stakeAccount.stakeAccount.info.stake?.delegation.activationEpoch}, voter: ${stakeAccount.stakeAccount.info.stake?.delegation.voter}` : 'No data' }
+                </Typography>
                 <L2 href={`https://explorer.solana.com/address/${stakeAccount.address.toBase58()}`}>
                   <OpenInNew />
                 </L2>
-                <ListItemText
-                  primary={`${stakeAccount.seed}`}
-                  secondary={`Balance: ${stakeAccount.balance} SOL`} 
-                >
-                </ListItemText>
-              </ListItem>
-            ))}
-          </List>
+              </CardContent>
+              {/* <CardActions>
+                <Button variant="contained">Coming soon</Button>
+              </CardActions> */}
+            </Card>
+          ))}
+          </Container>
         </Container>
       </main>
     </>
