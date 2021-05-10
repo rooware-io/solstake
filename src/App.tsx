@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import './App.css';
-import { AppBar, Button, Card, CardContent, Container, Link as L2, Menu, MenuItem, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Button, Container, Menu, MenuItem, TextField, Toolbar, Typography } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
-import { OpenInNew, Sync } from '@material-ui/icons';
+import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from './utils/stakeAccounts';
+import { StakeAccountCard } from './components/StakeAccount';
 
 const demoStakeAccounts: StakeAccountMeta[] = [
-  {address: new PublicKey(0), seed: 'stake:0', balance: 123.23},
-  {address: new PublicKey(0), seed: 'stake:1', balance: 221.0},
-  {address: new PublicKey(0), seed: 'stake:2', balance: 1}
+  {address: new PublicKey(0), seed: 'stake:0', balance: 123.23, inflationRewards: []},
+  {address: new PublicKey(0), seed: 'stake:1', balance: 221.0, inflationRewards: []},
+  {address: new PublicKey(0), seed: 'stake:2', balance: 1, inflationRewards: []}
 ];
 
 const connection = new Connection(clusterApiUrl('mainnet-beta'))
@@ -56,9 +56,10 @@ function App() {
           <MenuItem>Demo</MenuItem>
       </Menu>
       <main>
-        <Container maxWidth="sm">
+        <Container maxWidth="md">
           <TextField
             id="standard-basic"
+            fullWidth={true}
             label="Wallet public key"
             value={publicKey?.toBase58()}
             error={errorInfo !== null}
@@ -77,31 +78,9 @@ function App() {
               }
             }}
           />
-          <Button>
-            <Sync />
-          </Button>
           <Container>
-          {loading ? (<Skeleton height={200}></Skeleton>): stakeAccounts.map(stakeAccount => (
-            <Card variant="outlined">
-              <CardContent>
-                <Typography color="textSecondary" gutterBottom>
-                  {`${stakeAccount.seed}`}
-                </Typography>
-                <Typography variant="h5" component="h2">
-                  {`Balance: ${stakeAccount.balance} SOL`} 
-                </Typography>
-                <Typography color="textSecondary">
-                  { stakeAccount.stakeAccount ? `Type: ${stakeAccount.stakeAccount.type}, activation epoch: ${stakeAccount.stakeAccount.info.stake?.delegation.activationEpoch}, voter: ${stakeAccount.stakeAccount.info.stake?.delegation.voter}` : 'No data' }
-                </Typography>
-                <L2 href={`https://explorer.solana.com/address/${stakeAccount.address.toBase58()}`}>
-                  <OpenInNew />
-                </L2>
-              </CardContent>
-              {/* <CardActions>
-                <Button variant="contained">Coming soon</Button>
-              </CardActions> */}
-            </Card>
-          ))}
+          {loading ? (<Skeleton height={200}></Skeleton>): stakeAccounts.map(
+            meta => (<StakeAccountCard stakeAccountMeta={meta} />))}
           </Container>
         </Container>
       </main>
