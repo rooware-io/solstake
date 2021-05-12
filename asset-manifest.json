@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.8c8b27cf.chunk.css",
-    "main.js": "/static/js/main.525a0272.chunk.js",
-    "main.js.map": "/static/js/main.525a0272.chunk.js.map",
+    "main.css": "/static/css/main.8d75ce1f.chunk.css",
+    "main.js": "/static/js/main.cdc35f05.chunk.js",
+    "main.js.map": "/static/js/main.cdc35f05.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.af2d4f6c.js",
     "runtime-main.js.map": "/static/js/runtime-main.af2d4f6c.js.map",
     "static/js/2.8e599954.chunk.js": "/static/js/2.8e599954.chunk.js",
@@ -10,7 +10,7 @@
     "static/js/3.5817c1cb.chunk.js": "/static/js/3.5817c1cb.chunk.js",
     "static/js/3.5817c1cb.chunk.js.map": "/static/js/3.5817c1cb.chunk.js.map",
     "index.html": "/index.html",
-    "static/css/main.8c8b27cf.chunk.css.map": "/static/css/main.8c8b27cf.chunk.css.map",
+    "static/css/main.8d75ce1f.chunk.css.map": "/static/css/main.8d75ce1f.chunk.css.map",
     "static/js/2.8e599954.chunk.js.LICENSE.txt": "/static/js/2.8e599954.chunk.js.LICENSE.txt",
     "static/media/solstake-logo-main.a37ef2f4.svg": "/static/media/solstake-logo-main.a37ef2f4.svg",
     "static/media/solstake-text-only.bfbb4653.svg": "/static/media/solstake-text-only.bfbb4653.svg"
@@ -18,7 +18,7 @@
   "entrypoints": [
     "static/js/runtime-main.af2d4f6c.js",
     "static/js/2.8e599954.chunk.js",
-    "static/css/main.8c8b27cf.chunk.css",
-    "static/js/main.525a0272.chunk.js"
+    "static/css/main.8d75ce1f.chunk.css",
+    "static/js/main.cdc35f05.chunk.js"
   ]
 }
