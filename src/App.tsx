@@ -55,6 +55,7 @@ function Landing() {
         alignItems="center"
         justify="center"
         direction="column"
+        style={{textAlign: 'center'}}
       >
         <Grid item xs={10}>
           <SolstakeLogoMainSvg />
