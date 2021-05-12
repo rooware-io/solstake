@@ -6,11 +6,12 @@ import {
   Route,
   Link
 } from 'react-router-dom';
-import { AppBar, Box, Button, Container, Menu, MenuItem, TextField, Toolbar, Typography, IconButton, Grid } from '@material-ui/core';
+import { AppBar, Box, Button, Container, Menu, MenuItem, TextField, Toolbar, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent } from '@material-ui/core';
 import DApp from './views/DApp';
 import { ReactComponent as SolstakeLogoMainSvg } from './solstake-logo-main.svg';
 import { ReactComponent as SolstakeTextOnlySvg } from './solstake-text-only.svg';
 import { GitHub, Send, Twitter } from '@material-ui/icons';
+import { validateEmail } from './utils/validation';
 
 function App() {
   return (
@@ -27,7 +28,40 @@ const styles = {
   },
 };
 
+function SendButton(props: {callback: () => void, disabled: boolean}) {
+  return (
+    <Button
+      onClick={props.callback}
+      disabled={props.disabled}
+    >
+      <Send />
+    </Button>
+  );
+}
+
+async function submit(email: string) {
+  const response = await fetch(
+    'https://docs.google.com/forms/d/e/1FAIpQLSdi_hhrn3lPlbzUN0kUy0C05_HZFj9LwrHjmQK472bXRfG-MQ/formResponse',
+    {
+      method: 'POST',
+      headers: { 'Content-Type': 'x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        'entry.1456887657': email
+      })
+    }
+  );
+  console.log(response);
+}
+
 function Landing() {
+  const [email, setEmail] = useState<string | null>(null);
+  const [helperText, setHelperText] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+
+  function handleClose() {
+    setOpen(false);
+  }
+
   return (
     <>
       <AppBar style={{backgroundColor: '#fdc100'}} className="AppBar" position="relative">
@@ -66,8 +100,29 @@ function Landing() {
 
           <Box m={3} />
 
-          <TextField label="Enter your email" variant="outlined" style={{width: '80%'}}
-            InputProps={{endAdornment: <Button><Send /></Button>}}
+          <TextField
+            label="Enter your email"
+            variant="outlined"
+            style={{width: '80%'}}
+            error={helperText !== null}
+            helperText={helperText}
+            onChange={(event) => {
+              const isValid = validateEmail(event.target.value);
+              if (isValid) {
+                setHelperText(null);
+                setEmail(event.target.value);
+              }
+              else {
+                setHelperText('Invalid');
+                setEmail(null);
+              }
+            }}
+            InputProps={{
+              endAdornment: <SendButton
+                callback={() => { if(email) { submit(email) }; }}
+                disabled={helperText !== null || !email}
+              />
+            }}
           />
 
           <Box m={3} />
@@ -86,6 +141,27 @@ function Landing() {
           </div>
         </Grid>
       </Grid>
+      <Dialog
+          title="Email sent!"
+          fullWidth={true}
+          open={open}
+          onClose={handleClose}
+      >
+        <DialogTitle>Email sent!</DialogTitle>
+        <DialogContent>
+          <Box m={1}>
+            <Typography>
+              Thank you for registering, we will get back to you when solstake is production ready
+            </Typography>
+          </Box>
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            OK
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
