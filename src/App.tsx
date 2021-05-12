@@ -1,89 +1,92 @@
 import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import './App.css';
-import { AppBar, Button, Container, Menu, MenuItem, TextField, Toolbar, Typography } from '@material-ui/core';
-import Skeleton from '@material-ui/lab/Skeleton';
-import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
-import { findStakeAccountMetas, StakeAccountMeta } from './utils/stakeAccounts';
-import { StakeAccountCard } from './components/StakeAccount';
-
-const demoStakeAccounts: StakeAccountMeta[] = [
-  {address: new PublicKey(0), seed: 'stake:0', balance: 123.23, inflationRewards: []},
-  {address: new PublicKey(0), seed: 'stake:1', balance: 221.0, inflationRewards: []},
-  {address: new PublicKey(0), seed: 'stake:2', balance: 1, inflationRewards: []}
-];
-
-const connection = new Connection(clusterApiUrl('mainnet-beta'))
+import {
+  BrowserRouter as Router,
+  Route,
+  Link
+} from 'react-router-dom';
+import { AppBar, Box, Button, Container, Menu, MenuItem, TextField, Toolbar, Typography, IconButton, Grid } from '@material-ui/core';
+import DApp from './views/DApp';
+import { ReactComponent as SolstakeLogoMainSvg } from './solstake-logo-main.svg';
+import { ReactComponent as SolstakeTextOnlySvg } from './solstake-text-only.svg';
+import { GitHub, Send, Twitter } from '@material-ui/icons';
 
 function App() {
-  const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
-  const [errorInfo, setErrorInfo] = useState<string | null>(null);
-  const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[]>(demoStakeAccounts);
+  return (
+    <Router>
+      <Route exact path='/' component={Landing} />
+      <Route path='/app' component={DApp} />
+    </Router>
+  );
+}
 
-  async function fetchStakeAccounts(pk: PublicKey) {
-    setStakeAccounts(await findStakeAccountMetas(connection, pk));
-    setLoading(false);
-  }
+const styles = {
+  largeIcon: {
+    fontSize: "2em"
+  },
+};
 
-  useEffect(() => {
-    setStakeAccounts([]);
-    if (publicKey !== null) {
-      setLoading(true);
-      fetchStakeAccounts(publicKey);
-    }
-  }, [publicKey]);
-  
+function Landing() {
   return (
     <>
       <AppBar position="relative">
         <Toolbar>
-          <Typography variant="h6" color="inherit" noWrap>
-            Solstake
-          </Typography>
-        <div style={{flexGrow: 1}}></div>
-        <div style={{display: 'flex', gap: '10px'}}>
-          <Button variant="contained" disabled>Demo</Button>
-          <Button variant="contained">Connect wallet</Button>
+          <SolstakeTextOnlySvg width="20%" />
+          <div style={{flexGrow: 1}}></div>
+          <div style={{display: 'flex', gap: '10px'}}>
+          <Link style={{textDecoration: 'none'}} to="/app">
+            <Button variant="contained">Use Solstake</Button>
+          </Link>
         </div>
         </Toolbar>
       </AppBar>
       <Menu
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          open={false}
+        anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+        open={false}
       >
-          <MenuItem>Demo</MenuItem>
+        <MenuItem>Demo</MenuItem>
       </Menu>
-      <main>
-        <Container maxWidth="md">
-          <TextField
-            id="standard-basic"
-            fullWidth={true}
-            label="Wallet public key"
-            value={publicKey?.toBase58()}
-            error={errorInfo !== null}
-            helperText={errorInfo}
-            onChange={async function(e) {
-              try {
-                const walletAddress = new PublicKey(e.target.value);
-                setErrorInfo(null);
-                setPublicKey(walletAddress);
-              }
-              catch {
-                console.log(`${e.target.value} is not a valid PublicKey input`);
 
-                setErrorInfo('Invalid public key');
-                setPublicKey(null);
-              }
-            }}
+      <Grid
+        container
+        spacing={0}
+        alignItems="center"
+        justify="center"
+        direction="column"
+      >
+        <Grid item xs={10}>
+          <SolstakeLogoMainSvg />
+          <Typography>
+            Solstake is an open-source and Non-custodial interface that makes staking SOL effortless
+          </Typography>
+          <Typography>
+            Enjoy the beta, enter the your email to get notified when we are release our product
+          </Typography>
+
+          <Box m={3} />
+
+          <TextField label="Enter your email" variant="outlined" style={{width: '80%'}}
+            InputProps={{endAdornment: <Button><Send /></Button>}}
           />
-          <Container>
-          {loading ? (<Skeleton height={200}></Skeleton>): stakeAccounts.map(
-            meta => (<StakeAccountCard stakeAccountMeta={meta} />))}
-          </Container>
-        </Container>
-      </main>
+
+          <Box m={3} />
+
+          <div>
+            <IconButton
+              href="https://github.com/rooware-io/solstake"
+            >
+              <GitHub style={styles.largeIcon} />
+            </IconButton>
+            <IconButton
+              href="/"
+            >
+              <Twitter style={styles.largeIcon} />
+            </IconButton>
+          </div>
+        </Grid>
+      </Grid>
     </>
   );
 }
