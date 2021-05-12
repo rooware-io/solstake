@@ -30,9 +30,9 @@ const styles = {
 function Landing() {
   return (
     <>
-      <AppBar position="relative">
+      <AppBar style={{backgroundColor: '#fdc100'}} className="AppBar" position="relative">
         <Toolbar>
-          <SolstakeTextOnlySvg width="20%" />
+          <SolstakeTextOnlySvg className="App-logo" width="20%" />
           <div style={{flexGrow: 1}}></div>
           <div style={{display: 'flex', gap: '10px'}}>
           <Link style={{textDecoration: 'none'}} to="/app">
@@ -48,14 +48,12 @@ function Landing() {
       >
         <MenuItem>Demo</MenuItem>
       </Menu>
-
       <Grid
         container
-        spacing={0}
         alignItems="center"
         justify="center"
         direction="column"
-        style={{textAlign: 'center'}}
+        style={{minHeight: '80vh', height: 'auto', textAlign: 'center'}}
       >
         <Grid item xs={10}>
           <SolstakeLogoMainSvg />
@@ -81,7 +79,7 @@ function Landing() {
               <GitHub style={styles.largeIcon} />
             </IconButton>
             <IconButton
-              href="/"
+              href="https://twitter.com/solstakeio"
             >
               <Twitter style={styles.largeIcon} />
             </IconButton>

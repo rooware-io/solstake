@@ -37,9 +37,9 @@ function DApp() {
   
   return (
     <>
-      <AppBar position="relative">
+      <AppBar style={{backgroundColor: '#fdc100'}} position="relative">
         <Toolbar>
-            <SolstakeTextOnlySvg width="20%" />
+            <SolstakeTextOnlySvg className="App-logo" />
             <div style={{flexGrow: 1}}></div>
             <div style={{display: 'flex', gap: '10px'}}>
             <Button variant="contained" disabled>Demo</Button>
