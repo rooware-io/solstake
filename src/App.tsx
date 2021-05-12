@@ -95,7 +95,7 @@ function Landing() {
             Solstake is an open-source and Non-custodial interface that makes staking SOL effortless
           </Typography>
           <Typography>
-            Enjoy the beta, enter the your email to get notified when we are release our product
+            Enjoy the beta, enter your email to get notified when we release our product
           </Typography>
 
           <Box m={3} />
