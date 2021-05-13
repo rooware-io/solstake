@@ -53,9 +53,6 @@ export function Landing() {
   
     return (
       <>
-        <div id="stars"></div>
-        <div id="stars2"></div>
-        <div id="stars3"></div>
         <AppBar style={{backgroundColor: '#fdc100'}} className="AppBar" position="relative">
           <Toolbar>
             <SolstakeTextOnlySvg className="App-logo" width="20%" />
@@ -154,6 +151,9 @@ export function Landing() {
             </Button>
           </DialogActions>
         </Dialog>
+        <div id="stars"></div>
+        <div id="stars2"></div>
+        <div id="stars3"></div>
       </>
     );
   }
