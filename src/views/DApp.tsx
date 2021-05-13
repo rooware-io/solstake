@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import '../App.css';
-import { AppBar, Button, Container, Menu, MenuItem, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Button, Container, Menu, MenuItem, TextField, Toolbar } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
