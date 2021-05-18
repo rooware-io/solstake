@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-//import logo from './logo.svg';
 import '../App.css';
 import '../Stars.sass';
 import {
   Link
 } from 'react-router-dom';
-import { AppBar, Box, Button, Menu, MenuItem, TextField, Toolbar, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent } from '@material-ui/core';
+import { AppBar, Box, Button, Menu, MenuItem, TextField, Toolbar, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles } from '@material-ui/core';
 import { ReactComponent as SolstakeLogoMainSvg } from '../solstake-logo-main.svg';
 import { ReactComponent as SolstakeTextOnlySvg } from '../solstake-text-only.svg';
 import { GitHub, Send, Twitter } from '@material-ui/icons';
@@ -42,6 +41,14 @@ function SendButton(props: {callback: () => void, disabled: boolean}) {
   );
 }
 
+const useStyles = makeStyles((theme: Theme) =>
+  createStyles({
+    root: {
+      flexGrow: 1,
+    },
+  }),
+);
+
 export function Landing() {
     const [email, setEmail] = useState<string | null>(null);
     const [helperText, setHelperText] = useState<string | null>(null);
@@ -50,6 +57,8 @@ export function Landing() {
     function handleClose() {
       setOpen(false);
     }
+
+    const classes = useStyles();
   
     return (
       <>
@@ -71,65 +80,70 @@ export function Landing() {
         >
           <MenuItem>Demo</MenuItem>
         </Menu>
-        <Grid
-          container
-          alignItems="center"
-          justify="center"
-          direction="column"
-          style={{minHeight: '80vh', height: 'auto', textAlign: 'center'}}
-        >
-          <Grid item xs={10}>
-            <SolstakeLogoMainSvg />
-            <Typography>
-              Solstake is an open-source and Non-custodial interface that makes staking SOL effortless
-            </Typography>
-            <Typography>
-              Enjoy the beta, enter your email to get notified when we release our product
-            </Typography>
-  
-            <Box m={3} />
-  
-            <TextField
-              label="Enter your email"
-              variant="outlined"
-              style={{width: '80%'}}
-              error={helperText !== null}
-              helperText={helperText}
-              onChange={(event) => {
-                const isValid = validateEmail(event.target.value);
-                if (isValid) {
-                  setHelperText(null);
-                  setEmail(event.target.value);
-                }
-                else {
-                  setHelperText('Invalid');
-                  setEmail(null);
-                }
-              }}
-              InputProps={{
-                endAdornment: <SendButton
-                  callback={() => { if(email) { submit(email) }; }}
-                  disabled={helperText !== null || !email}
-                />
-              }}
-            />
-  
-            <Box m={3} />
-  
-            <div>
-              <IconButton
-                href="https://github.com/rooware-io/solstake"
-              >
-                <GitHub style={styles.largeIcon} />
-              </IconButton>
-              <IconButton
-                href="https://twitter.com/solstakeio"
-              >
-                <Twitter style={styles.largeIcon} />
-              </IconButton>
-            </div>
+        <div className={classes.root}>
+          <Grid
+            container
+            alignItems="center"
+            justify="center"
+            direction="column"
+            style={{minHeight: '100vh', textAlign: 'center'}}
+          >
+            <Grid item xs={8}>
+              <SolstakeLogoMainSvg />
+              <Typography style={{visibility: 'hidden'}}>
+                Hack for non working svg scaling SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+              </Typography>
+              <Typography>
+                Solstake is an open-source and Non-custodial interface that makes staking SOL effortless
+              </Typography>
+              <Typography>
+                Enjoy the beta, enter your email to get notified when we release our product
+              </Typography>
+    
+              <Box m={3} />
+    
+              <TextField
+                label="Enter your email"
+                variant="outlined"
+                style={{width: '40%'}}
+                error={helperText !== null}
+                helperText={helperText}
+                onChange={(event) => {
+                  const isValid = validateEmail(event.target.value);
+                  if (isValid) {
+                    setHelperText(null);
+                    setEmail(event.target.value);
+                  }
+                  else {
+                    setHelperText('Invalid');
+                    setEmail(null);
+                  }
+                }}
+                InputProps={{
+                  endAdornment: <SendButton
+                    callback={() => { if(email) { submit(email) }; }}
+                    disabled={helperText !== null || !email}
+                  />
+                }}
+              />
+    
+              <Box m={3} />
+    
+              <div>
+                <IconButton
+                  href="https://github.com/rooware-io/solstake"
+                >
+                  <GitHub style={styles.largeIcon} />
+                </IconButton>
+                <IconButton
+                  href="https://twitter.com/solstakeio"
+                >
+                  <Twitter style={styles.largeIcon} />
+                </IconButton>
+              </div>
+            </Grid>
           </Grid>
-        </Grid>
+        </div>
         <Dialog
             title="Email sent!"
             fullWidth={true}
