@@ -4,24 +4,33 @@ import '../Stars.sass';
 import {
   Link
 } from 'react-router-dom';
-import { AppBar, Box, Button, Menu, MenuItem, TextField, Toolbar, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles } from '@material-ui/core';
+import { AppBar, Box, Button, Menu, MenuItem, TextField, Toolbar, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles, Snackbar } from '@material-ui/core';
 import { ReactComponent as SolstakeLogoMainSvg } from '../solstake-logo-main.svg';
 import { ReactComponent as SolstakeTextOnlySvg } from '../solstake-text-only.svg';
 import { GitHub, Send, Twitter } from '@material-ui/icons';
 import { validateEmail } from '../utils/validation';
+import { Alert } from '@material-ui/lab';
+import { Color } from '@material-ui/lab/Alert';
 
 async function submit(email: string) {
-  const response = await fetch(
-    'https://docs.google.com/forms/d/e/1FAIpQLSdi_hhrn3lPlbzUN0kUy0C05_HZFj9LwrHjmQK472bXRfG-MQ/formResponse',
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        'entry.1456887657': email
-      })
-    }
-  );
-  console.log(response);
+  try {
+    const response = await fetch(
+      'https://hooks.zapier.com/hooks/catch/1602339/bob62i2/',
+      {
+        method: 'POST',
+        // https://zapier.com/help/create/code-webhooks/troubleshoot-webhooks-in-zapier#posting-json-from-web-browser-access-control-allow-headers-in-preflight-response-error
+        body: JSON.stringify({
+          'email': email
+        })
+      }
+    );
+  
+    console.log(response);
+    return response.ok;
+  }
+  catch(TypeError) { // TypeError: NetworkError when attempting to fetch resource.
+    return false;
+  }
 }
 
 const styles = {
@@ -30,7 +39,7 @@ const styles = {
   },
 };
 
-function SendButton(props: {callback: () => void, disabled: boolean}) {
+function SendButton(props: {callback: () => Promise<void>, disabled: boolean}) {
   return (
     <Button
       onClick={props.callback}
@@ -49,13 +58,37 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
+interface Message {
+  open: boolean;
+  content: string;
+  severity: Color;
+};
+
 export function Landing() {
-    const [email, setEmail] = useState<string | null>(null);
-    const [helperText, setHelperText] = useState<string | null>(null);
+    const [email, setEmail] = useState('');
+    const [isEmailValid, setIsEmailValid] = useState(false);
+    const [message, setMessage] = useState<Message>({open: false, content: '', severity: 'success'});
     const [open, setOpen] = useState(false);
   
     function handleClose() {
       setOpen(false);
+    }
+
+    function handleCloseSnackbar() {
+      setMessage({open: false, content: '', severity: 'success'});
+    }
+
+    async function submitAndFeedback() {
+      if (email) {
+        const success = await submit(email);
+        if (success) {
+          setEmail('');
+          setMessage({open: true, content: 'Your email has been sent, we will get back to you when solstake is released', severity: 'success'});
+        }
+        else {
+          setMessage({open: true, content: 'Failed to send email, please try again later', severity: 'error'});
+        }
+      }
     }
 
     const classes = useStyles();
@@ -106,23 +139,25 @@ export function Landing() {
                 label="Enter your email"
                 variant="outlined"
                 style={{width: '40%'}}
-                error={helperText !== null}
-                helperText={helperText}
-                onChange={(event) => {
-                  const isValid = validateEmail(event.target.value);
-                  if (isValid) {
-                    setHelperText(null);
-                    setEmail(event.target.value);
-                  }
-                  else {
-                    setHelperText('Invalid');
-                    setEmail(null);
+                error={email !== '' && !isEmailValid}
+                helperText={(email !== '' && !isEmailValid) ? 'Invalid' : null}
+                onKeyDown={async (event) => {
+                  if (event.key === 'Enter') {
+                    await submitAndFeedback();
                   }
                 }}
+                onChange={(event) => {
+                  const email = event.target.value;
+                  setEmail(email);
+
+                  const isValid = validateEmail(email);
+                  setIsEmailValid(isValid);
+                }}
+                value={email}
                 InputProps={{
                   endAdornment: <SendButton
-                    callback={() => { if(email) { submit(email) }; }}
-                    disabled={helperText !== null || !email}
+                    callback={submitAndFeedback}
+                    disabled={!isEmailValid}
                   />
                 }}
               />
@@ -168,6 +203,11 @@ export function Landing() {
         <div id="stars"></div>
         <div id="stars2"></div>
         <div id="stars3"></div>
+        <Snackbar open={message.open} autoHideDuration={10000} onClose={handleCloseSnackbar}>
+          <Alert onClose={handleClose} severity={message.severity}>
+            {message.content}
+          </Alert>
+        </Snackbar>
       </>
     );
   }

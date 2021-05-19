@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import '../App.css';
-import { AppBar, Button, Container, Menu, MenuItem, TextField, Toolbar } from '@material-ui/core';
+import { AppBar, Button, Container, Menu, MenuItem, Select, TextField, Toolbar } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
@@ -44,6 +44,10 @@ function DApp() {
             <div style={{display: 'flex', gap: '10px'}}>
             <Button variant="contained" disabled>Demo</Button>
             <Button variant="contained">Connect wallet</Button>
+            <Select defaultValue="mainnet-beta" variant="outlined">
+              <MenuItem value="mainnet-beta">Mainnet-beta</MenuItem>
+              <MenuItem value="testnet">Testnet</MenuItem>
+            </Select>
             </div>
         </Toolbar>
       </AppBar>
