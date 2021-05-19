@@ -10,46 +10,65 @@ export interface StakeAccountMeta {
   inflationRewards: InflationReward[]
 }
 
-// export async function getStakeAccounts(connection: Connection) {
-//   const results = await connection.getParsedProgramAccounts(
-//     StakeProgram.programId,
-//     {
-//       filters: [
-
-//       ]
-//     });
-  
-//   console.log(results);
-// }
-
-
 export async function findStakeAccountMetas(connection: Connection, walletAddress: PublicKey): Promise<StakeAccountMeta[]> {
   let newStakeAccountMetas: StakeAccountMeta[] = [];
 
-  // We discover account with the solflare seed only for now
-  for(let i = 0;i<8;i++) {
+  // Create potential solflare seed PDAs
+  const solflareStakeAccountSeedPubkeys = await Promise.all(Array.from(Array(20).keys()).map(async i => {
     const seed = `stake:${i}`;
+    return PublicKey.createWithSeed(walletAddress, seed, STAKE_PROGRAM_ID).then(pubkey => ({seed, pubkey}));
+  }));
 
-    const stakeAccountPublicKey = await PublicKey.createWithSeed(walletAddress, seed, STAKE_PROGRAM_ID);
-    console.log(stakeAccountPublicKey.toBase58());
-    const accountInfo = await connection.getAccountInfo(stakeAccountPublicKey);
-    const {value} = await connection.getParsedAccountInfo(stakeAccountPublicKey);
+  const naturalStakeAccountSeedPubkeys = await Promise.all(Array.from(Array(20).keys()).map(async i => {
+    const seed = `${i}`;
+    return PublicKey.createWithSeed(walletAddress, seed, STAKE_PROGRAM_ID).then(pubkey => ({seed, pubkey}));
+  }));
 
-    if (value?.data && 'parsed' in value?.data) {
-      console.log(value?.data.parsed);
-      const stakeAccount = value?.data.parsed as StakeAccount;
+  const parsedStakeAccounts = await connection.getParsedProgramAccounts(
+    StakeProgram.programId,
+    {
+      filters: [
+        {dataSize: 200},
+        {
+          memcmp: {
+            offset: 12,
+            bytes: walletAddress.toBase58()
+          }
+        }
+      ]
+    });
+  
+  parsedStakeAccounts.forEach(({pubkey, account}) => {
+    if (account?.data && 'parsed' in account?.data) {
+      console.log(account?.data.parsed);
+      const stakeAccount = account?.data.parsed as StakeAccount;
+
+      // We identify accounts with the solflare seed, or natural seed only for now
+      const matchingSolflareSeed = solflareStakeAccountSeedPubkeys.find(element => element.pubkey.equals(pubkey))?.seed;
+      const matchingNaturalSeed = naturalStakeAccountSeedPubkeys.find(element => element.pubkey.equals(pubkey))?.seed;
+      const seed = matchingSolflareSeed || matchingNaturalSeed || `${pubkey.toBase58().slice(12)}...`;
 
       newStakeAccountMetas.push({
-        address: stakeAccountPublicKey,
+        address: pubkey,
         seed,
-        balance: accountInfo?.lamports ? accountInfo?.lamports / LAMPORTS_PER_SOL : 0,
+        balance: parseInt(stakeAccount.info.stake?.delegation.stake as unknown as string) ?? 0 / LAMPORTS_PER_SOL,
         stakeAccount,
         inflationRewards: []
       });
     }
-  }
+  });
 
-  const epochInfo = await connection.getEpochInfo('singleGossip');
+  newStakeAccountMetas.sort((a, b) => {
+    if (a.seed < b.seed) {
+      return -1
+    }
+    else if(a.seed > b.seed) {
+      return 1
+    }
+    return 0;
+  });
+  
+  const epochInfo = await connection.getEpochInfo();
 
   const minEpoch = Math.min(
     ...newStakeAccountMetas.map(meta => {
@@ -61,8 +80,7 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
   for(let epoch = epochInfo.epoch - 1;epoch > minEpoch;epoch--) {
     const inflationRewardList = await connection.getInflationReward(
       newStakeAccountMetas.map(accountMeta => accountMeta.address),
-      epoch,
-      'singleGossip'
+      epoch
     );
     console.log(epoch)
     console.log(inflationRewardList);
