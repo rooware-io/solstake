@@ -94,7 +94,7 @@ export function Landing() {
     const classes = useStyles();
   
     return (
-      <>
+      <div id="landing">
         <AppBar style={{backgroundColor: '#fdc100'}} className="AppBar" position="relative">
           <Toolbar>
             <SolstakeTextOnlySvg className="App-logo" width="20%" />
@@ -119,7 +119,7 @@ export function Landing() {
             alignItems="center"
             justify="center"
             direction="column"
-            style={{minHeight: '100vh', textAlign: 'center'}}
+            style={{minHeight: '90vh', textAlign: 'center'}}
           >
             <Grid item xs={8}>
               <SolstakeLogoMainSvg />
@@ -180,10 +180,10 @@ export function Landing() {
           </Grid>
         </div>
         <Dialog
-            title="Email sent!"
-            fullWidth={true}
-            open={open}
-            onClose={handleClose}
+          title="Email sent!"
+          fullWidth={true}
+          open={open}
+          onClose={handleClose}
         >
           <DialogTitle>Email sent!</DialogTitle>
           <DialogContent>
@@ -208,6 +208,6 @@ export function Landing() {
             {message.content}
           </Alert>
         </Snackbar>
-      </>
+      </div>
     );
   }

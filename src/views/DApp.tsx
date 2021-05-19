@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import '../App.css';
-import { AppBar, Button, Container, Menu, MenuItem, Select, TextField, Toolbar } from '@material-ui/core';
+import { AppBar, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, Menu, MenuItem, Select, TextField, Toolbar, Typography } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeTextOnlySvg } from '../solstake-text-only.svg';
+import { Info } from '@material-ui/icons';
 
 const demoStakeAccounts: StakeAccountMeta[] = [
   {address: new PublicKey(0), seed: 'stake:0', balance: 123.23, inflationRewards: []},
@@ -21,7 +22,12 @@ function DApp() {
   const [loading, setLoading] = useState<boolean>(false);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[]>(demoStakeAccounts);
-
+  const [open, setOpen] = useState(false);
+  
+  function handleClose() {
+    setOpen(false);
+  }
+  
   async function fetchStakeAccounts(pk: PublicKey) {
     setStakeAccounts(await findStakeAccountMetas(connection, pk));
     setLoading(false);
@@ -42,6 +48,9 @@ function DApp() {
             <SolstakeTextOnlySvg className="App-logo" />
             <div style={{flexGrow: 1}}></div>
             <div style={{display: 'flex', gap: '10px'}}>
+            <IconButton onClick={() => { setOpen(true); }}>
+              <Info />
+            </IconButton>
             <Button variant="contained" disabled>Demo</Button>
             <Button variant="contained">Connect wallet</Button>
             <Select defaultValue="mainnet-beta" variant="outlined">
@@ -58,8 +67,8 @@ function DApp() {
       >
           <MenuItem>Demo</MenuItem>
       </Menu>
-      <main>
-        <Container maxWidth="md">
+      <Container maxWidth="md">
+        <Box m={1}>
           <TextField
             id="standard-basic"
             fullWidth={true}
@@ -81,12 +90,50 @@ function DApp() {
               }
             }}
           />
-          <Container>
-          {loading ? (<Skeleton height={200}></Skeleton>): stakeAccounts.map(
-            meta => (<StakeAccountCard stakeAccountMeta={meta} />))}
-          </Container>
+        </Box>
+
+        <Container>
+        {loading ? (<Skeleton height={200}></Skeleton>): stakeAccounts.map(
+          meta => (<StakeAccountCard stakeAccountMeta={meta} />))}
         </Container>
-      </main>
+      </Container>
+      
+      <Dialog
+        //title="Email sent!"
+        fullWidth={true}
+        open={open}
+        onClose={handleClose}
+      >
+        <DialogTitle>
+          <Typography variant="h4">
+            How to use solstake?
+          </Typography>
+        </DialogTitle>
+
+        <DialogContent>
+          <Box m={1}>
+            <Typography>
+              Paste your wallet public key (Stake account authority) to view your stake state, rewards and more
+            </Typography>
+            <Typography>
+              For in-depth staking documentation about solana staking head to <Link href="https://docs.solana.com/staking">Solana staking documentation</Link>
+            </Typography>
+            <Typography style={{visibility: 'hidden'}}>Spacer</Typography>
+            <Typography variant="h5">
+              Coming soon
+            </Typography>
+            <Typography>
+              Create stake accounts, delegate to validators, unstake, reward overview... All from any popular wallet: solflare, sollet, phantom, ledger... 
+            </Typography>
+          </Box>
+        </DialogContent>
+  
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }
