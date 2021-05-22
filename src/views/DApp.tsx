@@ -8,6 +8,8 @@ import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts'
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeTextOnlySvg } from '../solstake-text-only.svg';
 import { Info } from '@material-ui/icons';
+import { Connector } from '../components/Connector';
+import { useWallet } from '../contexts/wallet';
 
 const demoStakeAccounts: StakeAccountMeta[] = [
   {address: new PublicKey(0), seed: 'stake:0', balance: 123.23, inflationRewards: []},
@@ -18,6 +20,7 @@ const demoStakeAccounts: StakeAccountMeta[] = [
 const connection = new Connection(clusterApiUrl('mainnet-beta'))
 
 function DApp() {
+  const { wallet, connected } = useWallet();
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
@@ -35,11 +38,12 @@ function DApp() {
 
   useEffect(() => {
     setStakeAccounts([]);
-    if (publicKey !== null) {
+    const newPublicKey = connected ? wallet?.publicKey : publicKey;
+    if (newPublicKey) {
       setLoading(true);
-      fetchStakeAccounts(publicKey);
+      fetchStakeAccounts(newPublicKey);
     }
-  }, [publicKey]);
+  }, [connected, wallet?.publicKey, publicKey]);
   
   return (
     <>
@@ -52,7 +56,7 @@ function DApp() {
               <Info />
             </IconButton>
             <Button variant="contained" disabled>Demo</Button>
-            <Button variant="contained">Connect wallet</Button>
+            <Connector />
             <Select defaultValue="mainnet-beta" variant="outlined">
               <MenuItem value="mainnet-beta">Mainnet-beta</MenuItem>
               <MenuItem value="testnet">Testnet</MenuItem>
@@ -68,7 +72,8 @@ function DApp() {
           <MenuItem>Demo</MenuItem>
       </Menu>
       <Container maxWidth="md">
-        <Box m={1}>
+        {!connected ? (
+          <Box m={1}>
           <TextField
             id="standard-basic"
             fullWidth={true}
@@ -78,9 +83,8 @@ function DApp() {
             helperText={errorInfo}
             onChange={async function(e) {
               try {
-                const walletAddress = new PublicKey(e.target.value);
                 setErrorInfo(null);
-                setPublicKey(walletAddress);
+                setPublicKey(new PublicKey(e.target.value));
               }
               catch {
                 console.log(`${e.target.value} is not a valid PublicKey input`);
@@ -90,11 +94,19 @@ function DApp() {
               }
             }}
           />
-        </Box>
+          </Box>
+          ) : (
+          null
+        )}
 
         <Container>
         {loading ? (<Skeleton height={200}></Skeleton>): stakeAccounts.map(
           meta => (<StakeAccountCard stakeAccountMeta={meta} />))}
+        {(!loading && (publicKey || wallet?.publicKey)) &&
+          <Typography>
+            No stake account found
+          </Typography>
+        }
         </Container>
       </Container>
       
