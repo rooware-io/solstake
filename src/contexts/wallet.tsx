@@ -11,7 +11,7 @@ import { useConnectionConfig } from "./connection";
 import { useLocalStorageState } from "../utils/utils";
 import { WalletAdapter } from "../wallet-adapters/walletAdapter";
 import { WALLET_PROVIDERS } from "../wallet-adapters/walletProviders";
-import { Button, Dialog } from "@material-ui/core";
+import { Button, Dialog, DialogActions } from "@material-ui/core";
 
 const WalletContext = React.createContext<{
   wallet: WalletAdapter | undefined;
@@ -114,11 +114,9 @@ export function WalletProvider({ children = null as any }) {
       {children}
       <Dialog
         title="Select Wallet"
-        //okText="Connect"
         open={isModalVisible}
-        //okButtonProps={{ style: { display: "none" } }}
-        //onCancel={close}
-        //width={400}
+        onClose={close}
+        fullWidth={true}
       >
         {WALLET_PROVIDERS.map((provider) => {
           const onClick = function () {
@@ -130,14 +128,13 @@ export function WalletProvider({ children = null as any }) {
           return (
             <Button
               size="large"
-              //type={providerUrl === provider.url ? "primary" : "ghost"}
               onClick={onClick}
               style={{
                 display: "block",
                 width: "100%",
                 textAlign: "left",
-                marginBottom: 8,
               }}
+              variant="outlined"
             >
               {provider.name}
               <img
@@ -150,6 +147,11 @@ export function WalletProvider({ children = null as any }) {
             </Button>
           );
         })}
+        <DialogActions>
+          <Button onClick={close} color="primary">
+            Close
+          </Button>
+        </DialogActions>
       </Dialog>
     </WalletContext.Provider>
   );

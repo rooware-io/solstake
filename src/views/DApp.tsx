@@ -3,13 +3,15 @@ import React, { useEffect, useState } from 'react';
 import '../App.css';
 import { AppBar, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, Menu, MenuItem, Select, TextField, Toolbar, Typography } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
-import { clusterApiUrl, Connection, PublicKey } from '@solana/web3.js';
+import { PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeTextOnlySvg } from '../solstake-text-only.svg';
 import { Info } from '@material-ui/icons';
 import { Connector } from '../components/Connector';
 import { useWallet } from '../contexts/wallet';
+import { AppSettings } from '../components/AppSettings';
+import { useConnection } from '../contexts/connection';
 
 const demoStakeAccounts: StakeAccountMeta[] = [
   {address: new PublicKey(0), seed: 'stake:0', balance: 123.23, inflationRewards: []},
@@ -17,9 +19,8 @@ const demoStakeAccounts: StakeAccountMeta[] = [
   {address: new PublicKey(0), seed: 'stake:2', balance: 1, inflationRewards: []}
 ];
 
-const connection = new Connection(clusterApiUrl('mainnet-beta'))
-
 function DApp() {
+  const connection = useConnection();
   const { wallet, connected } = useWallet();
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -57,10 +58,7 @@ function DApp() {
             </IconButton>
             <Button variant="contained" disabled>Demo</Button>
             <Connector />
-            <Select defaultValue="mainnet-beta" variant="outlined">
-              <MenuItem value="mainnet-beta">Mainnet-beta</MenuItem>
-              <MenuItem value="testnet">Testnet</MenuItem>
-            </Select>
+            <AppSettings />
             </div>
         </Toolbar>
       </AppBar>
