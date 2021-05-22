@@ -7,13 +7,19 @@ import {
 } from 'react-router-dom';
 import DApp from './views/DApp';
 import { Landing } from './views/Landing';
+import { ConnectionProvider } from './contexts/connection';
+import { WalletProvider } from './contexts/wallet';
 
 function App() {
   return (
-    <Router>
-      <Route exact path='/' component={Landing} />
-      <Route path='/app' component={DApp} />
-    </Router>
+    <ConnectionProvider>
+      <WalletProvider>
+        <Router>
+          <Route exact path='/' component={Landing} />
+          <Route path='/app' component={DApp} />
+        </Router>    
+      </WalletProvider>
+    </ConnectionProvider>
   );
 }
 
