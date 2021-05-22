@@ -81,7 +81,8 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
   for(let epoch = epochInfo.epoch - 1;epoch > minEpoch;epoch--) {
     const inflationRewardList = await connection.getInflationReward(
       newStakeAccountMetas.map(accountMeta => accountMeta.address),
-      epoch
+      epoch,
+      'finalized'
     );
     console.log(epoch)
     console.log(inflationRewardList);

@@ -19,13 +19,34 @@ const demoStakeAccounts: StakeAccountMeta[] = [
   {address: new PublicKey(0), seed: 'stake:2', balance: 1, inflationRewards: []}
 ];
 
+function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[] | null}) {
+  if (!stakeAccountMetas) {
+    return (<></>);
+  }
+  else if (stakeAccountMetas.length === 0) {
+    return (
+      <Typography>
+        No stake account found
+      </Typography>
+    );
+  }
+
+  return (
+    <>
+      {stakeAccountMetas.map(
+        meta => (<StakeAccountCard stakeAccountMeta={meta} />))
+      }
+    </>
+  );
+}
+
 function DApp() {
   const connection = useConnection();
   const { wallet, connected } = useWallet();
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
-  const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[]>(demoStakeAccounts);
+  const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[] | null>(null);
   const [open, setOpen] = useState(false);
   
   function handleClose() {
@@ -38,13 +59,13 @@ function DApp() {
   }
 
   useEffect(() => {
-    setStakeAccounts([]);
+    setStakeAccounts(null);
     const newPublicKey = connected ? wallet?.publicKey : publicKey;
     if (newPublicKey) {
       setLoading(true);
       fetchStakeAccounts(newPublicKey);
     }
-  }, [connected, wallet?.publicKey, publicKey]);
+  }, [connection, connected, wallet?.publicKey, publicKey]);
   
   return (
     <>
@@ -98,13 +119,10 @@ function DApp() {
         )}
 
         <Container>
-        {loading ? (<Skeleton height={200}></Skeleton>): stakeAccounts.map(
-          meta => (<StakeAccountCard stakeAccountMeta={meta} />))}
-        {(!loading && (publicKey || wallet?.publicKey)) &&
-          <Typography>
-            No stake account found
-          </Typography>
-        }
+          {loading ? (
+              <Skeleton height={200}></Skeleton>
+            ) : <StakeAccounts stakeAccountMetas={stakeAccounts} />
+          }
         </Container>
       </Container>
       
