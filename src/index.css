@@ -6,6 +6,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+html {
+  height: 100%;
+  background: linear-gradient(352deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -13,4 +18,8 @@ code {
 
 #landing {
   background: linear-gradient(10deg, rgba(0,50,70,1) 0%, rgba(61,150,160,1) 50%, rgba(125,255,255,1) 100%);
+}
+
+#app {
+  background: linear-gradient(352deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
 }

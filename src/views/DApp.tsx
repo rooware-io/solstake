@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import '../App.css';
-import { AppBar, Box, Button, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, Menu, MenuItem, Select, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Box, Button, Card, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, TextField, Toolbar, Typography } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
-import { ReactComponent as SolstakeTextOnlySvg } from '../assets/solstake-text-only.svg';
+import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-medium-blue.svg';
 import { Info } from '@material-ui/icons';
 import { Connector } from '../components/Connector';
 import { useWallet } from '../contexts/wallet';
@@ -25,9 +25,11 @@ function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta
   }
   else if (stakeAccountMetas.length === 0) {
     return (
-      <Typography>
-        No stake account found
-      </Typography>
+      <Card>
+        <Typography>
+          No stake account found
+        </Typography>
+      </Card>
     );
   }
 
@@ -68,10 +70,10 @@ function DApp() {
   }, [connection, connected, wallet?.publicKey, publicKey]);
   
   return (
-    <>
-      <AppBar style={{backgroundColor: '#fdc100'}} position="relative">
+    <div id="dapp">
+      <AppBar position="relative">
         <Toolbar>
-            <SolstakeTextOnlySvg className="App-logo" />
+            <SolstakeLogoSvg className="App-logo" />
             <div style={{flexGrow: 1}}></div>
             <div style={{display: 'flex', gap: '10px'}}>
             <IconButton onClick={() => { setOpen(true); }}>
@@ -83,37 +85,33 @@ function DApp() {
             </div>
         </Toolbar>
       </AppBar>
-      <Menu
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          open={false}
-      >
-          <MenuItem>Demo</MenuItem>
-      </Menu>
       <Container maxWidth="md">
         {!connected ? (
-          <Box m={1}>
-          <TextField
-            id="standard-basic"
-            fullWidth={true}
-            label="Wallet public key"
-            value={publicKey?.toBase58()}
-            error={errorInfo !== null}
-            helperText={errorInfo}
-            onChange={async function(e) {
-              try {
-                setErrorInfo(null);
-                setPublicKey(new PublicKey(e.target.value));
-              }
-              catch {
-                console.log(`${e.target.value} is not a valid PublicKey input`);
+          <Card>
+            <Box m={1}>
+              <TextField
+                id="standard-basic"
+                fullWidth={true}
+                label="Wallet public key"
+                value={publicKey?.toBase58()}
+                error={errorInfo !== null}
+                helperText={errorInfo}
+                onChange={async function(e) {
+                  try {
+                    setErrorInfo(null);
+                    setPublicKey(new PublicKey(e.target.value));
+                  }
+                  catch {
+                    console.log(`${e.target.value} is not a valid PublicKey input`);
 
-                setErrorInfo('Invalid public key');
-                setPublicKey(null);
-              }
-            }}
-          />
-          </Box>
+                    setErrorInfo('Invalid public key');
+                    setPublicKey(null);
+                  }
+                }}
+              />
+            </Box>
+          </Card>
+
           ) : (
           null
         )}
@@ -127,7 +125,6 @@ function DApp() {
       </Container>
       
       <Dialog
-        //title="Email sent!"
         fullWidth={true}
         open={open}
         onClose={handleClose}
@@ -162,7 +159,7 @@ function DApp() {
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </div>
   );
 }
 
