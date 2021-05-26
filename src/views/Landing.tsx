@@ -90,12 +90,25 @@ export function Landing() {
               <Typography color="primary" variant="h4">
                 Solstake is an open-source and Non-custodial interface that makes staking SOL effortless
               </Typography>
+
+              <Box m={4} />
+
+              <Link style={{textDecoration: 'none'}} to="/app">
+                <Button variant="contained" size="large">
+                  <Typography variant="h5">
+                    Use Solstake
+                  </Typography>
+                </Button>
+              </Link>
+    
+              <Box m={4} />
+
               <Typography color="primary" variant="h5">
                 Enjoy the beta, enter your email to get notified when we release our product
               </Typography>
     
-              <Box m={3} />
-    
+              <Box m={4} />
+
               <TextField
                 label="Enter your email"
                 variant="outlined"
