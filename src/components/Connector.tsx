@@ -12,7 +12,7 @@ function CurrentUserBadge() {
 
   return (
     <>
-      <Button variant="outlined" color="primary">
+      <Button variant="outlined" color="secondary">
         {shortenAddress(`${wallet.publicKey}`)}
       </Button>
     </>

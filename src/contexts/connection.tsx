@@ -7,7 +7,7 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useContext, useEffect, useMemo } from "react";
 import { notify } from "./../utils/notifications";
 import { ExplorerLink } from "../components/ExplorerLink";
 import { WalletAdapter } from "../wallet-adapters/walletAdapter";

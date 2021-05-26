@@ -5,6 +5,9 @@ export const theme = createMuiTheme({
     primary: {
       main: '#FFFFFF',
     },
+    secondary: {
+      main: '#3D96A0'
+    }
   },
   typography: {
     fontFamily: '"Red Hat Display", sans-serif'

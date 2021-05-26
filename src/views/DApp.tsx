@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import '../App.css';
 import { AppBar, Box, Button, Card, CardContent, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, TextField, Toolbar, Typography } from '@material-ui/core';
-import Skeleton from '@material-ui/lab/Skeleton';
 import { PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
@@ -12,12 +11,6 @@ import { Connector } from '../components/Connector';
 import { useWallet } from '../contexts/wallet';
 import { AppSettings } from '../components/AppSettings';
 import { useConnection } from '../contexts/connection';
-
-const demoStakeAccounts: StakeAccountMeta[] = [
-  {address: new PublicKey(0), seed: 'stake:0', balance: 123.23, inflationRewards: []},
-  {address: new PublicKey(0), seed: 'stake:1', balance: 221.0, inflationRewards: []},
-  {address: new PublicKey(0), seed: 'stake:2', balance: 1, inflationRewards: []}
-];
 
 function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[] | null}) {
   if (!stakeAccountMetas) {
@@ -145,10 +138,10 @@ function DApp() {
         <DialogContent>
           <Box m={1}>
             <Typography>
-              Paste your wallet public key (Stake account authority) to view your stake state, rewards and more
+              Paste your wallet public key (Stake account authority) or connect your wallet to view your stake state, rewards and more
             </Typography>
             <Typography>
-              For in-depth staking documentation about solana staking head to <Link href="https://docs.solana.com/staking">Solana staking documentation</Link>
+              For in-depth staking documentation about solana staking head to <Link color="secondary" href="https://docs.solana.com/staking">Solana staking documentation</Link>
             </Typography>
             <Typography style={{visibility: 'hidden'}}>Spacer</Typography>
             <Typography variant="h5">
