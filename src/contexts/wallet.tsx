@@ -11,7 +11,7 @@ import { useConnectionConfig } from "./connection";
 import { useLocalStorageState } from "../utils/utils";
 import { WalletAdapter } from "../wallet-adapters/walletAdapter";
 import { WALLET_PROVIDERS } from "../wallet-adapters/walletProviders";
-import { Button, Dialog, DialogActions } from "@material-ui/core";
+import { Box, Button, Dialog, DialogActions, DialogContent } from "@material-ui/core";
 
 const WalletContext = React.createContext<{
   wallet: WalletAdapter | undefined;
@@ -118,35 +118,40 @@ export function WalletProvider({ children = null as any }) {
         onClose={close}
         fullWidth={true}
       >
-        {WALLET_PROVIDERS.map((provider) => {
-          const onClick = function () {
-            setProviderUrl(provider.url);
-            setAutoConnect(true);
-            close();
-          };
+        <DialogContent>
+          {WALLET_PROVIDERS.map((provider) => {
+            const onClick = function () {
+              setProviderUrl(provider.url);
+              setAutoConnect(true);
+              close();
+            };
 
-          return (
-            <Button
-              size="large"
-              onClick={onClick}
-              style={{
-                display: "block",
-                width: "100%",
-                textAlign: "left",
-              }}
-              variant="outlined"
-            >
-              {provider.name}
-              <img
-                alt={`${provider.name}`}
-                width={20}
-                height={20}
-                src={provider.icon}
-                style={{ marginRight: 8 }}
-              />
-            </Button>
-          );
-        })}
+            return (
+              <Box m={1}>
+                <Button
+                  size="large"
+                  onClick={onClick}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    width: "100%",
+                    textAlign: "left",
+                  }}
+                  variant="contained"
+                >
+                  <img
+                    alt={`${provider.name}`}
+                    width={40}
+                    height={40}
+                    src={provider.icon}
+                    style={{ marginRight: 20 }}
+                  />
+                  {provider.name}
+                </Button>
+              </Box>
+            );
+          })}
+        </DialogContent>
         <DialogActions>
           <Button onClick={close} color="primary">
             Close
