@@ -6,7 +6,7 @@ import Skeleton from '@material-ui/lab/Skeleton';
 import { PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
-import { ReactComponent as SolstakeTextOnlySvg } from '../solstake-text-only.svg';
+import { ReactComponent as SolstakeTextOnlySvg } from '../assets/solstake-text-only.svg';
 import { Info } from '@material-ui/icons';
 import { Connector } from '../components/Connector';
 import { useWallet } from '../contexts/wallet';

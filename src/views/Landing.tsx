@@ -1,37 +1,16 @@
 import React, { useState } from 'react';
 import '../App.css';
-import '../Stars.sass';
+//import '../Stars.sass';
 import {
   Link
 } from 'react-router-dom';
-import { AppBar, Box, Button, Menu, MenuItem, TextField, Toolbar, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles, Snackbar } from '@material-ui/core';
-import { ReactComponent as SolstakeLogoMainSvg } from '../solstake-logo-main.svg';
-import { ReactComponent as SolstakeTextOnlySvg } from '../solstake-text-only.svg';
+import { Box, Button, TextField, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles, Snackbar } from '@material-ui/core';
+import { ReactComponent as SolstakeLogoMainSvg } from '../assets/logo-white.svg';
 import { GitHub, Send, Twitter } from '@material-ui/icons';
-import { validateEmail } from '../utils/validation';
+import { validateEmail } from '../utils/email';
 import { Alert } from '@material-ui/lab';
 import { Color } from '@material-ui/lab/Alert';
-
-async function submit(email: string) {
-  try {
-    const response = await fetch(
-      'https://hooks.zapier.com/hooks/catch/1602339/bob62i2/',
-      {
-        method: 'POST',
-        // https://zapier.com/help/create/code-webhooks/troubleshoot-webhooks-in-zapier#posting-json-from-web-browser-access-control-allow-headers-in-preflight-response-error
-        body: JSON.stringify({
-          'email': email
-        })
-      }
-    );
-  
-    console.log(response);
-    return response.ok;
-  }
-  catch(TypeError) { // TypeError: NetworkError when attempting to fetch resource.
-    return false;
-  }
-}
+import { submitEmail } from '../utils/email';
 
 const styles = {
   largeIcon: {
@@ -80,7 +59,7 @@ export function Landing() {
 
     async function submitAndFeedback() {
       if (email) {
-        const success = await submit(email);
+        const success = await submitEmail(email);
         if (success) {
           setEmail('');
           setMessage({open: true, content: 'Your email has been sent, we will get back to you when solstake is released', severity: 'success'});
@@ -95,41 +74,23 @@ export function Landing() {
   
     return (
       <div id="landing">
-        <AppBar style={{backgroundColor: '#fdc100'}} className="AppBar" position="relative">
-          <Toolbar>
-            <SolstakeTextOnlySvg className="App-logo" width="20%" />
-            <div style={{flexGrow: 1}}></div>
-            <div style={{display: 'flex', gap: '10px'}}>
-            <Link style={{textDecoration: 'none'}} to="/app">
-              <Button variant="contained">Use Solstake</Button>
-            </Link>
-          </div>
-          </Toolbar>
-        </AppBar>
-        <Menu
-          anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-          open={false}
-        >
-          <MenuItem>Demo</MenuItem>
-        </Menu>
         <div className={classes.root}>
           <Grid
             container
             alignItems="center"
             justify="center"
             direction="column"
-            style={{minHeight: '90vh', textAlign: 'center'}}
+            style={{minHeight: '100vh', textAlign: 'center', overflow: 'hidden'}}
           >
             <Grid item xs={8}>
               <SolstakeLogoMainSvg />
               <Typography style={{visibility: 'hidden'}}>
                 Hack for non working svg scaling SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
               </Typography>
-              <Typography>
+              <Typography color="primary" variant="h4">
                 Solstake is an open-source and Non-custodial interface that makes staking SOL effortless
               </Typography>
-              <Typography>
+              <Typography color="primary" variant="h5">
                 Enjoy the beta, enter your email to get notified when we release our product
               </Typography>
     
@@ -200,9 +161,9 @@ export function Landing() {
             </Button>
           </DialogActions>
         </Dialog>
-        <div id="stars"></div>
+        {/* <div id="stars"></div>
         <div id="stars2"></div>
-        <div id="stars3"></div>
+        <div id="stars3"></div> */}
         <Snackbar open={message.open} autoHideDuration={10000} onClose={handleCloseSnackbar}>
           <Alert onClose={handleClose} severity={message.severity}>
             {message.content}
