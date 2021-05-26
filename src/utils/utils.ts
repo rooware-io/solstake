@@ -1,5 +1,4 @@
 import { useCallback, useState } from "react";
-import BN from "bn.js";
 
 export const formatPriceNumber = new Intl.NumberFormat("en-US", {
   style: "decimal",

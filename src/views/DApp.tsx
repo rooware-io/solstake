@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import '../App.css';
-import { AppBar, Box, Button, Card, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Box, Button, Card, CardContent, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, TextField, Toolbar, Typography } from '@material-ui/core';
 import Skeleton from '@material-ui/lab/Skeleton';
 import { PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
-import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-medium-blue.svg';
+import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-gradient.svg';
 import { Info } from '@material-ui/icons';
 import { Connector } from '../components/Connector';
 import { useWallet } from '../contexts/wallet';
@@ -26,9 +26,11 @@ function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta
   else if (stakeAccountMetas.length === 0) {
     return (
       <Card>
-        <Typography>
-          No stake account found
-        </Typography>
+        <CardContent>
+          <Typography>
+            No stake account found
+          </Typography>
+        </CardContent>
       </Card>
     );
   }
@@ -85,10 +87,11 @@ function DApp() {
             </div>
         </Toolbar>
       </AppBar>
+      <Box m={1} />
       <Container maxWidth="md">
         {!connected ? (
           <Card>
-            <Box m={1}>
+            <CardContent>
               <TextField
                 id="standard-basic"
                 fullWidth={true}
@@ -109,7 +112,7 @@ function DApp() {
                   }
                 }}
               />
-            </Box>
+            </CardContent>
           </Card>
 
           ) : (
@@ -118,7 +121,11 @@ function DApp() {
 
         <Container>
           {loading ? (
-              <Skeleton height={200}></Skeleton>
+              <Box m={1}>
+                <div style={{display: 'flex', justifyContent: 'center'}}>
+                  <CircularProgress />
+                </div>
+              </Box>
             ) : <StakeAccounts stakeAccountMetas={stakeAccounts} />
           }
         </Container>
