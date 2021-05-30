@@ -24,7 +24,7 @@ async function getDashboardEpochInfo(connection: Connection) : Promise<Dashboard
   const epochProgress = (100 * slotIndex) / slotsInEpoch;
 
   //const samples = await connection.getRecentPerformanceSamples(360);
-  const samples = [{samplePeriodSecs: 60, numSlots: 104}]
+  const samples = [{samplePeriodSecs: 689, numSlots: 1000}] // Hardcoded until mystery above is solved
   const timePerSlotSamples = samples
     .filter((sample) => {
       return sample.numSlots !== 0;
@@ -56,8 +56,15 @@ export function SummaryCard({connection, connected, publicKey, setPublicKey} : S
   const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo | null>(null);
 
   useEffect(() => {
-    getDashboardEpochInfo(connection)
-    .then(setDashboardEpochInfo);
+    async function update() {
+      setDashboardEpochInfo(
+        await getDashboardEpochInfo(connection)
+      );
+    }
+    update();
+
+    const id = setInterval(update, 10000);
+    return () => clearInterval(id);
   }, [true]);
 
   return (
