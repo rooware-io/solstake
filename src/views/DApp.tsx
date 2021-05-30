@@ -19,13 +19,15 @@ function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta
   }
   else if (stakeAccountMetas.length === 0) {
     return (
-      <Card>
-        <CardContent>
-          <Typography>
-            No stake account found
-          </Typography>
-        </CardContent>
-      </Card>
+      <Box m={1}>
+        <Card>
+          <CardContent>
+            <Typography>
+              No stake account found
+            </Typography>
+          </CardContent>
+        </Card>
+      </Box>
     );
   }
 
