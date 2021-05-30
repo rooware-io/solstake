@@ -1,4 +1,8 @@
 import { useCallback, useState } from "react";
+import {
+  HumanizeDuration,
+  HumanizeDurationLanguage,
+} from "humanize-duration-ts";
 
 export const formatPriceNumber = new Intl.NumberFormat("en-US", {
   style: "decimal",
@@ -105,4 +109,25 @@ export const formatPct = new Intl.NumberFormat("en-US", {
   style: "percent",
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
+});
+
+export const humanizeDuration = new HumanizeDuration(new HumanizeDurationLanguage());
+humanizeDuration.setOptions({
+  language: "short",
+  spacer: "",
+  delimiter: " ",
+  round: true,
+  units: ["d", "h", "m", "s"],
+  largest: 3,
+});
+humanizeDuration.addLanguage("short", {
+  y: () => "y",
+  mo: () => "mo",
+  w: () => "w",
+  d: () => "d",
+  h: () => "h",
+  m: () => "m",
+  s: () => "s",
+  ms: () => "ms",
+  decimal: ".",
 });

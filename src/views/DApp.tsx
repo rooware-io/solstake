@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import '../App.css';
-import { AppBar, Box, Button, Card, CardContent, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, TextField, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Box, Button, Card, CardContent, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, Toolbar, Typography } from '@material-ui/core';
 import { PublicKey } from '@solana/web3.js';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
@@ -11,6 +11,7 @@ import { Connector } from '../components/Connector';
 import { useWallet } from '../contexts/wallet';
 import { AppSettings } from '../components/AppSettings';
 import { useConnection } from '../contexts/connection';
+import { SummaryCard } from '../components/SummaryCard';
 
 function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[] | null}) {
   if (!stakeAccountMetas) {
@@ -42,7 +43,6 @@ function DApp() {
   const { wallet, connected } = useWallet();
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[] | null>(null);
   const [open, setOpen] = useState(false);
   
@@ -82,35 +82,11 @@ function DApp() {
       </AppBar>
       <Box m={1} />
       <Container maxWidth="md">
-        {!connected ? (
-          <Card>
-            <CardContent>
-              <TextField
-                id="standard-basic"
-                fullWidth={true}
-                label="Wallet public key"
-                value={publicKey?.toBase58()}
-                error={errorInfo !== null}
-                helperText={errorInfo}
-                onChange={async function(e) {
-                  try {
-                    setErrorInfo(null);
-                    setPublicKey(new PublicKey(e.target.value));
-                  }
-                  catch {
-                    console.log(`${e.target.value} is not a valid PublicKey input`);
-
-                    setErrorInfo('Invalid public key');
-                    setPublicKey(null);
-                  }
-                }}
-              />
-            </CardContent>
-          </Card>
-
-          ) : (
-          null
-        )}
+        <SummaryCard
+          connection={connection}
+          connected={connected}
+          publicKey={publicKey}
+          setPublicKey={setPublicKey} />
 
         <Container>
           {loading ? (
@@ -141,7 +117,7 @@ function DApp() {
               Paste your wallet public key (Stake account authority) or connect your wallet to view your stake state, rewards and more
             </Typography>
             <Typography>
-              For in-depth staking documentation about solana staking head to <Link color="secondary" href="https://docs.solana.com/staking">Solana staking documentation</Link>
+              For in-depth staking documentation about solana staking head to <Link color="secondary" href="https://docs.solana.com/staking" target="_blank">Solana staking documentation</Link>
             </Typography>
             <Typography style={{visibility: 'hidden'}}>Spacer</Typography>
             <Typography variant="h5">
