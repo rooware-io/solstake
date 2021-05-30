@@ -13,11 +13,8 @@ import { AppSettings } from '../components/AppSettings';
 import { useConnection } from '../contexts/connection';
 import { SummaryCard } from '../components/SummaryCard';
 
-function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[] | null}) {
-  if (!stakeAccountMetas) {
-    return (<></>);
-  }
-  else if (stakeAccountMetas.length === 0) {
+function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[]}) {
+  if (stakeAccountMetas.length === 0) {
     return (
       <Box m={1}>
         <Card>
@@ -91,14 +88,16 @@ function DApp() {
           setPublicKey={setPublicKey} />
 
         <Container>
-          {loading ? (
-              <Box m={1}>
-                <div style={{display: 'flex', justifyContent: 'center'}}>
-                  <CircularProgress />
-                </div>
-              </Box>
-            ) : <StakeAccounts stakeAccountMetas={stakeAccounts} />
-          }
+          {loading && (
+            <Box m={1}>
+              <div style={{display: 'flex', justifyContent: 'center'}}>
+                <CircularProgress />
+              </div>
+            </Box>
+          )}
+          {stakeAccounts && (
+            <StakeAccounts stakeAccountMetas={stakeAccounts} />
+          )}
         </Container>
       </Container>
       

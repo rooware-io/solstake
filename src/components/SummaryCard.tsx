@@ -78,7 +78,7 @@ export function SummaryCard({connection, connected, publicKey, setPublicKey} : S
             ETA {dashboardEpochInfo?.epochTimeRemaining && humanizeDuration.humanize(dashboardEpochInfo?.epochTimeRemaining)}
           </Typography>
           <Typography>
-            {dashboardEpochInfo?.epochProgress.toFixed(1) + '%'}
+            {dashboardEpochInfo?.epochProgress.toFixed(2) + '%'}
           </Typography>
           <LinearProgress
             style={{height: 10, borderRadius: 5}}
