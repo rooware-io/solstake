@@ -6,7 +6,7 @@ export interface StakeAccountMeta {
   address: PublicKey;
   seed: string;
   balance: number;
-  stakeAccount?: StakeAccount;
+  stakeAccount: StakeAccount;
   inflationRewards: InflationReward[]
 }
 

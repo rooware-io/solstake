@@ -1,13 +1,16 @@
-import React, { useEffect, useState } from "react";
-import { Card, CardContent, LinearProgress, Typography, TextField } from "@material-ui/core";
-import { Connection, EpochInfo, PublicKey } from "@solana/web3.js";
+import React, { useEffect, useMemo, useState } from "react";
+import { Card, CardContent, LinearProgress, Typography, TextField, Box, Divider } from "@material-ui/core";
+import { clusterApiUrl, Connection, EpochInfo, PublicKey } from "@solana/web3.js";
 import { humanizeDuration } from "../utils/utils";
+import { parseMappingData, parsePriceData, parseProductData } from '@pythnetwork/client';
+import { StakeAccountMeta } from "../utils/stakeAccounts";
 
 interface SummaryCardProps {
   connection: Connection;
   connected: boolean;
   publicKey: PublicKey | null;
   setPublicKey: (publicKey: PublicKey | null) => void;
+  stakeAccountMetas: StakeAccountMeta[] | null;
 }
 
 interface DashboardEpochInfo {
@@ -51,9 +54,36 @@ async function getDashboardEpochInfo(connection: Connection) : Promise<Dashboard
   };
 }
 
-export function SummaryCard({connection, connected, publicKey, setPublicKey} : SummaryCardProps) {
+async function getSOLPriceUSD(): Promise<number | undefined> {
+  // TODO: Switch to mainnet when available
+  const connection = new Connection(clusterApiUrl('devnet'));
+
+  /*
+    Where do we get this key? Do we really have to traverse everytime?
+    const publicKey = new PublicKey(ORACLE_MAPPING_PUBLIC_KEY);
+    const mappingAccountInfo = await connection.getAccountInfo(publicKey);
+    const { productAccountKeys } = parseMappingData(mappingAccountInfo?.data);
+    const productAccountInfo = await connection.getAccountInfo(productAccountKeys[productAccountKeys.length - 1]);
+    const { product, priceAccountKey } = parseProductData(productAccountInfo?.data);
+  */
+  
+  const SOLUSDPriceAccountKey = new PublicKey('BdgHsXrH1mXqhdosXavYxZgX6bGqTdj5mh2sxDhF8bJy');
+  const priceAccountInfo = await connection.getAccountInfo(SOLUSDPriceAccountKey);
+  if (!priceAccountInfo) {
+    return;
+  }
+  const { price, confidence } = parsePriceData(priceAccountInfo?.data);
+  //console.log(`${product.symbol}: $${price} \xB1$${confidence}`);
+  console.log(`price: ${price}, confidence: ${confidence}`);
+  return price;
+}
+
+export function SummaryCard(props : SummaryCardProps) {
+  const {connection, connected, publicKey, setPublicKey, stakeAccountMetas} = props;
+
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
-  const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo | null>(null);
+  const [SOLPriceUSD, setSOLPriceUSD] = useState<number>();
+  const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo>();
 
   useEffect(() => {
     async function update() {
@@ -63,9 +93,18 @@ export function SummaryCard({connection, connected, publicKey, setPublicKey} : S
     }
     update();
 
-    const id = setInterval(update, 10000);
+    const id = setInterval(update, 30000);
     return () => clearInterval(id);
   }, [true]);
+
+  useEffect(() => {
+    getSOLPriceUSD()
+      .then(setSOLPriceUSD);
+  }, [true]);
+
+  const totalStakedSOL = useMemo(() => {
+    return stakeAccountMetas?.reduce((sum, current) => sum + current.balance, 0);
+  }, [stakeAccountMetas]);
 
   return (
     <Card>
@@ -87,6 +126,8 @@ export function SummaryCard({connection, connected, publicKey, setPublicKey} : S
             value={dashboardEpochInfo?.epochProgress ?? 0}
           />
         </div>
+
+        <Box m={2}></Box>
 
         {!connected && (
           <TextField
@@ -110,6 +151,25 @@ export function SummaryCard({connection, connected, publicKey, setPublicKey} : S
             }}
           />
         )}
+        <Divider />
+
+        <Box m={2}></Box>
+
+        <div>
+          {totalStakedSOL && (
+            <>
+              <Typography>
+                Total staked:
+              </Typography>
+              <Typography>
+              {totalStakedSOL} SOL ({SOLPriceUSD && (totalStakedSOL * SOLPriceUSD).toFixed(2)} USD)
+              </Typography>
+            </>
+          )}
+          <Typography>
+            SOL {SOLPriceUSD?.toFixed(2)}$
+          </Typography>
+        </div>
       </CardContent>
     </Card>
   );

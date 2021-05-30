@@ -85,7 +85,9 @@ function DApp() {
           connection={connection}
           connected={connected}
           publicKey={publicKey}
-          setPublicKey={setPublicKey} />
+          setPublicKey={setPublicKey}
+          stakeAccountMetas={stakeAccounts}
+        />
 
         <Container>
           {loading && (

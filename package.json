@@ -8,6 +8,7 @@
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.58",
     "@project-serum/sol-wallet-adapter": "^0.2.0",
+    "@pythnetwork/client": "^1.0.5",
     "@solana/web3.js": "^1.5.0",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",

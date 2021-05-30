@@ -37,7 +37,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         </CardContent>
 
         <CardActions>
-          <Link color="secondary" href={`https://explorer.solana.com/address/${stakeAccountMeta.address.toBase58()}`}>
+          <Link color="secondary" href={`https://explorer.solana.com/address/${stakeAccountMeta.address.toBase58()}`} rel="noopener noreferrer" target="_blank">
             <OpenInNew />
           </Link>
         </CardActions>
