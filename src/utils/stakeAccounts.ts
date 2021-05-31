@@ -1,4 +1,7 @@
+import { RestoreOutlined } from "@material-ui/icons";
 import { Connection, InflationReward, LAMPORTS_PER_SOL, PublicKey, StakeProgram } from "@solana/web3.js";
+import { create } from "superstruct";
+import { ParsedInfo } from "../validators";
 import { StakeAccount } from "../validators/accounts/accounts";
 import { STAKE_PROGRAM_ID } from "./ids";
 
@@ -41,7 +44,7 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
   parsedStakeAccounts.forEach(({pubkey, account}) => {
     if (account?.data && 'parsed' in account?.data) {
       console.log(account?.data.parsed);
-      const stakeAccount = account?.data.parsed as StakeAccount;
+      const stakeAccount = create(account.data.parsed, StakeAccount);
 
       // We identify accounts with the solflare seed, or natural seed only for now
       const matchingSolflareSeed = solflareStakeAccountSeedPubkeys.find(element => element.pubkey.equals(pubkey))?.seed;
@@ -73,7 +76,7 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
 
   const minEpoch = Math.min(
     ...newStakeAccountMetas.map(meta => {
-      return parseInt(meta.stakeAccount?.info.stake?.delegation.activationEpoch as unknown as string ?? '1000'); // TODO: Cleaner way to get the min epoch1
+      return meta.stakeAccount?.info.stake?.delegation.activationEpoch.toNumber() ?? 1000; // TODO: Cleaner way to get the min epoch
     })
   );
 

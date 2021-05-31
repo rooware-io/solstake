@@ -6,15 +6,12 @@ import React, { useState } from "react";
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 
 const MAX_EPOCH = new BN(2).pow(new BN(64)).sub(new BN(1));
-const MAX_EPOCH_STRING = `${MAX_EPOCH}`;
 
 export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAccountMeta}) {
   const [open, setOpen] = useState(false);
 
   function formatEpoch(epoch: BN) {
-    const epochString = epoch as unknown as string;
-
-    return epochString === MAX_EPOCH_STRING ? '-' : epochString;
+    return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
   }
 
   console.log(stakeAccountMeta.stakeAccount.info.stake?.delegation.deactivationEpoch);
@@ -36,7 +33,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
             <Typography color="textSecondary">
               Activation epoch: {formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.activationEpoch)},
               Deactivation epoch: {formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.deactivationEpoch)},
-              Voter: {stakeAccountMeta.stakeAccount.info.stake.delegation.voter}
+              Voter: {stakeAccountMeta.stakeAccount.info.stake.delegation.voter.toBase58()}
             </Typography>
           )}
 
