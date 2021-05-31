@@ -48,7 +48,7 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
       const matchingNaturalSeed = naturalStakeAccountSeedPubkeys.find(element => element.pubkey.equals(pubkey))?.seed;
       const seed = matchingSolflareSeed || matchingNaturalSeed || `${pubkey.toBase58().slice(12)}...`;
 
-      const balanceLamports = parseInt(stakeAccount.info.stake?.delegation.stake as unknown as string) ?? 0;
+      const balanceLamports = account.lamports;
       newStakeAccountMetas.push({
         address: pubkey,
         seed,
