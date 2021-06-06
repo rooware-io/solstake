@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
 //import logo from './logo.svg';
 import '../App.css';
-import { AppBar, Box, Button, Card, CardContent, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, Toolbar, Typography } from '@material-ui/core';
+import { AppBar, Box, Button, Card, CardContent, CircularProgress, Container, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, Link, Toolbar, Tooltip, Typography } from '@material-ui/core';
 import { PublicKey } from '@solana/web3.js';
+import {
+  Link as RouterLink
+} from 'react-router-dom';
 import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-gradient.svg';
@@ -10,8 +13,10 @@ import { Info } from '@material-ui/icons';
 import { Connector } from '../components/Connector';
 import { useWallet } from '../contexts/wallet';
 import { AppSettings } from '../components/AppSettings';
-import { useConnection } from '../contexts/connection';
+import { ENDPOINTS, useConnection, useConnectionConfig } from '../contexts/connection';
 import { SummaryCard } from '../components/SummaryCard';
+
+const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 
 function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[]}) {
   if (stakeAccountMetas.length === 0) {
@@ -39,7 +44,9 @@ function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta
 
 function DApp() {
   const connection = useConnection();
-  const { wallet, connected } = useWallet();
+  const { setUrl } = useConnectionConfig();
+  const { wallet, connected, disconnect } = useWallet();
+  const [publicKeyString, setPublicKeyString] = useState<string>();
   const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[] | null>(null);
@@ -67,15 +74,28 @@ function DApp() {
     <div id="dapp">
       <AppBar position="relative">
         <Toolbar>
-            <SolstakeLogoSvg className="App-logo" />
+            <RouterLink to="/">
+              <SolstakeLogoSvg className="App-logo" />
+            </RouterLink>
             <div style={{flexGrow: 1}}></div>
-            <div style={{display: 'flex', gap: '10px'}}>
-            <IconButton onClick={() => { setOpen(true); }}>
-              <Info />
-            </IconButton>
-            <Button variant="contained" disabled>Demo</Button>
-            <Connector />
-            <AppSettings />
+            <div style={{display: 'flex', gap: '10px', padding: '5px'}}>
+              <IconButton onClick={() => { setOpen(true); }}>
+                <Info />
+              </IconButton>
+              <Tooltip title="Use known stake account authority">
+                <Button
+                  variant="contained"
+                  onClick={() => {
+                    disconnect();
+                    setUrl(ENDPOINTS[0].url);
+                    setPublicKeyString(DEMO_PUBLIC_KEY_STRING);
+                  }}
+                >
+                    Demo
+                </Button>
+              </Tooltip>
+              <Connector />
+              <AppSettings />
             </div>
         </Toolbar>
       </AppBar>
@@ -84,7 +104,8 @@ function DApp() {
         <SummaryCard
           connection={connection}
           connected={connected}
-          publicKey={publicKey}
+          publicKeyString={publicKeyString}
+          setPublicKeyString={setPublicKeyString}
           setPublicKey={setPublicKey}
           stakeAccountMetas={stakeAccounts}
         />

@@ -1,5 +1,5 @@
 import { Box, Button, Card, CardActions, CardContent, Collapse, Link, List, ListItem, ListItemText, Typography } from "@material-ui/core";
-import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
+import { ExpandLess, ExpandMore, OpenInNew, RedoOutlined } from "@material-ui/icons";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import BN from "bn.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
@@ -33,6 +33,9 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
     const firstActivatedSlot = (stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch.toNumber() + 1) * SLOT_PER_EPOCH;
     getFirstBlockTime(connection, firstActivatedSlot)
       .then(activatedBlockTime => {
+        if(!activatedBlockTime) {
+          return;
+        }
         const timePeriod = epochStartTime - activatedBlockTime;
         const apy = totalRewards / initialStake / timePeriod * 365 * 24 * 60 * 60;
         setAPY(apy);

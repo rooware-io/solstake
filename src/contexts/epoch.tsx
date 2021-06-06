@@ -19,11 +19,13 @@ export function EpochProvider({ children = undefined as any }) {
     const [epochStartTime, setEpochStartTime] = useState<number>();
 
     useEffect(() => {
+        setEpochInfo(undefined);
         connection.getEpochInfo().then(setEpochInfo);
     }, [connection]);
 
     useEffect(() => {
       if(!epochInfo) {
+        setEpochStartTime(undefined);
         return;
       }
 

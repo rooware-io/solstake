@@ -8,7 +8,8 @@ import { StakeAccountMeta } from "../utils/stakeAccounts";
 interface SummaryCardProps {
   connection: Connection;
   connected: boolean;
-  publicKey: PublicKey | null;
+  publicKeyString: string | undefined;
+  setPublicKeyString: (publicKeyString: string | undefined) => void;
   setPublicKey: (publicKey: PublicKey | null) => void;
   stakeAccountMetas: StakeAccountMeta[] | null;
 }
@@ -79,13 +80,15 @@ async function getSOLPriceUSD(): Promise<number | undefined> {
 }
 
 export function SummaryCard(props : SummaryCardProps) {
-  const {connection, connected, publicKey, setPublicKey, stakeAccountMetas} = props;
+  const {connection, connected, publicKeyString, setPublicKeyString, setPublicKey, stakeAccountMetas} = props;
 
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [SOLPriceUSD, setSOLPriceUSD] = useState<number>();
   const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo>();
+  const [id, setId] = useState<number>();
 
   useEffect(() => {
+    clearInterval(id);
     async function update() {
       setDashboardEpochInfo(
         await getDashboardEpochInfo(connection)
@@ -93,14 +96,34 @@ export function SummaryCard(props : SummaryCardProps) {
     }
     update();
 
-    const id = setInterval(update, 30000);
-    return () => clearInterval(id);
-  }, [true]);
+    const newId = setInterval(update, 30000)
+    setId(newId[Symbol.toPrimitive]);
+
+    return () => clearInterval(newId);
+  }, [connection]);
 
   useEffect(() => {
     getSOLPriceUSD()
       .then(setSOLPriceUSD);
   }, [true]);
+
+  useEffect(() => {
+    setErrorInfo(null);
+    if(!publicKeyString) {
+      setPublicKey(null);
+      return;
+    }
+
+    try {
+      setPublicKey(new PublicKey(publicKeyString));
+    }
+    catch {
+      console.log(`${publicKeyString} is not a valid PublicKey input`);
+
+      setErrorInfo('Invalid public key');
+      setPublicKey(null);
+    }
+  }, [publicKeyString]);
 
   const totalStakedSOL = useMemo(() => {
     return stakeAccountMetas?.reduce((sum, current) => sum + current.balance, 0);
@@ -134,20 +157,11 @@ export function SummaryCard(props : SummaryCardProps) {
             id="standard-basic"
             fullWidth={true}
             label="Wallet account public key (stake authority)"
-            value={publicKey?.toBase58()}
+            value={publicKeyString}
             error={errorInfo !== null}
             helperText={errorInfo}
-            onChange={async function(e) {
-              try {
-                setErrorInfo(null);
-                setPublicKey(new PublicKey(e.target.value));
-              }
-              catch {
-                console.log(`${e.target.value} is not a valid PublicKey input`);
-  
-                setErrorInfo('Invalid public key');
-                setPublicKey(null);
-              }
+            onChange={(e) => {
+              setPublicKeyString(e.target.value);
             }}
           />
         )}
@@ -162,7 +176,7 @@ export function SummaryCard(props : SummaryCardProps) {
                 Total staked
               </Typography>
               <Typography>
-              ≈{formatPriceNumber.format(totalStakedSOL)} SOL ({SOLPriceUSD && formatPriceNumber.format(totalStakedSOL * SOLPriceUSD)} USD)
+               ≈{formatPriceNumber.format(totalStakedSOL)} SOL ({SOLPriceUSD && formatPriceNumber.format(totalStakedSOL * SOLPriceUSD)} USD)
               </Typography>
             </>
           )}
