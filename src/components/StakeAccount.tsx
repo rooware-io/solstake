@@ -1,5 +1,5 @@
 import { Box, Button, Card, CardActions, CardContent, Collapse, Link, List, ListItem, ListItemText, Typography } from "@material-ui/core";
-import { ExpandLess, ExpandMore, OpenInNew, RedoOutlined } from "@material-ui/icons";
+import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import BN from "bn.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
@@ -14,7 +14,7 @@ const MAX_EPOCH = new BN(2).pow(new BN(64)).sub(new BN(1));
 export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAccountMeta}) {
   const connection = useConnection();
   const [open, setOpen] = useState(false);
-  const [APY, setAPY] = useState<number>();
+  const [APY, setAPY] = useState<number | null>();
   const { epochInfo, epochStartTime } = useContext(EpochContext);
 
   function formatEpoch(epoch: BN) {
@@ -26,21 +26,24 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   }, [stakeAccountMeta]);
 
   useEffect(() => {
+    setAPY(null);
     const initialStake = stakeAccountMeta.lamports - totalRewards;
-    if(!stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch || !epochStartTime) {
+    if(!stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch || !epochStartTime || !totalRewards) {
       return;
     }
     const firstActivatedSlot = (stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch.toNumber() + 1) * SLOT_PER_EPOCH;
+    console.log(`${epochInfo?.epoch}, ${firstActivatedSlot}`);
     getFirstBlockTime(connection, firstActivatedSlot)
       .then(activatedBlockTime => {
         if(!activatedBlockTime) {
           return;
         }
         const timePeriod = epochStartTime - activatedBlockTime;
+        console.log(`timePeriod: ${timePeriod}, epochStartTime: ${epochStartTime}, activatedBlockTime: ${activatedBlockTime}`);
         const apy = totalRewards / initialStake / timePeriod * 365 * 24 * 60 * 60;
         setAPY(apy);
-      })
-  }, [stakeAccountMeta, totalRewards, epochInfo])
+      });
+  }, [connection, stakeAccountMeta, totalRewards, epochInfo])
   
   return (
     <Box m={1}>
@@ -64,7 +67,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
           )}
 
           <Button onClick={() => setOpen(!open)}>
-            Rewards {totalRewards / LAMPORTS_PER_SOL} SOL, {APY && formatPct.format(APY) || '-'} APY
+            Rewards {totalRewards / LAMPORTS_PER_SOL} SOL, {(APY && formatPct.format(APY)) || '-'} APY
             {open ? <ExpandLess /> : <ExpandMore />}
           </Button>
           <Collapse in={open} timeout="auto" unmountOnExit>

@@ -131,3 +131,7 @@ humanizeDuration.addLanguage("short", {
   ms: () => "ms",
   decimal: ".",
 });
+
+export function sleep(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}

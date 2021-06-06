@@ -36,7 +36,7 @@ function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta
   return (
     <>
       {stakeAccountMetas.map(
-        meta => (<StakeAccountCard stakeAccountMeta={meta} />))
+        meta => (<StakeAccountCard key={meta.address.toBase58()} stakeAccountMeta={meta} />))
       }
     </>
   );

@@ -84,11 +84,10 @@ export function SummaryCard(props : SummaryCardProps) {
 
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [SOLPriceUSD, setSOLPriceUSD] = useState<number>();
-  const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo>();
-  const [id, setId] = useState<number>();
+  const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo | null>();
 
   useEffect(() => {
-    clearInterval(id);
+    setDashboardEpochInfo(null);
     async function update() {
       setDashboardEpochInfo(
         await getDashboardEpochInfo(connection)
@@ -96,10 +95,8 @@ export function SummaryCard(props : SummaryCardProps) {
     }
     update();
 
-    const newId = setInterval(update, 30000)
-    setId(newId[Symbol.toPrimitive]);
-
-    return () => clearInterval(newId);
+    const id = setInterval(update, 30000)
+    return () => clearInterval(id);
   }, [connection]);
 
   useEffect(() => {

@@ -84,30 +84,34 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
   
   const epochInfo = await connection.getEpochInfo();
 
-  const minEpoch = Math.min(
-    ...newStakeAccountMetas.map(meta => {
-      return meta.stakeAccount?.info.stake?.delegation.activationEpoch?.toNumber() ?? 1000; // TODO: Cleaner way to get the min epoch
-    })
-  );
+  const delegatedActivationEpochs = newStakeAccountMetas
+    .filter(meta => meta.stakeAccount.info.stake?.delegation.activationEpoch)
+    .map(meta => meta.stakeAccount.info.stake?.delegation.activationEpoch?.toNumber() ?? 1000) // null coallescing not possible here
 
-  console.log(`minEpoch: ${minEpoch}`);
-  
-  let startEpoch = epochInfo.epoch - 1; // No rewards yet for the current epoch, so query from previous epoch
-  const tasks: (() => Promise<(InflationReward | null)[]>)[] = [];
-  for(let epoch = startEpoch;epoch > minEpoch;epoch--) {
-    tasks.push(() => connection.getInflationReward(
-      newStakeAccountMetas.map(accountMeta => accountMeta.address),
-      epoch,
-      'finalized'
-    ));
-  }
+  if(delegatedActivationEpochs.length !== 0) {
+    const minEpoch = Math.min(
+      ...delegatedActivationEpochs
+    );
 
-  const inflationRewardsResults = await promiseAllInBatches(tasks, 4);
-  inflationRewardsResults.forEach(inflationRewards => inflationRewards.forEach((inflationReward, index) => {
-    if (inflationReward) {
-      newStakeAccountMetas[index].inflationRewards.push(inflationReward)
+    console.log(`minEpoch: ${minEpoch}`);
+
+    let startEpoch = epochInfo.epoch - 1; // No rewards yet for the current epoch, so query from previous epoch
+    const tasks: (() => Promise<(InflationReward | null)[]>)[] = [];
+    for(let epoch = startEpoch;epoch > minEpoch;epoch--) {
+      tasks.push(() => connection.getInflationReward(
+        newStakeAccountMetas.map(accountMeta => accountMeta.address),
+        epoch,
+        'finalized'
+      ));
     }
-  }));
+
+    const inflationRewardsResults = await promiseAllInBatches(tasks, 4);
+    inflationRewardsResults.forEach(inflationRewards => inflationRewards.forEach((inflationReward, index) => {
+      if (inflationReward) {
+        newStakeAccountMetas[index].inflationRewards.push(inflationReward)
+      }
+    }));
+  }
 
   return newStakeAccountMetas;
 }
