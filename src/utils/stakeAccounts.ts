@@ -1,16 +1,25 @@
-import { RestoreOutlined } from "@material-ui/icons";
 import { Connection, InflationReward, LAMPORTS_PER_SOL, PublicKey, StakeProgram } from "@solana/web3.js";
 import { create } from "superstruct";
-import { ParsedInfo } from "../validators";
 import { StakeAccount } from "../validators/accounts/accounts";
 import { STAKE_PROGRAM_ID } from "./ids";
 
 export interface StakeAccountMeta {
   address: PublicKey;
   seed: string;
+  lamports: number;
   balance: number;
   stakeAccount: StakeAccount;
   inflationRewards: InflationReward[]
+}
+
+async function promiseAllInBatches<T>(tasks: (() => Promise<T>)[], batchSize: number) {
+  let results: T[] = [];
+  while(tasks.length > 0) {
+    const currentTasks = tasks.splice(0, batchSize);
+    results = results.concat(await Promise.all(currentTasks.map(task => task())));
+    console.log('batch finished');
+  }
+  return results;
 }
 
 export async function findStakeAccountMetas(connection: Connection, walletAddress: PublicKey): Promise<StakeAccountMeta[]> {
@@ -55,6 +64,7 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
       newStakeAccountMetas.push({
         address: pubkey,
         seed,
+        lamports: balanceLamports,
         balance: balanceLamports / LAMPORTS_PER_SOL,
         stakeAccount,
         inflationRewards: []
@@ -76,26 +86,28 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
 
   const minEpoch = Math.min(
     ...newStakeAccountMetas.map(meta => {
-      return meta.stakeAccount?.info.stake?.delegation.activationEpoch.toNumber() ?? 1000; // TODO: Cleaner way to get the min epoch
+      return meta.stakeAccount?.info.stake?.delegation.activationEpoch?.toNumber() ?? 1000; // TODO: Cleaner way to get the min epoch
     })
   );
 
   console.log(`minEpoch: ${minEpoch}`);
-  for(let epoch = epochInfo.epoch - 1;epoch > minEpoch;epoch--) {
-    const inflationRewardList = await connection.getInflationReward(
+  
+  let startEpoch = epochInfo.epoch - 1; // No rewards yet for the current epoch, so query from previous epoch
+  const tasks: (() => Promise<(InflationReward | null)[]>)[] = [];
+  for(let epoch = startEpoch;epoch > minEpoch;epoch--) {
+    tasks.push(() => connection.getInflationReward(
       newStakeAccountMetas.map(accountMeta => accountMeta.address),
       epoch,
       'finalized'
-    );
-    console.log(epoch)
-    console.log(inflationRewardList);
-
-    inflationRewardList.forEach((inflationReward, index) => {
-      if (inflationReward) {
-        newStakeAccountMetas[index].inflationRewards.push(inflationReward)
-      }
-    });
+    ));
   }
+
+  const inflationRewardsResults = await promiseAllInBatches(tasks, 4);
+  inflationRewardsResults.forEach(inflationRewards => inflationRewards.forEach((inflationReward, index) => {
+    if (inflationReward) {
+      newStakeAccountMetas[index].inflationRewards.push(inflationReward)
+    }
+  }));
 
   return newStakeAccountMetas;
 }

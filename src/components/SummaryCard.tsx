@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, LinearProgress, Typography, TextField, Box, Divider } from "@material-ui/core";
 import { clusterApiUrl, Connection, EpochInfo, PublicKey } from "@solana/web3.js";
-import { humanizeDuration } from "../utils/utils";
+import { formatPriceNumber, humanizeDuration } from "../utils/utils";
 import { parseMappingData, parsePriceData, parseProductData } from '@pythnetwork/client';
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 
@@ -133,7 +133,7 @@ export function SummaryCard(props : SummaryCardProps) {
           <TextField
             id="standard-basic"
             fullWidth={true}
-            label="Wallet public key"
+            label="Wallet account public key (stake authority)"
             value={publicKey?.toBase58()}
             error={errorInfo !== null}
             helperText={errorInfo}
@@ -159,10 +159,10 @@ export function SummaryCard(props : SummaryCardProps) {
           {totalStakedSOL && (
             <>
               <Typography>
-                Total staked:
+                Total staked
               </Typography>
               <Typography>
-              {totalStakedSOL} SOL ({SOLPriceUSD && (totalStakedSOL * SOLPriceUSD).toFixed(2)} USD)
+              ≈{formatPriceNumber.format(totalStakedSOL)} SOL ({SOLPriceUSD && formatPriceNumber.format(totalStakedSOL * SOLPriceUSD)} USD)
               </Typography>
             </>
           )}

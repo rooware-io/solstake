@@ -7,7 +7,7 @@ import {
 export const formatPriceNumber = new Intl.NumberFormat("en-US", {
   style: "decimal",
   minimumFractionDigits: 2,
-  maximumFractionDigits: 8,
+  maximumFractionDigits: 2,
 });
 
 export function useLocalStorageState(key: string, defaultState?: string) {

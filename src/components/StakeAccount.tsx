@@ -2,19 +2,42 @@ import { Box, Button, Card, CardActions, CardContent, Collapse, Link, List, List
 import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import BN from "bn.js";
-import React, { useState } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { useConnection } from "../contexts/connection";
+import { EpochContext } from "../contexts/epoch";
+import { getFirstBlockTime, SLOT_PER_EPOCH } from "../utils/block";
 import { StakeAccountMeta } from "../utils/stakeAccounts";
+import { formatPct } from "../utils/utils";
 
 const MAX_EPOCH = new BN(2).pow(new BN(64)).sub(new BN(1));
 
 export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAccountMeta}) {
+  const connection = useConnection();
   const [open, setOpen] = useState(false);
+  const [APY, setAPY] = useState<number>();
+  const { epochInfo, epochStartTime } = useContext(EpochContext);
 
   function formatEpoch(epoch: BN) {
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
   }
 
-  console.log(stakeAccountMeta.stakeAccount.info.stake?.delegation.deactivationEpoch);
+  const totalRewards = useMemo(() => {
+    return stakeAccountMeta.inflationRewards.reduce((sum, current) => sum + current.amount, 0)
+  }, [stakeAccountMeta]);
+
+  useEffect(() => {
+    const initialStake = stakeAccountMeta.lamports - totalRewards;
+    if(!stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch || !epochStartTime) {
+      return;
+    }
+    const firstActivatedSlot = (stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch.toNumber() + 1) * SLOT_PER_EPOCH;
+    getFirstBlockTime(connection, firstActivatedSlot)
+      .then(activatedBlockTime => {
+        const timePeriod = epochStartTime - activatedBlockTime;
+        const apy = totalRewards / initialStake / timePeriod * 365 * 24 * 60 * 60;
+        setAPY(apy);
+      })
+  }, [stakeAccountMeta, totalRewards, epochInfo])
   
   return (
     <Box m={1}>
@@ -38,13 +61,13 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
           )}
 
           <Button onClick={() => setOpen(!open)}>
-            Rewards {stakeAccountMeta.inflationRewards.reduce((sum, current) => sum + current.amount, 0) / LAMPORTS_PER_SOL} SOL
+            Rewards {totalRewards / LAMPORTS_PER_SOL} SOL, {APY && formatPct.format(APY) || '-'} APY
             {open ? <ExpandLess /> : <ExpandMore />}
           </Button>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {stakeAccountMeta.inflationRewards.map(inflationReward => (
-              <ListItem style={{paddingLeft: 4}}>
+              <ListItem style={{paddingLeft: 4}} key={inflationReward.epoch}>
                   <ListItemText primary={`Epoch: ${inflationReward.epoch}, reward: ${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
               </ListItem>
               ))}
