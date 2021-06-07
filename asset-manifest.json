@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.57fd4838.chunk.css",
-    "main.js": "/static/js/main.9013e45d.chunk.js",
-    "main.js.map": "/static/js/main.9013e45d.chunk.js.map",
+    "main.css": "/static/css/main.6bf43da3.chunk.css",
+    "main.js": "/static/js/main.1fb44abb.chunk.js",
+    "main.js.map": "/static/js/main.1fb44abb.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.49d805bb.js",
     "runtime-main.js.map": "/static/js/runtime-main.49d805bb.js.map",
     "static/js/2.cf62d19d.chunk.js": "/static/js/2.cf62d19d.chunk.js",
@@ -10,7 +10,7 @@
     "static/js/3.b07b3bc1.chunk.js": "/static/js/3.b07b3bc1.chunk.js",
     "static/js/3.b07b3bc1.chunk.js.map": "/static/js/3.b07b3bc1.chunk.js.map",
     "index.html": "/index.html",
-    "static/css/main.57fd4838.chunk.css.map": "/static/css/main.57fd4838.chunk.css.map",
+    "static/css/main.6bf43da3.chunk.css.map": "/static/css/main.6bf43da3.chunk.css.map",
     "static/js/2.cf62d19d.chunk.js.LICENSE.txt": "/static/js/2.cf62d19d.chunk.js.LICENSE.txt",
     "static/media/logo-gradient.a321f18b.svg": "/static/media/logo-gradient.a321f18b.svg",
     "static/media/logo-white.3c891f2a.svg": "/static/media/logo-white.3c891f2a.svg"
@@ -18,7 +18,7 @@
   "entrypoints": [
     "static/js/runtime-main.49d805bb.js",
     "static/js/2.cf62d19d.chunk.js",
-    "static/css/main.57fd4838.chunk.css",
-    "static/js/main.9013e45d.chunk.js"
+    "static/css/main.6bf43da3.chunk.css",
+    "static/js/main.1fb44abb.chunk.js"
   ]
 }
