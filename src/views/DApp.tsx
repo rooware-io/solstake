@@ -74,7 +74,7 @@ function DApp() {
     <div id="dapp">
       <AppBar position="relative">
         <Toolbar>
-            <RouterLink to="/">
+            <RouterLink to="/" style={{width: '15%'}}>
               <SolstakeLogoSvg className="App-logo" />
             </RouterLink>
             <div style={{flexGrow: 1}}></div>

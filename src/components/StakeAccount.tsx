@@ -43,7 +43,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         const apy = totalRewards / initialStake / timePeriod * 365 * 24 * 60 * 60;
         setAPY(apy);
       });
-  }, [connection, stakeAccountMeta, totalRewards, epochInfo])
+  }, [connection, stakeAccountMeta, totalRewards, epochStartTime])
   
   return (
     <Box m={1}>
