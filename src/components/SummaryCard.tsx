@@ -154,6 +154,10 @@ export function SummaryCard(props : SummaryCardProps) {
             id="standard-basic"
             fullWidth={true}
             label="Wallet account public key (stake authority)"
+            placeholder="Public key"
+            InputLabelProps={{
+              shrink: true
+            }}
             value={publicKeyString}
             error={errorInfo !== null}
             helperText={errorInfo}
