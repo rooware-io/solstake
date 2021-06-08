@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, LinearProgress, Typography, TextField, Box, Divider } from "@material-ui/core";
+import { Card, CardContent, LinearProgress, Typography, TextField, Box, Divider, Tooltip } from "@material-ui/core";
 import { clusterApiUrl, Connection, EpochInfo, PublicKey } from "@solana/web3.js";
 import { formatPct, formatPriceNumber, humanizeDuration } from "../utils/utils";
 import { parseMappingData, parsePriceData, parseProductData } from '@pythnetwork/client';
@@ -182,7 +182,10 @@ export function SummaryCard(props : SummaryCardProps) {
             </>
           )}
           <Typography>
-            SOL {SOLPriceUSD ? formatPriceNumber.format(SOLPriceUSD) : '-'} $
+            SOL {SOLPriceUSD ? formatPriceNumber.format(SOLPriceUSD) : '-'} $&nbsp;
+            <Tooltip title="On-chain SOL price from pyth.network oracle">
+              <img style={{display: 'inline', verticalAlign: 'middle'}} height="25px" src="pyth-icon-48x48.png" />
+            </Tooltip>
           </Typography>
         </div>
       </CardContent>
