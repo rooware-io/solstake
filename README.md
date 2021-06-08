@@ -2,19 +2,12 @@
 
 Solstake is an open-source and Non-custodial interface that makes staking SOL effortless
 
+[Google slide presentation](https://docs.google.com/presentation/d/1e-Ybs4T5sbo9YrRjl-CbmNQ9M6p32gntnqdXDMnSzeo/edit#slide=id.p)
+
+[![Twitter URL]](https://img.shields.io/twitter/url/https/twitter.com/bukotsunikki.svg?style=social&label=Follow%20%40SolstakeIO)](https://twitter.com/SolstakeIO)
 
 ## Technical
 
-https://github.com/solana-labs/solana/blob/8a3135d17bbc5ca901c0b401fdfbb453eb07a7d3/stake-accounts/src/stake_accounts.rs#L12-L14
-
-https://github.com/solana-labs/solana/tree/master/programs/stake
-
-web3
-
-https://github.com/solana-labs/solana-web3.js/blob/master/src/stake-program.ts
-
-getAccountInfo to get the stake account stuff
-
-https://solana-labs.github.io/solana-web3.js/classes/connection.html#getstakeactivation
+https://docs.solana.com/staking
 
 https://docs.solana.com/cluster/stake-delegation-and-rewards#vote-and-stake-accounts
