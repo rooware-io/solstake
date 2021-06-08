@@ -182,7 +182,7 @@ export function SummaryCard(props : SummaryCardProps) {
             </>
           )}
           <Typography>
-            SOL {SOLPriceUSD?.toFixed(2)}$
+            SOL {SOLPriceUSD ? formatPriceNumber.format(SOLPriceUSD) : '-'} $
           </Typography>
         </div>
       </CardContent>

@@ -41,7 +41,7 @@ export function EpochProvider({ children = undefined as any }) {
     const slot = getFirstSlotInEpoch(epochSchedule, epochInfo.epoch);
     getFirstBlockTime(connection, slot)
       .then(setEpochStartTime);
-  }, [connection, epochInfo]);
+  }, [connection, epochInfo, epochSchedule]);
 
   return (
     <EpochContext.Provider
