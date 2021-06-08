@@ -5,7 +5,7 @@ import BN from "bn.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { useConnection } from "../contexts/connection";
 import { EpochContext } from "../contexts/epoch";
-import { getFirstBlockTime, SLOT_PER_EPOCH } from "../utils/block";
+import { getFirstBlockTime, getFirstSlotInEpoch } from "../utils/block";
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 import { formatPct } from "../utils/utils";
 
@@ -15,7 +15,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   const connection = useConnection();
   const [open, setOpen] = useState(false);
   const [APY, setAPY] = useState<number | null>();
-  const { epochInfo, epochStartTime } = useContext(EpochContext);
+  const { epochInfo, epochSchedule, epochStartTime } = useContext(EpochContext);
 
   function formatEpoch(epoch: BN) {
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
@@ -28,10 +28,13 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   useEffect(() => {
     setAPY(null);
     const initialStake = stakeAccountMeta.lamports - totalRewards;
-    if(!stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch || !epochStartTime || !totalRewards) {
+    if(!stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch || !epochSchedule || !epochStartTime || !totalRewards) {
       return;
     }
-    const firstActivatedSlot = (stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch.toNumber() + 1) * SLOT_PER_EPOCH;
+    const firstActivatedSlot = getFirstSlotInEpoch(
+      epochSchedule,
+      stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch.toNumber() + 1
+    );
     console.log(`${epochInfo?.epoch}, ${firstActivatedSlot}`);
     getFirstBlockTime(connection, firstActivatedSlot)
       .then(activatedBlockTime => {
@@ -43,7 +46,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         const apy = totalRewards / initialStake / timePeriod * 365 * 24 * 60 * 60;
         setAPY(apy);
       });
-  }, [connection, stakeAccountMeta, totalRewards, epochStartTime])
+  }, [connection, stakeAccountMeta, totalRewards, epochSchedule, epochStartTime])
   
   return (
     <Box m={1}>

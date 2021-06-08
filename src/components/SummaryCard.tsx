@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Card, CardContent, LinearProgress, Typography, TextField, Box, Divider } from "@material-ui/core";
 import { clusterApiUrl, Connection, EpochInfo, PublicKey } from "@solana/web3.js";
-import { formatPriceNumber, humanizeDuration } from "../utils/utils";
+import { formatPct, formatPriceNumber, humanizeDuration } from "../utils/utils";
 import { parseMappingData, parsePriceData, parseProductData } from '@pythnetwork/client';
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 
@@ -25,7 +25,7 @@ async function getDashboardEpochInfo(connection: Connection) : Promise<Dashboard
   const epochInfo = await connection.getEpochInfo();
   const {slotIndex, slotsInEpoch} =  epochInfo;
 
-  const epochProgress = (100 * slotIndex) / slotsInEpoch;
+  const epochProgress = slotIndex / slotsInEpoch;
 
   //const samples = await connection.getRecentPerformanceSamples(360);
   const samples = [{samplePeriodSecs: 689, numSlots: 1000}] // Hardcoded until mystery above is solved
@@ -137,13 +137,13 @@ export function SummaryCard(props : SummaryCardProps) {
             ETA {dashboardEpochInfo?.epochTimeRemaining && humanizeDuration.humanize(dashboardEpochInfo?.epochTimeRemaining)}
           </Typography>
           <Typography>
-            {dashboardEpochInfo?.epochProgress.toFixed(2) + '%'}
+            {dashboardEpochInfo?.epochProgress && formatPct.format(dashboardEpochInfo?.epochProgress)}
           </Typography>
           <LinearProgress
             style={{height: 10, borderRadius: 5}}
             color="secondary"
             variant="determinate"
-            value={dashboardEpochInfo?.epochProgress ?? 0}
+            value={(dashboardEpochInfo?.epochProgress ?? 0) * 100}
           />
         </div>
 

@@ -6,7 +6,7 @@ import {
 } from 'react-router-dom';
 import { Box, Button, TextField, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles, Snackbar } from '@material-ui/core';
 import { ReactComponent as SolstakeLogoMainSvg } from '../assets/logo-white.svg';
-import { GitHub, Send, Twitter } from '@material-ui/icons';
+import { GitHub, Send, Twitter, YouTube } from '@material-ui/icons';
 import { validateEmail } from '../utils/email';
 import { Alert } from '@material-ui/lab';
 import { Color } from '@material-ui/lab/Alert';
@@ -14,7 +14,7 @@ import { submitEmail } from '../utils/email';
 
 const styles = {
   largeIcon: {
-    fontSize: "2em"
+    fontSize: "2.5em"
   },
 };
 
@@ -48,9 +48,14 @@ export function Landing() {
     const [isEmailValid, setIsEmailValid] = useState(false);
     const [message, setMessage] = useState<Message>({open: false, content: '', severity: 'success'});
     const [open, setOpen] = useState(false);
+    const [openVideo, setOpenVideo] = useState(false);
   
     function handleClose() {
       setOpen(false);
+    }
+
+    function handleCloseVideo() {
+      setOpenVideo(false);
     }
 
     function handleCloseSnackbar() {
@@ -145,6 +150,11 @@ export function Landing() {
                   <GitHub style={styles.largeIcon} />
                 </IconButton>
                 <IconButton
+                  onClick={() => setOpenVideo(true)}
+                >
+                  <YouTube style={styles.largeIcon} />
+                </IconButton>
+                <IconButton
                   href="https://twitter.com/solstakeio"
                 >
                   <Twitter style={styles.largeIcon} />
@@ -173,6 +183,16 @@ export function Landing() {
               OK
             </Button>
           </DialogActions>
+        </Dialog>
+        <Dialog
+          open={openVideo}
+          fullWidth
+          maxWidth="md"
+          onClose={handleCloseVideo}
+        >
+          <div className="videoWrapper">
+            <iframe width="560" height="315" src="https://www.youtube.com/embed/JUDG6j5ktW4" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
+          </div>
         </Dialog>
         {/* <div id="stars"></div>
         <div id="stars2"></div>
