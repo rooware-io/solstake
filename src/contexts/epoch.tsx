@@ -22,22 +22,24 @@ export function EpochProvider({ children = undefined as any }) {
     const [epochStartTime, setEpochStartTime] = useState<number>();
 
     useEffect(() => {
-        setEpochSchedule(undefined);
         setEpochInfo(undefined);
         connection.getEpochInfo().then(setEpochInfo);
     }, [connection]);
 
     useEffect(() => {
-      if(!epochSchedule || !epochInfo) {
+      setEpochSchedule(undefined);
+      connection.getEpochSchedule()
+        .then(setEpochSchedule);
+    }, [connection]);
+
+    useEffect(() => {
+      if(!epochInfo || !epochSchedule) {
         setEpochStartTime(undefined);
         return;
       }
 
-      connection.getEpochSchedule()
-        .then(epochSchedule => {
-          setEpochSchedule(epochSchedule);
-          return getFirstBlockTime(connection, getFirstSlotInEpoch(epochSchedule, epochInfo.epoch));
-        })
+      const slot = getFirstSlotInEpoch(epochSchedule, epochInfo.epoch);
+      getFirstBlockTime(connection, slot)
         .then(setEpochStartTime);
     }, [connection, epochInfo]);
 
