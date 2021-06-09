@@ -138,17 +138,21 @@ function DApp() {
         <DialogContent>
           <Box m={1}>
             <Typography>
-              Paste your wallet public key (Stake account authority) or connect your wallet to view your stake state, rewards and more
+              Enter you wallet public key (Stake account authority) or connect your wallet to view your stake accounts, balances, rewards and much more
             </Typography>
             <Typography>
               For in-depth staking documentation about solana staking head to <Link color="secondary" href="https://docs.solana.com/staking" target="_blank">Solana staking documentation</Link>
             </Typography>
-            <Typography style={{visibility: 'hidden'}}>Spacer</Typography>
+            <Box m={2} />
             <Typography variant="h5">
               Coming soon
             </Typography>
             <Typography>
               Create stake accounts, delegate to validators, unstake, reward overview... All from any popular wallet: solflare, sollet, phantom, ledger... 
+            </Typography>
+            <Box m={2} />
+            <Typography>
+              We'd love to hear from you - please send any feedback or suggestions to solstakeio@gmail.com
             </Typography>
           </Box>
         </DialogContent>

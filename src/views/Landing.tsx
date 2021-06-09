@@ -93,7 +93,8 @@ export function Landing() {
                 Hack for non working svg scaling SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
               </Typography>
               <Typography color="primary" variant="h4">
-                Solstake is an open-source and Non-custodial interface that makes staking SOL effortless
+                Solstake makes staking on Solana easier than ever - no matter what wallet you’re using. 
+                Stake your SOL, manage accounts and earn rewards all in a single and easy-to-use app.
               </Typography>
 
               <Box m={4} />
@@ -109,7 +110,7 @@ export function Landing() {
               <Box m={4} />
 
               <Typography color="primary" variant="h5">
-                Enjoy the beta, enter your email to get notified when we release our product
+                We’re just getting started around here. In the meantime stay updated on product releases, new features and more by subscribing below.
               </Typography>
     
               <Box m={4} />
