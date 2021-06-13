@@ -102,8 +102,6 @@ function DApp() {
       <Box m={1} />
       <Container maxWidth="md">
         <SummaryCard
-          connection={connection}
-          connected={connected}
           publicKeyString={publicKeyString}
           setPublicKeyString={setPublicKeyString}
           setPublicKey={setPublicKey}
