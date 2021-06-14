@@ -1,14 +1,14 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Card, CardContent, LinearProgress, Typography, TextField, Box, Divider, Tooltip, Button, Dialog, DialogContent, DialogActions, DialogTitle, Grid } from "@material-ui/core";
-import { Authorized, clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram, SystemInstruction, SystemProgram } from "@solana/web3.js";
+import { Card, CardContent, LinearProgress, Typography, TextField, Box, Divider, Tooltip, Button, Grid } from "@material-ui/core";
+import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { formatPct, formatPriceNumber, humanizeDuration } from "../utils/utils";
 import { parsePriceData } from '@pythnetwork/client';
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 import { DashboardEpochInfo, getDashboardEpochInfo } from "../utils/epoch";
 import { AccountsContext } from "../contexts/accounts";
-import { WalletAdapter } from "../wallet-adapters/walletAdapter";
-import { sendTransaction, useConnection, useSendConnection } from "../contexts/connection";
+import { useConnection, useSendConnection } from "../contexts/connection";
 import { useWallet } from "../contexts/wallet";
+import { CreateStakeAccountDialog } from "./CreateStakeAccount";
 
 interface SummaryCardProps {
   publicKeyString: string | undefined;
@@ -30,73 +30,6 @@ async function getSOLPriceUSD(): Promise<number | undefined> {
 
   console.log(`price: ${price}, confidence: ${confidence}`);
   return price;
-}
-
-interface CreateStakeAccountProps {
-  open: boolean;
-  setOpen: (open: boolean) => void;
-  wallet: WalletAdapter;
-  connection: Connection;
-  sendConnection: Connection;
-};
-
-function CreateStakeAccountDialog({open, setOpen, wallet, connection, sendConnection}: CreateStakeAccountProps) {
-  function handleClose() {
-    setOpen(false);
-  }
-
-  const seed = '0';
-
-  return (
-    <Dialog
-      open={open}
-      onClose={handleClose}
-    >
-      <DialogTitle>
-        Create stake account
-      </DialogTitle>
-      <DialogContent>
-        <TextField
-          placeholder="SOL"
-        ></TextField>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={handleClose}>Close</Button>
-        <Button
-          onClick={async () => {
-            if(!wallet.publicKey) {
-              return;
-            }
-            const [stakePubkey] = await PublicKey.findProgramAddress(
-              [wallet.publicKey.toBuffer(), Buffer.from(seed, 'utf8')],
-              StakeProgram.programId
-            );
-            const transaction = StakeProgram.createAccountWithSeed({
-              fromPubkey: wallet.publicKey,
-              stakePubkey,
-              basePubkey: wallet.publicKey,
-              seed,
-              authorized: new Authorized(
-                wallet.publicKey,
-                wallet.publicKey
-              ),
-              lamports: await connection.getMinimumBalanceForRentExemption(StakeProgram.space) + 1
-            });
-
-            const signature = await sendTransaction(
-              sendConnection,
-              wallet,
-              transaction.instructions,
-              []
-            );
-            console.log(signature);
-          }}
-        >
-          Create
-        </Button>
-      </DialogActions>
-    </Dialog>
-  );
 }
 
 export function SummaryCard(props : SummaryCardProps) {
@@ -215,7 +148,7 @@ export function SummaryCard(props : SummaryCardProps) {
             <Typography>
               SOL {SOLPriceUSD ? formatPriceNumber.format(SOLPriceUSD) : '-'} $&nbsp;
               <Tooltip title="On-chain SOL price from pyth.network oracle">
-                <img style={{display: 'inline', verticalAlign: 'middle'}} height="25px" src="pyth-icon-48x48.png" />
+                <img style={{display: 'inline', verticalAlign: 'middle'}} height="25px" src="pyth-icon-48x48.png" alt="PythNetwork" />
               </Tooltip>
             </Typography>
           </Grid>

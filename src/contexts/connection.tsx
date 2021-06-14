@@ -4,6 +4,7 @@ import {
   Cluster,
   clusterApiUrl,
   Connection,
+  Signer,
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
@@ -52,8 +53,8 @@ const ConnectionContext = React.createContext<ConnectionConfig>({
   cluster: ENDPOINTS[0].name,
   url: DEFAULT,
   setUrl: () => {},
-  connection: new Connection(DEFAULT, "recent"),
-  sendConnection: new Connection(DEFAULT, "recent"),
+  connection: new Connection(DEFAULT, "confirmed"),
+  sendConnection: new Connection(DEFAULT, "confirmed"),
 });
 
 export function ConnectionProvider({ children = undefined as any }) {
@@ -62,10 +63,10 @@ export function ConnectionProvider({ children = undefined as any }) {
     ENDPOINTS[0].url
   );
 
-  const connection = useMemo(() => new Connection(url, "recent"), [
+  const connection = useMemo(() => new Connection(url, "confirmed"), [
     url,
   ]);
-  const sendConnection = useMemo(() => new Connection(url, "recent"), [
+  const sendConnection = useMemo(() => new Connection(url, "confirmed"), [
     url,
   ]);
 
@@ -165,67 +166,45 @@ const getErrorForTransaction = async (connection: Connection, txid: string) => {
   return errors;
 };
 
-export const sendTransaction = async (
+export async function sendTransaction(
   connection: Connection,
   wallet: WalletAdapter,
   instructions: TransactionInstruction[],
-  signers: Account[],
-  awaitConfirmation = true
-) => {
+  signers: Signer[],
+) {
   if (!wallet?.publicKey) {
     throw new Error("Wallet is not connected");
   }
 
-  let transaction = new Transaction();
-  instructions.forEach((instruction) => transaction.add(instruction));
+  let transaction = new Transaction({feePayer: wallet.publicKey});
+  transaction.add(...instructions);
   transaction.recentBlockhash = (
-    await connection.getRecentBlockhash("max")
+    await connection.getRecentBlockhash("finalized")
   ).blockhash;
-  transaction.setSigners(
-    // fee payied by the wallet owner
-    wallet.publicKey,
-    ...signers.map((s) => s.publicKey)
-  );
-  if (signers.length > 0) {
+  if(signers.length > 0) {
     transaction.partialSign(...signers);
   }
   transaction = await wallet.signTransaction(transaction);
   const rawTransaction = transaction.serialize();
   let options = {
     skipPreflight: true,
-    commitment: "singleGossip",
+    commitment: "processed",
   };
 
   const txid = await connection.sendRawTransaction(rawTransaction, options);
-
-  if (awaitConfirmation) {
-    const status = (
-      await connection.confirmTransaction(
-        txid,
-        options && (options.commitment as any)
-      )
-    ).value;
-
-    if (status?.err) {
-      const errors = await getErrorForTransaction(connection, txid);
-      notify({
-        message: "Transaction failed...",
-        description: (
-          <>
-            {errors.map((err) => (
-              <div>{err}</div>
-            ))}
-            <ExplorerLink address={txid} type="transaction" />
-          </>
-        ),
-        type: "error",
-      });
-
-      throw new Error(
-        `Raw transaction ${txid} failed (${JSON.stringify(status)})`
-      );
-    }
-  }
-
   return txid;
 };
+
+export function useSolanaExplorerUrlSuffix() {
+  const context = useContext(ConnectionContext);
+  if (!context) {
+    throw new Error('Missing connection context');
+  }
+  const endpoint = context.url;
+  if (endpoint === clusterApiUrl('devnet')) {
+    return '?cluster=devnet';
+  } else if (endpoint === clusterApiUrl('testnet')) {
+    return '?cluster=testnet';
+  }
+  return '';
+}

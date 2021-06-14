@@ -15,7 +15,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   const connection = useConnection();
   const [open, setOpen] = useState(false);
   const [APY, setAPY] = useState<number | null>();
-  const { epochInfo, epochSchedule, epochStartTime } = useContext(EpochContext);
+  const { epochSchedule, epochStartTime } = useContext(EpochContext);
 
   function formatEpoch(epoch: BN) {
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
@@ -35,7 +35,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
       epochSchedule,
       stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch.toNumber() + 1
     );
-    console.log(`${epochInfo?.epoch}, ${firstActivatedSlot}`);
+
     getFirstBlockTime(connection, firstActivatedSlot)
       .then(activatedBlockTime => {
         if(!activatedBlockTime) {
