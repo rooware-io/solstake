@@ -13,3 +13,5 @@ Solstake is an open-source and Non-custodial interface that makes staking SOL ef
 https://docs.solana.com/staking
 
 https://docs.solana.com/cluster/stake-delegation-and-rewards#vote-and-stake-accounts
+
+https://docs.solana.com/developing/clients/jsonrpc-api#getvoteaccounts

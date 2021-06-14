@@ -3,8 +3,9 @@ import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import BN from "bn.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { useConnection } from "../contexts/connection";
+import { useConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
 import { EpochContext } from "../contexts/epoch";
+import { useWallet } from "../contexts/wallet";
 import { getFirstBlockTime, getFirstSlotInEpoch } from "../utils/block";
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 import { formatPct } from "../utils/utils";
@@ -13,9 +14,11 @@ const MAX_EPOCH = new BN(2).pow(new BN(64)).sub(new BN(1));
 
 export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAccountMeta}) {
   const connection = useConnection();
+  const {wallet} = useWallet();
   const [open, setOpen] = useState(false);
   const [APY, setAPY] = useState<number | null>();
   const { epochSchedule, epochStartTime } = useContext(EpochContext);
+  const urlSuffix = useSolanaExplorerUrlSuffix();
 
   function formatEpoch(epoch: BN) {
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
@@ -85,9 +88,15 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         </CardContent>
 
         <CardActions>
-          <Link color="secondary" href={`https://explorer.solana.com/address/${stakeAccountMeta.address.toBase58()}`} rel="noopener noreferrer" target="_blank">
+          <Link color="secondary" href={`https://explorer.solana.com/address/${stakeAccountMeta.address.toBase58()}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
             <OpenInNew />
           </Link>
+          <Button
+            variant="outlined"
+            //onClick={() => setOpen(true)}
+          >
+            Delegate
+          </Button>
         </CardActions>
       </Card>
     </Box>)

@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField } from "@material-ui/core";
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@material-ui/core";
 import { Authorized, Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram } from "@solana/web3.js";
 import { useState } from "react";
 import { sendTransaction } from "../contexts/connection";
@@ -6,6 +6,7 @@ import { useMonitorTransaction } from "../utils/notifications";
 import { WalletAdapter } from "../wallet-adapters/walletAdapter";
 
 interface CreateStakeAccountProps {
+  seed: string;
   open: boolean;
   setOpen: (open: boolean) => void;
   wallet: WalletAdapter;
@@ -13,7 +14,7 @@ interface CreateStakeAccountProps {
   sendConnection: Connection;
 };
   
-export function CreateStakeAccountDialog({open, setOpen, wallet, connection, sendConnection}: CreateStakeAccountProps) {
+export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connection, sendConnection}: CreateStakeAccountProps) {
   const {monitorTransaction, sending} = useMonitorTransaction();
 
   const [amount, setAmount] = useState<string>('');
@@ -22,7 +23,6 @@ export function CreateStakeAccountDialog({open, setOpen, wallet, connection, sen
     setOpen(false);
   }
 
-  const seed = '0';
   return (
     <Dialog
       open={open}
@@ -32,6 +32,9 @@ export function CreateStakeAccountDialog({open, setOpen, wallet, connection, sen
         Create stake account
       </DialogTitle>
       <DialogContent>
+        <Typography>
+          Seed: {seed}
+        </Typography>
         <TextField
           type="number"
           value={amount}
@@ -67,7 +70,7 @@ export function CreateStakeAccountDialog({open, setOpen, wallet, connection, sen
               lamports
             });
 
-            await monitorTransaction( 
+            await monitorTransaction(
               sendTransaction(
                 sendConnection,
                 wallet,

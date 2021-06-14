@@ -9,6 +9,7 @@ import { AccountsContext } from "../contexts/accounts";
 import { useConnection, useSendConnection } from "../contexts/connection";
 import { useWallet } from "../contexts/wallet";
 import { CreateStakeAccountDialog } from "./CreateStakeAccount";
+import { STAKE_PROGRAM_ID } from "../utils/ids";
 
 interface SummaryCardProps {
   publicKeyString: string | undefined;
@@ -42,6 +43,7 @@ export function SummaryCard(props : SummaryCardProps) {
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [SOLPriceUSD, setSOLPriceUSD] = useState<number>();
   const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo | null>();
+  const [seed, setSeed] = useState('0');
   const [open, setOpen] = useState(true);
 
   useEffect(() => {
@@ -82,6 +84,34 @@ export function SummaryCard(props : SummaryCardProps) {
 
   const totalStakedSOL = useMemo(() => {
     return stakeAccountMetas?.reduce((sum, current) => sum + current.balance, 0);
+  }, [stakeAccountMetas]);
+
+  // Yield first seed sequentially from unused seeds
+  useEffect(() => {
+    if(!stakeAccountMetas || !wallet?.publicKey) {
+      return;
+    }
+    const pk = wallet.publicKey;
+
+    let newAccountIndex = 0;
+    // Hacky but should do the job in 99.9% of cases
+    Promise.all(Array.from(Array(20).keys()).map(async i => {
+      const seed = `${i}`;
+      return PublicKey.createWithSeed(pk, seed, STAKE_PROGRAM_ID).then(pubkey => ({seed, pubkey}));
+    }))
+      .then(naturalStakeAccountSeedPubkeys => {
+        stakeAccountMetas.forEach(meta => {
+          const naturalStakeAccountSeedPubkey = naturalStakeAccountSeedPubkeys.find(({pubkey}) => meta.address.equals(pubkey));
+          if(naturalStakeAccountSeedPubkey) {
+            const accountIndex = parseInt(naturalStakeAccountSeedPubkey.seed);
+            if(newAccountIndex <= accountIndex) {
+              newAccountIndex = accountIndex + 1;
+            }
+          }
+        });
+
+        setSeed(newAccountIndex.toString());
+      });
   }, [stakeAccountMetas]);
 
   return (
@@ -170,6 +200,7 @@ export function SummaryCard(props : SummaryCardProps) {
                 Create stake account
               </Button>
               <CreateStakeAccountDialog
+                seed={seed}
                 open={open}
                 setOpen={setOpen}
                 connection={connection}
