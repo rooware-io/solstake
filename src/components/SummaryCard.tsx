@@ -44,7 +44,7 @@ export function SummaryCard(props : SummaryCardProps) {
   const [SOLPriceUSD, setSOLPriceUSD] = useState<number>();
   const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo | null>();
   const [seed, setSeed] = useState('0');
-  const [open, setOpen] = useState(true);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setDashboardEpochInfo(null);

@@ -17,6 +17,7 @@ export function AccountsProvider({ children = null as any }) {
 
   useEffect(() => {
     if(!publicKey) {
+      setSystemProgramAccountInfo(null);
       return;
     }
     connection.getAccountInfo(publicKey)

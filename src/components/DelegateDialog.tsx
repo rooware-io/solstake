@@ -1,24 +1,26 @@
 import 'react-virtualized/styles.css';
-
-// You can import any component you want as a named export from 'react-virtualized', eg
-//import {Column, Table} from 'react-virtualized';
-
-// But if you only use a few react-virtualized components,
-// And you're concerned about increasing your application's bundle size,
-// You can directly import only the components you need, like so:
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
-import List from 'react-virtualized/dist/commonjs/List';
+import List, { ListRowProps } from 'react-virtualized/dist/commonjs/List';
 import React, { useEffect, useState } from "react";
-import { useConnection } from "../contexts/connection";
-import { LAMPORTS_PER_SOL, VoteAccountInfo } from "@solana/web3.js";
-import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Box, Slider } from '@material-ui/core';
+import { sendTransaction, useConnection, useSendConnection } from "../contexts/connection";
+import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, VoteAccountInfo } from "@solana/web3.js";
+import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, MenuItem } from '@material-ui/core';
+import { useWallet } from '../contexts/wallet';
+import { useMonitorTransaction } from '../utils/notifications';
 
-export function DelegateDialog() {
+export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, handleClose: () => void}) {
+  const {stakePubkey, open, handleClose} = props;
+
   const connection = useConnection();
-  const [open, setOpen] = useState(true);
+  const sendConnection = useSendConnection();
+  const {wallet} = useWallet();
+  const {monitorTransaction, sending} = useMonitorTransaction();
+  
   const [maxComission, setMaxComission] = useState<number>(100);
   const [voteAccounts, setVoteAccounts] = useState<VoteAccountInfo[]>();
   const [filteredVoteAccounts, setFilteredVoteAccount] = useState<VoteAccountInfo[]>();
+  const [selectedIndex, setSelectedIndex] = useState<number>();
+
 
   useEffect(() => {
     // For now hide stake lower than 1000 SOL, also ignore delinquents
@@ -32,9 +34,11 @@ export function DelegateDialog() {
     setFilteredVoteAccount(voteAccounts?.filter(info => info.commission <= maxComission));
   }, [voteAccounts, maxComission]);
 
-  function handleClose() {
-    setOpen(false);
-  }
+  useEffect(() => {
+    if(selectedIndex && selectedIndex >= (voteAccounts?.length ?? 0)) {
+      setSelectedIndex(undefined);
+    }
+  }, [voteAccounts, selectedIndex]);
 
   function rowRenderer({
     key, // Unique key within array of rows
@@ -42,13 +46,25 @@ export function DelegateDialog() {
     isScrolling, // The List is currently being scrolled
     isVisible, // This row is visible within the List (eg it is not an overscanned row)
     style, // Style object to be applied to row (to position it)
-  }: {key: string, index: number, isScrolling: boolean, isVisible: boolean, style: React.CSSProperties}) {
+  }: ListRowProps) {
     return (
-      <div key={key} style={style}>       
+      <MenuItem
+        key={key}
+        style={style}
+        selected={selectedIndex === index}
+        onClick={() => {
+          if(selectedIndex !== undefined && selectedIndex === index) {
+            setSelectedIndex(undefined);
+          }
+          else {
+            setSelectedIndex(index);
+          }
+        }}
+      >       
         <Typography>
           {filteredVoteAccounts && (filteredVoteAccounts[index].votePubkey + ' ' + filteredVoteAccounts[index].activatedStake / LAMPORTS_PER_SOL + ' ' + filteredVoteAccounts[index].commission + '%')}
         </Typography>
-      </div>
+      </MenuItem>
     );
   }
 
@@ -75,21 +91,64 @@ export function DelegateDialog() {
           step={1}
           valueLabelDisplay="auto"
         />
-        <AutoSizer>
-          {({height, width}) => (
-            <List
-              width={width}
-              height={height}
-              rowHeight={50}
-              rowCount={filteredVoteAccounts?.length ?? 0}
-              rowRenderer={rowRenderer}
-            />
-          )}
-        </AutoSizer>
+        <Typography>
+          votePubkey activatedStake comission
+        </Typography>
+
+        <div style={{height: '90%'}}>
+          <AutoSizer>
+            {({height, width}) => (
+              <List
+                width={width}
+                height={height}
+                rowHeight={50}
+                rowCount={filteredVoteAccounts?.length ?? 0}
+                rowRenderer={rowRenderer}
+              />
+            )}
+          </AutoSizer>
+        </div>
+
+        {(filteredVoteAccounts && selectedIndex && filteredVoteAccounts[selectedIndex]) && (
+          <Typography variant="h6">
+            Selected votePubkey  {filteredVoteAccounts[selectedIndex].votePubkey}
+          </Typography>
+        )}
       </DialogContent>
+
       <DialogActions>
         <Button onClick={handleClose}>Close</Button>
-        <Button disabled>Select</Button>
+        <Button
+          disabled={!selectedIndex || sending}
+          onClick={async () => {
+            if(!wallet?.publicKey || !filteredVoteAccounts || selectedIndex === undefined || !filteredVoteAccounts[selectedIndex]) {
+              return;
+            }
+
+            const transaction = StakeProgram.delegate({
+              stakePubkey,
+              authorizedPubkey: wallet.publicKey,
+              votePubkey: new PublicKey(filteredVoteAccounts[selectedIndex].votePubkey)
+            });
+
+            await monitorTransaction(
+              sendTransaction(
+                sendConnection,
+                wallet,
+                transaction.instructions,
+                []
+              ),
+              {
+                onSuccess: () => {
+                  handleClose();
+                },
+                onError: () => {}
+              }
+            );
+          }}
+        >
+          Delegate
+        </Button>
       </DialogActions>
     </Dialog>
   );

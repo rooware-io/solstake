@@ -15,7 +15,6 @@ import { useWallet } from '../contexts/wallet';
 import { AppSettings } from '../components/AppSettings';
 import { ENDPOINTS, useConnection, useConnectionConfig } from '../contexts/connection';
 import { SummaryCard } from '../components/SummaryCard';
-import { DelegateDialog } from '../components/DelegateDialog';
 
 const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 
@@ -162,7 +161,6 @@ function DApp() {
           </Button>
         </DialogActions>
       </Dialog>
-      <DelegateDialog />
     </div>
   );
 }
