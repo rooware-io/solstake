@@ -62,7 +62,7 @@ export function SummaryCard(props : SummaryCardProps) {
   useEffect(() => {
     getSOLPriceUSD()
       .then(setSOLPriceUSD);
-  }, [true]);
+  }, []);
 
   useEffect(() => {
     setErrorInfo(null);
@@ -80,7 +80,7 @@ export function SummaryCard(props : SummaryCardProps) {
       setErrorInfo('Invalid public key');
       setPublicKey(null);
     }
-  }, [publicKeyString]);
+  }, [publicKeyString, setPublicKey]);
 
   const totalStakedSOL = useMemo(() => {
     return stakeAccountMetas?.reduce((sum, current) => sum + current.balance, 0);
@@ -112,7 +112,7 @@ export function SummaryCard(props : SummaryCardProps) {
 
         setSeed(newAccountIndex.toString());
       });
-  }, [stakeAccountMetas]);
+  }, [wallet?.publicKey, stakeAccountMetas]);
 
   return (
     <Card>

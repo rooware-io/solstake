@@ -55,18 +55,17 @@ function DApp() {
   function handleClose() {
     setOpen(false);
   }
-  
-  async function fetchStakeAccounts(pk: PublicKey) {
-    setStakeAccounts(await findStakeAccountMetas(connection, pk));
-    setLoading(false);
-  }
 
   useEffect(() => {
     setStakeAccounts(null);
     const newPublicKey = connected ? wallet?.publicKey : publicKey;
     if (newPublicKey) {
       setLoading(true);
-      fetchStakeAccounts(newPublicKey);
+      findStakeAccountMetas(connection, newPublicKey)
+        .then(newStakeAccounts => {
+          setStakeAccounts(newStakeAccounts);
+          setLoading(false);
+        });
     }
   }, [connection, connected, wallet?.publicKey, publicKey]);
   

@@ -23,7 +23,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   const [APY, setAPY] = useState<number | null>();
   const { epochSchedule, epochStartTime } = useContext(EpochContext);
   const urlSuffix = useSolanaExplorerUrlSuffix();
-  const {monitorTransaction, sending} = useMonitorTransaction();
+  const {monitorTransaction} = useMonitorTransaction();
 
   function formatEpoch(epoch: BN) {
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();

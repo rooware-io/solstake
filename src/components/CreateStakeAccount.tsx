@@ -15,7 +15,7 @@ interface CreateStakeAccountProps {
 };
   
 export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connection, sendConnection}: CreateStakeAccountProps) {
-  const {monitorTransaction, sending} = useMonitorTransaction();
+  const {monitorTransaction} = useMonitorTransaction();
 
   const [amount, setAmount] = useState<string>('');
 
