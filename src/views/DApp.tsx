@@ -90,7 +90,7 @@ function DApp() {
                     setPublicKeyString(DEMO_PUBLIC_KEY_STRING);
                   }}
                 >
-                    Demo
+                  Demo
                 </Button>
               </Tooltip>
               <Connector />

@@ -1,6 +1,6 @@
 import { EpochInfo, EpochSchedule } from "@solana/web3.js";
 import React, { useEffect, useState } from "react";
-import { getFirstBlockTime, getFirstSlotInEpoch } from "../utils/block";
+import { getFirstBlockTime } from "../utils/block";
 import { useConnection } from "./connection";
 
 interface EpochConfig {
@@ -38,7 +38,7 @@ export function EpochProvider({ children = undefined as any }) {
       return;
     }
 
-    const slot = getFirstSlotInEpoch(epochSchedule, epochInfo.epoch);
+    const slot = epochSchedule.getFirstSlotInEpoch(epochInfo.epoch);
     getFirstBlockTime(connection, slot)
       .then(setEpochStartTime);
   }, [connection, epochInfo, epochSchedule]);

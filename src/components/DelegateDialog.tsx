@@ -3,7 +3,7 @@ import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import List, { ListRowProps } from 'react-virtualized/dist/commonjs/List';
 import React, { useEffect, useState } from "react";
 import { sendTransaction, useConnection, useSendConnection } from "../contexts/connection";
-import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, VoteAccountInfo } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, VoteAccountInfo, VoteAccountStatus } from "@solana/web3.js";
 import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, MenuItem } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
@@ -17,28 +17,27 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   const {monitorTransaction, sending} = useMonitorTransaction();
   
   const [maxComission, setMaxComission] = useState<number>(100);
-  const [voteAccounts, setVoteAccounts] = useState<VoteAccountInfo[]>();
+  const [voteAccountStatus, setVoteAccountStatus] = useState<VoteAccountStatus>();
   const [filteredVoteAccounts, setFilteredVoteAccount] = useState<VoteAccountInfo[]>();
   const [selectedIndex, setSelectedIndex] = useState<number>();
 
 
   useEffect(() => {
-    // For now hide stake lower than 1000 SOL, also ignore delinquents
     connection.getVoteAccounts()
       .then(voteAccountStatus => {
-        setVoteAccounts(voteAccountStatus.current);
+        setVoteAccountStatus(voteAccountStatus);
       });
   }, [connection]);
 
   useEffect(() => {
-    setFilteredVoteAccount(voteAccounts?.filter(info => info.commission <= maxComission));
-  }, [voteAccounts, maxComission]);
+    setFilteredVoteAccount(voteAccountStatus?.current.filter(info => info.commission <= maxComission));
+  }, [voteAccountStatus, maxComission]);
 
   useEffect(() => {
-    if(selectedIndex && selectedIndex >= (voteAccounts?.length ?? 0)) {
+    if(selectedIndex && selectedIndex >= (filteredVoteAccounts?.length ?? 0)) {
       setSelectedIndex(undefined);
     }
-  }, [voteAccounts, selectedIndex]);
+  }, [filteredVoteAccounts, selectedIndex]);
 
   function rowRenderer({
     key, // Unique key within array of rows
@@ -119,7 +118,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
       <DialogActions>
         <Button onClick={handleClose}>Close</Button>
         <Button
-          disabled={!selectedIndex || sending}
+          disabled={selectedIndex === undefined || sending}
           onClick={async () => {
             if(!wallet?.publicKey || !filteredVoteAccounts || selectedIndex === undefined || !filteredVoteAccounts[selectedIndex]) {
               return;

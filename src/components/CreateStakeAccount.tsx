@@ -1,4 +1,4 @@
-import { Button, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@material-ui/core";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, TextField, Typography } from "@material-ui/core";
 import { Authorized, Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram } from "@solana/web3.js";
 import { useState } from "react";
 import { sendTransaction } from "../contexts/connection";
@@ -15,7 +15,7 @@ interface CreateStakeAccountProps {
 };
   
 export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connection, sendConnection}: CreateStakeAccountProps) {
-  const {monitorTransaction} = useMonitorTransaction();
+  const {monitorTransaction, sending} = useMonitorTransaction();
 
   const [amount, setAmount] = useState<string>('');
 
@@ -47,6 +47,7 @@ export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connectio
       <DialogActions>
         <Button onClick={handleClose}>Close</Button>
         <Button
+          disabled={sending}
           onClick={async () => {
             if(!wallet.publicKey) {
               return;
@@ -86,7 +87,7 @@ export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connectio
             );
           }}
         >
-          Create
+          {sending ? <CircularProgress color="secondary" size={14} /> : "Create"}
         </Button>
       </DialogActions>
     </Dialog>

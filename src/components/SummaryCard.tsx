@@ -199,14 +199,17 @@ export function SummaryCard(props : SummaryCardProps) {
               >
                 Create stake account
               </Button>
-              <CreateStakeAccountDialog
-                seed={seed}
-                open={open}
-                setOpen={setOpen}
-                connection={connection}
-                sendConnection={sendConnection}
-                wallet={wallet}
-              />
+              { open &&
+                <CreateStakeAccountDialog
+                  seed={seed}
+                  open={open}
+                  setOpen={setOpen}
+                  connection={connection}
+                  sendConnection={sendConnection}
+                  wallet={wallet}
+                />
+              }
+
             </Grid>
           )}
         </Grid>
