@@ -4,7 +4,7 @@ import List, { ListRowProps } from 'react-virtualized/dist/commonjs/List';
 import React, { useEffect, useState } from "react";
 import { sendTransaction, useConnection, useSendConnection } from "../contexts/connection";
 import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, VoteAccountInfo, VoteAccountStatus } from "@solana/web3.js";
-import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, MenuItem } from '@material-ui/core';
+import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, MenuItem, TextField } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 
@@ -20,6 +20,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   const [voteAccountStatus, setVoteAccountStatus] = useState<VoteAccountStatus>();
   const [filteredVoteAccounts, setFilteredVoteAccount] = useState<VoteAccountInfo[]>();
   const [selectedIndex, setSelectedIndex] = useState<number>();
+  const [searchCriteria, setSearchCriteria] = useState<string>('');
 
 
   useEffect(() => {
@@ -30,8 +31,8 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   }, [connection]);
 
   useEffect(() => {
-    setFilteredVoteAccount(voteAccountStatus?.current.filter(info => info.commission <= maxComission));
-  }, [voteAccountStatus, maxComission]);
+    setFilteredVoteAccount(voteAccountStatus?.current.filter(info => info.commission <= maxComission && searchCriteria ? info.votePubkey.includes(searchCriteria) : true));
+  }, [voteAccountStatus, maxComission, searchCriteria]);
 
   useEffect(() => {
     if(selectedIndex && selectedIndex >= (filteredVoteAccounts?.length ?? 0)) {
@@ -81,6 +82,13 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
         <Typography>
           Max commission %
         </Typography>
+        <TextField
+          title="Search"
+          value={searchCriteria}
+          onChange={(e) => {
+            setSearchCriteria(e.target.value);
+          }}
+        />
         <Slider
           color="secondary"
           style={{width: '20%'}}
