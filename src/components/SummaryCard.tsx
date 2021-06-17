@@ -1,90 +1,50 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { Card, CardContent, LinearProgress, Typography, TextField, Box, Divider, Tooltip } from "@material-ui/core";
-import { clusterApiUrl, Connection, EpochInfo, PublicKey } from "@solana/web3.js";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { Card, CardContent, LinearProgress, Typography, TextField, Box, Divider, Tooltip, Button, Grid } from "@material-ui/core";
+import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from "@solana/web3.js";
 import { formatPct, formatPriceNumber, humanizeDuration } from "../utils/utils";
-import { parseMappingData, parsePriceData, parseProductData } from '@pythnetwork/client';
+import { parsePriceData } from '@pythnetwork/client';
 import { StakeAccountMeta } from "../utils/stakeAccounts";
+import { DashboardEpochInfo, getDashboardEpochInfo } from "../utils/epoch";
+import { AccountsContext } from "../contexts/accounts";
+import { useConnection, useSendConnection } from "../contexts/connection";
+import { useWallet } from "../contexts/wallet";
+import { CreateStakeAccountDialog } from "./CreateStakeAccount";
+import { STAKE_PROGRAM_ID } from "../utils/ids";
 
 interface SummaryCardProps {
-  connection: Connection;
-  connected: boolean;
   publicKeyString: string | undefined;
   setPublicKeyString: (publicKeyString: string | undefined) => void;
   setPublicKey: (publicKey: PublicKey | null) => void;
   stakeAccountMetas: StakeAccountMeta[] | null;
 }
 
-interface DashboardEpochInfo {
-  epochInfo: EpochInfo;
-  epochProgress: number;
-  epochTimeRemaining: number;
-}
-
-async function getDashboardEpochInfo(connection: Connection) : Promise<DashboardEpochInfo> {
-  // Inspired from explorer.solana.com DashboardInfo
-  const epochInfo = await connection.getEpochInfo();
-  const {slotIndex, slotsInEpoch} =  epochInfo;
-
-  const epochProgress = slotIndex / slotsInEpoch;
-
-  //const samples = await connection.getRecentPerformanceSamples(360);
-  const samples = [{samplePeriodSecs: 689, numSlots: 1000}] // Hardcoded until mystery above is solved
-  const timePerSlotSamples = samples
-    .filter((sample) => {
-      return sample.numSlots !== 0;
-    })
-    .slice(0, 60)
-    .map((sample) => {
-      return sample.samplePeriodSecs / sample.numSlots;
-    })
-
-  const samplesInHour = timePerSlotSamples.length < 60 ? timePerSlotSamples.length : 60;
-  const avgSlotTime_1h =
-    timePerSlotSamples.reduce((sum: number, cur: number) => {
-      return sum + cur;
-    }, 0) / samplesInHour;
-
-  const hourlySlotTime = Math.round(1000 * avgSlotTime_1h);
-  const epochTimeRemaining = (slotsInEpoch - slotIndex) * hourlySlotTime;
-
-  console.log(`epochProgress: ${epochProgress}, epochTimeRemaining: ${epochTimeRemaining}`);
-  return {
-    epochInfo,
-    epochProgress,
-    epochTimeRemaining,
-  };
-}
-
 async function getSOLPriceUSD(): Promise<number | undefined> {
   // TODO: Switch to mainnet when available
   const connection = new Connection(clusterApiUrl('devnet'));
 
-  /*
-    Where do we get this key? Do we really have to traverse everytime?
-    const publicKey = new PublicKey(ORACLE_MAPPING_PUBLIC_KEY);
-    const mappingAccountInfo = await connection.getAccountInfo(publicKey);
-    const { productAccountKeys } = parseMappingData(mappingAccountInfo?.data);
-    const productAccountInfo = await connection.getAccountInfo(productAccountKeys[productAccountKeys.length - 1]);
-    const { product, priceAccountKey } = parseProductData(productAccountInfo?.data);
-  */
-  
   const SOLUSDPriceAccountKey = new PublicKey('BdgHsXrH1mXqhdosXavYxZgX6bGqTdj5mh2sxDhF8bJy');
   const priceAccountInfo = await connection.getAccountInfo(SOLUSDPriceAccountKey);
   if (!priceAccountInfo) {
     return;
   }
   const { price, confidence } = parsePriceData(priceAccountInfo?.data);
-  //console.log(`${product.symbol}: $${price} \xB1$${confidence}`);
+
   console.log(`price: ${price}, confidence: ${confidence}`);
   return price;
 }
 
 export function SummaryCard(props : SummaryCardProps) {
-  const {connection, connected, publicKeyString, setPublicKeyString, setPublicKey, stakeAccountMetas} = props;
-
+  const connection = useConnection();
+  const sendConnection = useSendConnection();
+  const {wallet, connected} = useWallet();
+  const {publicKeyString, setPublicKeyString, setPublicKey, stakeAccountMetas} = props;
+  
+  const {systemProgramAccountInfo} = useContext(AccountsContext);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [SOLPriceUSD, setSOLPriceUSD] = useState<number>();
   const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo | null>();
+  const [seed, setSeed] = useState('0');
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setDashboardEpochInfo(null);
@@ -102,7 +62,7 @@ export function SummaryCard(props : SummaryCardProps) {
   useEffect(() => {
     getSOLPriceUSD()
       .then(setSOLPriceUSD);
-  }, [true]);
+  }, []);
 
   useEffect(() => {
     setErrorInfo(null);
@@ -120,11 +80,39 @@ export function SummaryCard(props : SummaryCardProps) {
       setErrorInfo('Invalid public key');
       setPublicKey(null);
     }
-  }, [publicKeyString]);
+  }, [publicKeyString, setPublicKey]);
 
   const totalStakedSOL = useMemo(() => {
     return stakeAccountMetas?.reduce((sum, current) => sum + current.balance, 0);
   }, [stakeAccountMetas]);
+
+  // Yield first seed sequentially from unused seeds
+  useEffect(() => {
+    if(!stakeAccountMetas || !wallet?.publicKey) {
+      return;
+    }
+    const pk = wallet.publicKey;
+
+    let newAccountIndex = 0;
+    // Hacky but should do the job in 99.9% of cases
+    Promise.all(Array.from(Array(20).keys()).map(async i => {
+      const seed = `${i}`;
+      return PublicKey.createWithSeed(pk, seed, STAKE_PROGRAM_ID).then(pubkey => ({seed, pubkey}));
+    }))
+      .then(naturalStakeAccountSeedPubkeys => {
+        stakeAccountMetas.forEach(meta => {
+          const naturalStakeAccountSeedPubkey = naturalStakeAccountSeedPubkeys.find(({pubkey}) => meta.address.equals(pubkey));
+          if(naturalStakeAccountSeedPubkey) {
+            const accountIndex = parseInt(naturalStakeAccountSeedPubkey.seed);
+            if(newAccountIndex <= accountIndex) {
+              newAccountIndex = accountIndex + 1;
+            }
+          }
+        });
+
+        setSeed(newAccountIndex.toString());
+      });
+  }, [wallet?.publicKey, stakeAccountMetas]);
 
   return (
     <Card>
@@ -170,24 +158,61 @@ export function SummaryCard(props : SummaryCardProps) {
 
         <Box m={2}></Box>
 
-        <div>
-          {totalStakedSOL && (
-            <>
+        <Grid
+          container
+          direction="row"
+          justify="space-between"
+          alignItems="center"
+        >
+          <Grid item xs>
+            {totalStakedSOL && (
+              <>
+                <Typography>
+                  Total staked
+                </Typography>
+                <Typography>
+                ≈{formatPriceNumber.format(totalStakedSOL)} SOL ({SOLPriceUSD && formatPriceNumber.format(totalStakedSOL * SOLPriceUSD)} USD)
+                </Typography>
+              </>
+            )}
+            <Typography>
+              SOL {SOLPriceUSD ? formatPriceNumber.format(SOLPriceUSD) : '-'} $&nbsp;
+              <Tooltip title="On-chain SOL price from pyth.network oracle">
+                <img style={{display: 'inline', verticalAlign: 'middle'}} height="25px" src="pyth-icon-48x48.png" alt="PythNetwork" />
+              </Tooltip>
+            </Typography>
+          </Grid>
+
+          <Grid item xs></Grid>
+
+          {(wallet && systemProgramAccountInfo) && (
+            <Grid item xs style={{textAlign: 'right'}}>
               <Typography>
-                Total staked
+                Account balance
               </Typography>
               <Typography>
-               ≈{formatPriceNumber.format(totalStakedSOL)} SOL ({SOLPriceUSD && formatPriceNumber.format(totalStakedSOL * SOLPriceUSD)} USD)
+                {systemProgramAccountInfo.lamports / LAMPORTS_PER_SOL} SOL
               </Typography>
-            </>
+              <Button
+                variant="outlined"
+                onClick={() => setOpen(true)}
+              >
+                Create stake account
+              </Button>
+              { open &&
+                <CreateStakeAccountDialog
+                  seed={seed}
+                  open={open}
+                  setOpen={setOpen}
+                  connection={connection}
+                  sendConnection={sendConnection}
+                  wallet={wallet}
+                />
+              }
+
+            </Grid>
           )}
-          <Typography>
-            SOL {SOLPriceUSD ? formatPriceNumber.format(SOLPriceUSD) : '-'} $&nbsp;
-            <Tooltip title="On-chain SOL price from pyth.network oracle">
-              <img style={{display: 'inline', verticalAlign: 'middle'}} height="25px" src="pyth-icon-48x48.png" />
-            </Tooltip>
-          </Typography>
-        </div>
+        </Grid>
       </CardContent>
     </Card>
   );

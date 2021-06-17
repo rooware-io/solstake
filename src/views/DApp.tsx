@@ -55,18 +55,17 @@ function DApp() {
   function handleClose() {
     setOpen(false);
   }
-  
-  async function fetchStakeAccounts(pk: PublicKey) {
-    setStakeAccounts(await findStakeAccountMetas(connection, pk));
-    setLoading(false);
-  }
 
   useEffect(() => {
     setStakeAccounts(null);
     const newPublicKey = connected ? wallet?.publicKey : publicKey;
     if (newPublicKey) {
       setLoading(true);
-      fetchStakeAccounts(newPublicKey);
+      findStakeAccountMetas(connection, newPublicKey)
+        .then(newStakeAccounts => {
+          setStakeAccounts(newStakeAccounts);
+          setLoading(false);
+        });
     }
   }, [connection, connected, wallet?.publicKey, publicKey]);
   
@@ -91,7 +90,7 @@ function DApp() {
                     setPublicKeyString(DEMO_PUBLIC_KEY_STRING);
                   }}
                 >
-                    Demo
+                  Demo
                 </Button>
               </Tooltip>
               <Connector />
@@ -102,8 +101,6 @@ function DApp() {
       <Box m={1} />
       <Container maxWidth="md">
         <SummaryCard
-          connection={connection}
-          connected={connected}
           publicKeyString={publicKeyString}
           setPublicKeyString={setPublicKeyString}
           setPublicKey={setPublicKey}

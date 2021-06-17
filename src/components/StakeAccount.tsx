@@ -1,25 +1,41 @@
-import { Box, Button, Card, CardActions, CardContent, Collapse, Link, List, ListItem, ListItemText, Typography } from "@material-ui/core";
+import { Box, Button, Card, CardActions, CardContent, Collapse, Link, List, ListItem, ListItemText, Tooltip, Typography } from "@material-ui/core";
 import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, StakeActivationData, StakeProgram } from "@solana/web3.js";
 import BN from "bn.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { useConnection } from "../contexts/connection";
+import { sendTransaction, useConnection, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
 import { EpochContext } from "../contexts/epoch";
-import { getFirstBlockTime, getFirstSlotInEpoch } from "../utils/block";
+import { useWallet } from "../contexts/wallet";
+import { getFirstBlockTime } from "../utils/block";
+import { useMonitorTransaction } from "../utils/notifications";
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 import { formatPct } from "../utils/utils";
+import { DelegateDialog } from "./DelegateDialog";
 
 const MAX_EPOCH = new BN(2).pow(new BN(64)).sub(new BN(1));
 
 export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAccountMeta}) {
   const connection = useConnection();
+  const sendConnection = useSendConnection();
+  const {wallet, connected} = useWallet();
+  const {monitorTransaction} = useMonitorTransaction();
+  const urlSuffix = useSolanaExplorerUrlSuffix();
+  const { epochSchedule, epochStartTime } = useContext(EpochContext);
+
+  const [rewardsOpen, setRewardsOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const [APY, setAPY] = useState<number | null>();
-  const { epochInfo, epochSchedule, epochStartTime } = useContext(EpochContext);
+  const [stakeActivationData, setStakeActivationData] = useState<StakeActivationData>();
 
   function formatEpoch(epoch: BN) {
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
   }
+
+  
+  useEffect(() => {
+    connection.getStakeActivation(stakeAccountMeta.address)
+      .then(setStakeActivationData);
+  }, [connection, stakeAccountMeta]);
 
   const totalRewards = useMemo(() => {
     return stakeAccountMeta.inflationRewards.reduce((sum, current) => sum + current.amount, 0)
@@ -31,11 +47,10 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
     if(!stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch || !epochSchedule || !epochStartTime || !totalRewards) {
       return;
     }
-    const firstActivatedSlot = getFirstSlotInEpoch(
-      epochSchedule,
+    const firstActivatedSlot = epochSchedule.getFirstSlotInEpoch(
       stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch.toNumber() + 1
     );
-    console.log(`${epochInfo?.epoch}, ${firstActivatedSlot}`);
+
     getFirstBlockTime(connection, firstActivatedSlot)
       .then(activatedBlockTime => {
         if(!activatedBlockTime) {
@@ -68,16 +83,19 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
               Voter: {stakeAccountMeta.stakeAccount.info.stake.delegation.voter.toBase58()}
             </Typography>
           )}
+          <Typography>
+            State: {stakeActivationData?.state}
+          </Typography>
 
-          <Button onClick={() => setOpen(!open)}>
+          <Button onClick={() => setRewardsOpen(!rewardsOpen)}>
             Rewards {totalRewards / LAMPORTS_PER_SOL} SOL, {(APY && formatPct.format(APY)) || '-'} APY
-            {open ? <ExpandLess /> : <ExpandMore />}
+            {rewardsOpen ? <ExpandLess /> : <ExpandMore />}
           </Button>
-          <Collapse in={open} timeout="auto" unmountOnExit>
+          <Collapse in={rewardsOpen} timeout="auto" unmountOnExit>
             <List component="div" disablePadding>
               {stakeAccountMeta.inflationRewards.map(inflationReward => (
               <ListItem style={{paddingLeft: 4}} key={inflationReward.epoch}>
-                  <ListItemText primary={`Epoch: ${inflationReward.epoch}, reward: ${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
+                <ListItemText primary={`Epoch: ${inflationReward.epoch}, reward: ${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
               </ListItem>
               ))}
             </List>
@@ -85,9 +103,72 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         </CardContent>
 
         <CardActions>
-          <Link color="secondary" href={`https://explorer.solana.com/address/${stakeAccountMeta.address.toBase58()}`} rel="noopener noreferrer" target="_blank">
+          <Link color="secondary" href={`https://explorer.solana.com/address/${stakeAccountMeta.address.toBase58()}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
             <OpenInNew />
           </Link>
+          <Tooltip
+            title={connected ? "Delegate stake account to a vote account": "Connect wallet to interact with stake accounts"}
+          >
+            <>
+              <div
+                hidden={stakeActivationData?.state === "active"}
+              >
+                <Button
+                  variant="outlined"
+                  onClick={() => setOpen(true)}
+                  disabled={!connected}
+                >
+                  {stakeActivationData?.state === "activating" && "Re-"}Delegate
+                </Button>
+              </div>
+              <div
+                hidden={stakeActivationData?.state === "inactive"}
+              >
+                <Button
+                  variant="outlined"
+                  onClick={async () => {
+                    if(!wallet?.publicKey) {
+                      return;
+                    }
+
+                    const transaction = StakeProgram.deactivate({
+                      stakePubkey: stakeAccountMeta.address,
+                      authorizedPubkey: wallet.publicKey,
+                    });
+
+                    await monitorTransaction(
+                      sendTransaction(
+                        sendConnection,
+                        wallet,
+                        transaction.instructions,
+                        []
+                      ),
+                      {
+                        onSuccess: () => {
+
+                        },
+                        onError: () => {}
+                      }
+                    );
+                  }} 
+                  disabled={!connected}
+                >
+                  Undelegate
+                </Button>
+              </div>
+            </>
+          </Tooltip>
+
+          {open && 
+            <DelegateDialog
+              stakePubkey={stakeAccountMeta.address}
+              open={open}
+              handleClose={() => {
+                setOpen(false);
+              }}
+            />    
+          }
+
         </CardActions>
       </Card>
     </Box>)

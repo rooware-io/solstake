@@ -12,19 +12,25 @@ import { WalletProvider } from './contexts/wallet';
 import { ThemeProvider } from '@material-ui/core';
 import { theme } from './assets/theme';
 import { EpochProvider } from './contexts/epoch';
+import { AccountsProvider } from './contexts/accounts';
+import { SnackbarProvider } from 'notistack';
 
 function App() {
   return (
     <ConnectionProvider>
       <WalletProvider>
-        <EpochProvider>
-          <ThemeProvider theme={theme}>
-            <Router>
-              <Route exact path='/' component={Landing} />
-              <Route path='/app' component={DApp} />
-            </Router>
-          </ThemeProvider>
-        </EpochProvider>
+        <AccountsProvider>
+          <EpochProvider>
+            <SnackbarProvider maxSnack={5} autoHideDuration={10000}>
+              <ThemeProvider theme={theme}>
+                <Router>
+                  <Route exact path='/' component={Landing} />
+                  <Route path='/app' component={DApp} />
+                </Router>
+              </ThemeProvider>
+            </SnackbarProvider>
+          </EpochProvider>
+        </AccountsProvider>
       </WalletProvider>
     </ConnectionProvider>
   );
