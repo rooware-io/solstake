@@ -24,6 +24,10 @@ export function AccountsProvider({ children = null as any }) {
       .then(accountInfo => {
         setSystemProgramAccountInfo(accountInfo);
       });
+    const subscriptionId = connection.onAccountChange(publicKey, accountInfo => {
+      setSystemProgramAccountInfo(accountInfo);
+    });
+    return () => { connection.removeAccountChangeListener(subscriptionId) };
   }, [connection, publicKey]);
 
   return (

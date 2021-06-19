@@ -40,7 +40,7 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
     StakeProgram.programId,
     {
       filters: [
-        {dataSize: 200},
+        {dataSize: 200}, // TODO: Trent said we might want to exclude the dataSize filter
         {
           memcmp: {
             offset: 12,

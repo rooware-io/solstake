@@ -1,6 +1,6 @@
-import { Box, Button, Card, CardActions, CardContent, Collapse, Link, List, ListItem, ListItemText, Tooltip, Typography } from "@material-ui/core";
+import { Box, Button, Card, CardActions, CardContent, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, Link, List, ListItem, ListItemText, TextField, Tooltip, Typography } from "@material-ui/core";
 import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
-import { LAMPORTS_PER_SOL, StakeActivationData, StakeProgram } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey, StakeActivationData, StakeProgram } from "@solana/web3.js";
 import BN from "bn.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import { sendTransaction, useConnection, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
@@ -10,6 +10,7 @@ import { getFirstBlockTime } from "../utils/block";
 import { useMonitorTransaction } from "../utils/notifications";
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 import { formatPct } from "../utils/utils";
+import { WalletAdapter } from "../wallet-adapters/walletAdapter";
 import { DelegateDialog } from "./DelegateDialog";
 
 const MAX_EPOCH = new BN(2).pow(new BN(64)).sub(new BN(1));
@@ -26,6 +27,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   const [open, setOpen] = useState(false);
   const [APY, setAPY] = useState<number | null>();
   const [stakeActivationData, setStakeActivationData] = useState<StakeActivationData>();
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
   function formatEpoch(epoch: BN) {
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
@@ -156,6 +158,28 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                   Undelegate
                 </Button>
               </div>
+              <div
+                hidden={stakeActivationData?.state !== "inactive"}
+              >
+                <Button
+                  variant="outlined"
+                  onClick={() => {
+                    setWithdrawOpen(true);
+                  }}
+                >
+                  Withdraw
+                </Button>
+                {wallet?.publicKey && withdrawOpen && (
+                  <WithdrawDialog
+                    wallet={wallet}
+                    userPublicKey={wallet.publicKey}
+                    stakePubkey={stakeAccountMeta.address}
+                    handleClose={() => {
+                      setWithdrawOpen(false);
+                    }}
+                  />
+                )}
+              </div>
             </>
           </Tooltip>
 
@@ -172,4 +196,67 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         </CardActions>
       </Card>
     </Box>)
+}
+
+interface WithdrawDialogProps {
+  wallet: WalletAdapter;
+  userPublicKey: PublicKey;
+  stakePubkey: PublicKey;
+  handleClose: () => void;
+};
+
+function WithdrawDialog({wallet, userPublicKey, stakePubkey, handleClose}: WithdrawDialogProps) {
+  const sendConnection = useSendConnection();
+  const {monitorTransaction, sending} = useMonitorTransaction();
+
+  const [amount, setAmount] = useState('');
+
+  return (
+    <Dialog
+      open
+      onClose={handleClose}
+    >
+      <DialogTitle>
+        Withdraw from inactive stake account
+      </DialogTitle>
+      <DialogContent>
+        <TextField
+          placeholder="SOL"
+          value={amount}
+          onChange={e => {
+            setAmount(e.target.value);
+          }}
+        />
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={handleClose}>Close</Button>
+        <Button
+          disabled={sending}
+          onClick={async () => {
+            await monitorTransaction(
+              sendTransaction(
+                sendConnection,
+                wallet,
+                StakeProgram.withdraw({
+                  stakePubkey,
+                  authorizedPubkey: userPublicKey,
+                  toPubkey: userPublicKey,
+                  lamports: Number(amount) * LAMPORTS_PER_SOL,
+                }).instructions,
+                []
+              ),
+              {
+                onSuccess: () => {
+                  handleClose();
+                },
+                onError: () => {}
+              }
+            );
+          }}
+        >
+          {sending ? <CircularProgress color="secondary" size={14} /> : "Withdraw"}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }
