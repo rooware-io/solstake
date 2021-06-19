@@ -1,4 +1,4 @@
-import { Connection, InflationReward, LAMPORTS_PER_SOL, PublicKey, StakeProgram } from "@solana/web3.js";
+import { AccountInfo, Connection, InflationReward, ParsedAccountData, PublicKey, StakeProgram } from "@solana/web3.js";
 import { create } from "superstruct";
 import { StakeAccount } from "../validators/accounts/accounts";
 import { STAKE_PROGRAM_ID } from "./ids";
@@ -7,7 +7,6 @@ export interface StakeAccountMeta {
   address: PublicKey;
   seed: string;
   lamports: number;
-  balance: number;
   stakeAccount: StakeAccount;
   inflationRewards: InflationReward[]
 }
@@ -20,6 +19,10 @@ async function promiseAllInBatches<T>(tasks: (() => Promise<T>)[], batchSize: nu
     console.log('batch finished');
   }
   return results;
+}
+
+export function accounInfoToStakeAccount(account: AccountInfo<Buffer | ParsedAccountData>): StakeAccount | undefined {
+  return ('parsed' in account?.data && create(account.data.parsed, StakeAccount)) || undefined;
 }
 
 export async function findStakeAccountMetas(connection: Connection, walletAddress: PublicKey): Promise<StakeAccountMeta[]> {
@@ -51,25 +54,25 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
     });
   
   parsedStakeAccounts.forEach(({pubkey, account}) => {
-    if (account?.data && 'parsed' in account?.data) {
-      console.log(account?.data.parsed);
-      const stakeAccount = create(account.data.parsed, StakeAccount);
-
-      // We identify accounts with the solflare seed, or natural seed only for now
-      const matchingSolflareSeed = solflareStakeAccountSeedPubkeys.find(element => element.pubkey.equals(pubkey))?.seed;
-      const matchingNaturalSeed = naturalStakeAccountSeedPubkeys.find(element => element.pubkey.equals(pubkey))?.seed;
-      const seed = matchingSolflareSeed || matchingNaturalSeed || `${pubkey.toBase58().slice(12)}...`;
-
-      const balanceLamports = account.lamports;
-      newStakeAccountMetas.push({
-        address: pubkey,
-        seed,
-        lamports: balanceLamports,
-        balance: balanceLamports / LAMPORTS_PER_SOL,
-        stakeAccount,
-        inflationRewards: []
-      });
+    console.log('parsed' in account?.data ? account?.data.parsed : "Does not contain parsed data");
+    const stakeAccount = accounInfoToStakeAccount(account);
+    if (!stakeAccount) {
+      return;
     }
+
+    // We identify accounts with the solflare seed, or natural seed only for now
+    const matchingSolflareSeed = solflareStakeAccountSeedPubkeys.find(element => element.pubkey.equals(pubkey))?.seed;
+    const matchingNaturalSeed = naturalStakeAccountSeedPubkeys.find(element => element.pubkey.equals(pubkey))?.seed;
+    const seed = matchingSolflareSeed || matchingNaturalSeed || `${pubkey.toBase58().slice(12)}...`;
+
+    const balanceLamports = account.lamports;
+    newStakeAccountMetas.push({
+      address: pubkey,
+      seed,
+      lamports: balanceLamports,
+      stakeAccount,
+      inflationRewards: []
+    });
   });
 
   newStakeAccountMetas.sort((a, b) => {

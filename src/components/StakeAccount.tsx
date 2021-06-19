@@ -33,11 +33,12 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
   }
 
-  
   useEffect(() => {
     connection.getStakeActivation(stakeAccountMeta.address)
       .then(setStakeActivationData);
-  }, [connection, stakeAccountMeta]);
+    // Hidden dependency as we update only the underlying data
+    // eslint-disable-next-line
+  }, [connection, stakeAccountMeta.stakeAccount]);
 
   const totalRewards = useMemo(() => {
     return stakeAccountMeta.inflationRewards.reduce((sum, current) => sum + current.amount, 0)
@@ -73,7 +74,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
             Seed: {stakeAccountMeta.seed}
           </Typography>
           <Typography variant="h6" component="h2">
-            {`Balance: ${stakeAccountMeta.balance} SOL`} 
+            {`Balance: ${stakeAccountMeta.lamports / LAMPORTS_PER_SOL} SOL`} 
           </Typography>
           <Typography color="textSecondary">
             Type: {stakeAccountMeta.stakeAccount.type}

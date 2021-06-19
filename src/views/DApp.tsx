@@ -6,7 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import {
   Link as RouterLink
 } from 'react-router-dom';
-import { findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
+import { accounInfoToStakeAccount, findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-gradient.svg';
 import { Info } from '@material-ui/icons';
@@ -68,6 +68,36 @@ function DApp() {
         });
     }
   }, [connection, connected, wallet?.publicKey, publicKey]);
+
+  useEffect(() => {
+    const subscriptionIds = stakeAccounts?.map(stakeAccountMeta => {
+      const subscriptionId = connection.onAccountChange(stakeAccountMeta.address, async () => {
+        console.log(`StakeAccount update for ${stakeAccountMeta.address.toBase58()}`);
+        const parsedAccountInfo = (await connection.getParsedAccountInfo(stakeAccountMeta.address)).value;
+        if (!parsedAccountInfo) {
+          return;
+        }
+        const newStakeAccount = accounInfoToStakeAccount(parsedAccountInfo);
+
+        const index = stakeAccounts?.findIndex(extistingStakeAccountMeta => extistingStakeAccountMeta.address.equals(stakeAccountMeta.address));
+        if (index === undefined || index === -1 || !stakeAccounts || !newStakeAccount) {
+          console.log(`Could not find existing stake account for address: ${index}, ${stakeAccounts?.length} ${newStakeAccount}`);
+          return;
+        }
+        let receivedStakeAccounts = [...stakeAccounts];
+        receivedStakeAccounts[index].stakeAccount = newStakeAccount;
+        setStakeAccounts(receivedStakeAccounts);
+      });
+      return subscriptionId;
+    });
+
+    // Necessary subscription cleanup
+    return () => {
+      subscriptionIds?.forEach(id => {
+        connection.removeAccountChangeListener(id);
+      })
+    };
+  }, [connection, stakeAccounts]);
   
   return (
     <div id="dapp">

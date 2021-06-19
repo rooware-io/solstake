@@ -83,7 +83,8 @@ export function SummaryCard(props : SummaryCardProps) {
   }, [publicKeyString, setPublicKey]);
 
   const totalStakedSOL = useMemo(() => {
-    return stakeAccountMetas?.reduce((sum, current) => sum + current.balance, 0);
+    const totalLamports = stakeAccountMetas?.reduce((sum, current) => sum + current.lamports, 0);
+    return totalLamports ? totalLamports / LAMPORTS_PER_SOL: 0;
   }, [stakeAccountMetas]);
 
   // Yield first seed sequentially from unused seeds
