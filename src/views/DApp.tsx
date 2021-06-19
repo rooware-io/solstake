@@ -98,13 +98,21 @@ function DApp() {
     const subscriptionIds = stakeAccounts?.map(stakeAccountMeta => {
       const subscriptionId = connection.onAccountChange(stakeAccountMeta.address, async () => {
         console.log(`StakeAccount update for ${stakeAccountMeta.address.toBase58()}`);
+        const index = stakeAccounts?.findIndex(extistingStakeAccountMeta => 
+          extistingStakeAccountMeta.address.equals(stakeAccountMeta.address)
+        );
         const parsedAccountInfo = (await connection.getParsedAccountInfo(stakeAccountMeta.address)).value;
         if (!parsedAccountInfo) {
+          // The account can no longer be found, it has been closed
+          if (index > -1) {
+            let updatedStakeAccounts = [...stakeAccounts];
+            updatedStakeAccounts.splice(index, 1);
+            setStakeAccounts (updatedStakeAccounts);
+          }
           return;
         }
         const newStakeAccount = accountInfoToStakeAccount(parsedAccountInfo);
 
-        const index = stakeAccounts?.findIndex(extistingStakeAccountMeta => extistingStakeAccountMeta.address.equals(stakeAccountMeta.address));
         if (index === undefined || index === -1 || !stakeAccounts || !newStakeAccount) {
           console.log(`Could not find existing stake account for address: ${index}, ${stakeAccounts?.length} ${newStakeAccount}`);
           return;
