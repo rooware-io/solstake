@@ -56,6 +56,31 @@ function DApp() {
     setOpen(false);
   }
 
+  async function addStakeAccount(stakeAccountPublicKey: PublicKey, seed: string) {
+    if (!stakeAccounts) {
+      return;
+    }
+    let newStakeAccounts = [...stakeAccounts];
+
+    const parsedAccountInfo = (await connection.getParsedAccountInfo(stakeAccountPublicKey)).value;
+    if (!parsedAccountInfo) {
+      console.log('Did not find new account');
+      return;
+    }
+    const stakeAccount = accounInfoToStakeAccount(parsedAccountInfo);
+    if (!stakeAccount) {
+      return;
+    }
+    newStakeAccounts.push({
+      address: stakeAccountPublicKey,
+      seed,
+      lamports: parsedAccountInfo.lamports,
+      stakeAccount,
+      inflationRewards: []
+    });
+    setStakeAccounts(newStakeAccounts);
+  }
+
   useEffect(() => {
     setStakeAccounts(null);
     const newPublicKey = connected ? wallet?.publicKey : publicKey;
@@ -135,6 +160,7 @@ function DApp() {
           setPublicKeyString={setPublicKeyString}
           setPublicKey={setPublicKey}
           stakeAccountMetas={stakeAccounts}
+          addStakeAccount={addStakeAccount}
         />
 
         <Container>

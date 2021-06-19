@@ -12,9 +12,10 @@ interface CreateStakeAccountProps {
   wallet: WalletAdapter;
   connection: Connection;
   sendConnection: Connection;
+  onSuccess: () => void;
 };
   
-export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connection, sendConnection}: CreateStakeAccountProps) {
+export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connection, sendConnection, onSuccess}: CreateStakeAccountProps) {
   const {monitorTransaction, sending} = useMonitorTransaction();
 
   const [amount, setAmount] = useState<string>('');
@@ -80,6 +81,7 @@ export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connectio
               ),
               {
                 onSuccess: () => {
+                  onSuccess();
                   handleClose();
                 },
                 onError: () => {}

@@ -9,7 +9,7 @@ async function confirmTransaction(
   signature: string,
 ) {
   let startTime = new Date();
-  let result = await connection.confirmTransaction(signature, 'recent');
+  let result = await connection.confirmTransaction(signature, 'confirmed');
   if (result.value.err) {
     throw new Error(
       'Error confirming transaction: ' + JSON.stringify(result.value.err),
