@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardActions, CardContent, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, Link, List, ListItem, ListItemText, TextField, Tooltip, Typography } from "@material-ui/core";
+import { Box, Button, Card, CardActions, CardContent, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, Link, List, ListItem, ListItemText, TextField, Tooltip, Typography } from "@material-ui/core";
 import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
 import { LAMPORTS_PER_SOL, PublicKey, StakeActivationData, StakeProgram } from "@solana/web3.js";
 import BN from "bn.js";
@@ -175,6 +175,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                     wallet={wallet}
                     userPublicKey={wallet.publicKey}
                     stakePubkey={stakeAccountMeta.address}
+                    stakeAccountLamports={stakeAccountMeta.lamports}
                     handleClose={() => {
                       setWithdrawOpen(false);
                     }}
@@ -203,14 +204,18 @@ interface WithdrawDialogProps {
   wallet: WalletAdapter;
   userPublicKey: PublicKey;
   stakePubkey: PublicKey;
+  stakeAccountLamports: number;
   handleClose: () => void;
 };
 
-function WithdrawDialog({wallet, userPublicKey, stakePubkey, handleClose}: WithdrawDialogProps) {
+function WithdrawDialog({wallet, userPublicKey, stakePubkey, stakeAccountLamports, handleClose}: WithdrawDialogProps) {
   const sendConnection = useSendConnection();
   const {monitorTransaction, sending} = useMonitorTransaction();
 
   const [amount, setAmount] = useState('');
+  const max = useMemo(() => {
+    return stakeAccountLamports / LAMPORTS_PER_SOL;
+  }, [stakeAccountLamports]);
 
   return (
     <Dialog
@@ -223,6 +228,23 @@ function WithdrawDialog({wallet, userPublicKey, stakePubkey, handleClose}: Withd
       <DialogContent>
         <TextField
           placeholder="SOL"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Button
+                  onClick={() => 
+                    setAmount(max.toString())
+                  }
+                >
+                  MAX
+                </Button>
+                SOL
+              </InputAdornment>
+            ),
+            inputProps: {
+              step: 0.1,
+            },
+          }}
           value={amount}
           onChange={e => {
             setAmount(e.target.value);
@@ -255,7 +277,10 @@ function WithdrawDialog({wallet, userPublicKey, stakePubkey, handleClose}: Withd
             );
           }}
         >
-          {sending ? <CircularProgress color="secondary" size={14} /> : "Withdraw"}
+          {sending ?
+            <CircularProgress color="secondary" size={14} />
+            : "Withdraw"
+          }
         </Button>
       </DialogActions>
     </Dialog>

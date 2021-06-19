@@ -6,7 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import {
   Link as RouterLink
 } from 'react-router-dom';
-import { accounInfoToStakeAccount, findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
+import { accounInfoToStakeAccount as accountInfoToStakeAccount, findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-gradient.svg';
 import { Info } from '@material-ui/icons';
@@ -67,7 +67,7 @@ function DApp() {
       console.log('Did not find new account');
       return;
     }
-    const stakeAccount = accounInfoToStakeAccount(parsedAccountInfo);
+    const stakeAccount = accountInfoToStakeAccount(parsedAccountInfo);
     if (!stakeAccount) {
       return;
     }
@@ -102,7 +102,7 @@ function DApp() {
         if (!parsedAccountInfo) {
           return;
         }
-        const newStakeAccount = accounInfoToStakeAccount(parsedAccountInfo);
+        const newStakeAccount = accountInfoToStakeAccount(parsedAccountInfo);
 
         const index = stakeAccounts?.findIndex(extistingStakeAccountMeta => extistingStakeAccountMeta.address.equals(stakeAccountMeta.address));
         if (index === undefined || index === -1 || !stakeAccounts || !newStakeAccount) {
