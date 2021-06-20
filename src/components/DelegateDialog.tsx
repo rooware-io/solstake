@@ -1,14 +1,13 @@
 import 'react-virtualized/styles.css';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
-import List, { ListRowProps } from 'react-virtualized/dist/commonjs/List';
-import React, { useEffect, useMemo, useState } from "react";
-import { sendTransaction, useConnection, useSendConnection } from "../contexts/connection";
+import React, { useEffect, useState } from "react";
+import { sendTransaction, useConnection, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
 import { Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo, VoteAccountStatus } from "@solana/web3.js";
-import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, MenuItem, TextField, Link, Grid } from '@material-ui/core';
+import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPriceNumber, shortenAddress } from '../utils/utils';
-import { OpenInNew } from '@material-ui/icons';
+import { Column, Table, TableCellProps } from 'react-virtualized';
 
 const CONFIG_PROGRAM_ID = new PublicKey('Config1111111111111111111111111111111111111');
 
@@ -29,6 +28,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   const sendConnection = useSendConnection();
   const {wallet} = useWallet();
   const {monitorTransaction, sending} = useMonitorTransaction();
+  const urlSuffix = useSolanaExplorerUrlSuffix();
   
   const [maxComission, setMaxComission] = useState<number>(100);
   const [voteAccountStatus, setVoteAccountStatus] = useState<VoteAccountStatus>();
@@ -36,7 +36,6 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>();
   const [selectedIndex, setSelectedIndex] = useState<number>();
   const [searchCriteria, setSearchCriteria] = useState<string>('');
-
 
   useEffect(() => {
     connection.getVoteAccounts()
@@ -63,66 +62,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
       });
   }, [connection]);
 
-  function RowRenderer({
-    key, // Unique key within array of rows
-    index, // Index of row within collection
-    isScrolling, // The List is currently being scrolled
-    isVisible, // This row is visible within the List (eg it is not an overscanned row)
-    style, // Style object to be applied to row (to position it)
-  }: ListRowProps) {
-    const voteAccount = filteredVoteAccounts && filteredVoteAccounts[index];
-    const validatorInfo = voteAccount && validatorInfos?.find(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccount.nodePubkey)));
-
-    const imgSrcDefault = 'placeholder-questionmark.png';
-    const imgSrc = validatorInfo?.info?.keybaseUsername ?
-      `https://keybase.io/${validatorInfo?.info?.keybaseUsername}/picture`
-      : imgSrcDefault;
-
-    if(!voteAccount) {
-      return;
-    }
-
-    return (
-      <MenuItem
-        key={key}
-        style={style}
-        selected={selectedIndex === index}
-        onClick={() => {
-          if(selectedIndex !== undefined && selectedIndex === index) {
-            setSelectedIndex(undefined);
-          }
-          else {
-            setSelectedIndex(index);
-          }
-        }}
-      >
-        <Grid
-          container
-          direction="row"
-          justify="space-between"
-          alignItems="stretch"
-        >
-          <Grid item>
-            <img height="60px" src={imgSrc} alt="validator logo" />
-          </Grid>
-          <Grid item>
-            <Typography color="secondary">
-              {validatorInfo?.info.name || shortenAddress(voteAccount.votePubkey)}
-            </Typography>
-          </Grid>
-          <Grid item>
-            {formatPriceNumber.format(voteAccount.activatedStake / LAMPORTS_PER_SOL) + ' SOL '}
-            {voteAccount.commission + '%' + ' '}
-          </Grid>
-          <Grid item>
-            <Link hidden={!validatorInfo?.info?.website} color="secondary" href={validatorInfo?.info.website}  rel="noopener noreferrer" target="_blank">
-              <OpenInNew />
-            </Link>
-          </Grid>
-        </Grid>
-      </MenuItem>
-    );
-  }
+  const imgSrcDefault = 'placeholder-questionmark.png';
 
   return (
     <Dialog
@@ -159,20 +99,62 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
           }}
         />
 
-        <Typography>
-          votePubkey activatedStake comission
-        </Typography>
+        <Box m={1} />
 
         <div style={{height: '85%'}}>
           <AutoSizer>
             {({height, width}) => (
-              <List
+              <Table
                 width={width}
                 height={height}
+                headerHeight={20}
                 rowHeight={60}
                 rowCount={filteredVoteAccounts?.length ?? 0}
-                rowRenderer={RowRenderer}
-              />
+                rowGetter={({index}) => {
+                  if(!filteredVoteAccounts) return;
+
+                  const voteAccountInfo = filteredVoteAccounts[index];
+                  const validatorInfo = validatorInfos?.find(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+
+                  return {
+                    name: {name: validatorInfo?.info.name || shortenAddress(voteAccountInfo.votePubkey), votePubkey: voteAccountInfo.votePubkey},
+                    activatedStake: formatPriceNumber.format(voteAccountInfo.activatedStake / LAMPORTS_PER_SOL),
+                    commission: `${voteAccountInfo.commission}%`,
+                    imgSrc: validatorInfo?.info?.keybaseUsername ?
+                      `https://keybase.io/${validatorInfo?.info?.keybaseUsername}/picture`
+                      : imgSrcDefault,
+                    website: validatorInfo?.info?.website,
+                  };
+                }}
+              >
+                <Column dataKey="imgSrc" width={150} cellRenderer={(props: TableCellProps) => {
+                  
+                  // TODO: Fix with placeholder when picture does not exist
+                  return (
+                    <object height="60px" data={props.cellData} type="image/png">
+                      <img src={imgSrcDefault} alt="validator logo" />
+                    </object>
+                  );
+                }} />
+                <Column label="name or public key" dataKey="name" width={200} cellRenderer={(props: TableCellProps) => {
+                    return (
+                      <Link color="secondary" href={`https://explorer.solana.com/address/${props.cellData.votePubkey}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
+                        {props.cellData.name}
+                      </Link>
+                    );
+                  }}
+                />
+                <Column label="Activated stake (SOL)" dataKey="activatedStake" width={200} />
+                <Column label="Commission" dataKey="commission" width={120} />
+                <Column label="Website" dataKey="website" width={200} cellRenderer={(props: TableCellProps) => {
+                  return (
+                    <Link color="secondary" href={props.cellData} rel="noopener noreferrer" target="_blank">
+                      {props.cellData}
+                    </Link>
+                  );
+                }} />
+                <Column dataKey="APY (Coming soon)" width={120} />
+              </Table>
             )}
           </AutoSizer>
         </div>
