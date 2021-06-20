@@ -25,6 +25,18 @@ export function accounInfoToStakeAccount(account: AccountInfo<Buffer | ParsedAcc
   return ('parsed' in account?.data && create(account.data.parsed, StakeAccount)) || undefined;
 }
 
+export function sortStakeAccountMetas(stakeAccountMetas: StakeAccountMeta[]) {
+  stakeAccountMetas.sort((a, b) => {
+    if (a.seed < b.seed) {
+      return -1
+    }
+    else if(a.seed > b.seed) {
+      return 1
+    }
+    return 0;
+  });
+}
+
 export async function findStakeAccountMetas(connection: Connection, walletAddress: PublicKey): Promise<StakeAccountMeta[]> {
   let newStakeAccountMetas: StakeAccountMeta[] = [];
 
@@ -74,16 +86,6 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
       inflationRewards: []
     });
   });
-
-  newStakeAccountMetas.sort((a, b) => {
-    if (a.seed < b.seed) {
-      return -1
-    }
-    else if(a.seed > b.seed) {
-      return 1
-    }
-    return 0;
-  });
   
   const epochInfo = await connection.getEpochInfo();
 
@@ -107,6 +109,8 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
         'finalized'
       ));
     }
+
+    sortStakeAccountMetas(newStakeAccountMetas);
 
     const inflationRewardsResults = await promiseAllInBatches(tasks, 4);
     inflationRewardsResults.forEach(inflationRewards => inflationRewards.forEach((inflationReward, index) => {

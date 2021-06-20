@@ -34,6 +34,20 @@ async function getSOLPriceUSD(): Promise<number | undefined> {
   return price;
 }
 
+async function findFirstAvailableSeed(userPublicKey: PublicKey, stakeAccountMetas: StakeAccountMeta[]) {
+  let seedIndex = 0;
+  while(1) {
+    const newStakeAccountPubkey = await PublicKey.createWithSeed(userPublicKey, seedIndex.toString(), STAKE_PROGRAM_ID);
+    const matching = stakeAccountMetas.find(meta => newStakeAccountPubkey.equals(meta.address));
+    if(!matching) {
+      break;
+    }
+    seedIndex++;
+  }
+
+  return seedIndex.toString();
+}
+
 export function SummaryCard(props : SummaryCardProps) {
   const connection = useConnection();
   const sendConnection = useSendConnection();
@@ -93,27 +107,9 @@ export function SummaryCard(props : SummaryCardProps) {
     if(!stakeAccountMetas || !wallet?.publicKey) {
       return;
     }
-    const pk = wallet.publicKey;
 
-    let newAccountIndex = 0;
-    // Hacky but should do the job in 99.9% of cases
-    Promise.all(Array.from(Array(20).keys()).map(async i => {
-      const seed = `${i}`;
-      return PublicKey.createWithSeed(pk, seed, STAKE_PROGRAM_ID).then(pubkey => ({seed, pubkey}));
-    }))
-      .then(naturalStakeAccountSeedPubkeys => {
-        stakeAccountMetas.forEach(meta => {
-          const naturalStakeAccountSeedPubkey = naturalStakeAccountSeedPubkeys.find(({pubkey}) => meta.address.equals(pubkey));
-          if(naturalStakeAccountSeedPubkey) {
-            const accountIndex = parseInt(naturalStakeAccountSeedPubkey.seed);
-            if(newAccountIndex <= accountIndex) {
-              newAccountIndex = accountIndex + 1;
-            }
-          }
-        });
-
-        setSeed(newAccountIndex.toString());
-      });
+    findFirstAvailableSeed(wallet.publicKey, stakeAccountMetas)
+      .then(setSeed);
   }, [wallet?.publicKey, stakeAccountMetas]);
 
   return (
@@ -167,7 +163,7 @@ export function SummaryCard(props : SummaryCardProps) {
           alignItems="center"
         >
           <Grid item xs>
-            {totalStakedSOL && (
+            {stakeAccountMetas && (
               <>
                 <Typography>
                   Total staked

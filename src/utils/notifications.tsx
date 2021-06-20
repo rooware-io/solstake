@@ -83,7 +83,7 @@ function ViewTransactionOnExplorerButton({ signature }: {signature: string}) {
       rel="noopener"
       href={`https://explorer.solana.com/tx/${signature}` + urlSuffix}
     >
-      View on Solscan
+      View on Explorer
     </Button>
   );
 }

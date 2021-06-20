@@ -6,7 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import {
   Link as RouterLink
 } from 'react-router-dom';
-import { accounInfoToStakeAccount as accountInfoToStakeAccount, findStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
+import { accounInfoToStakeAccount as accountInfoToStakeAccount, findStakeAccountMetas, sortStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-gradient.svg';
 import { Info } from '@material-ui/icons';
@@ -78,6 +78,7 @@ function DApp() {
       stakeAccount,
       inflationRewards: []
     });
+    sortStakeAccountMetas(newStakeAccounts);
     setStakeAccounts(newStakeAccounts);
   }
 
