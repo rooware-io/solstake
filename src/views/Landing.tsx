@@ -147,6 +147,7 @@ export function Landing() {
               <div>
                 <IconButton
                   href="https://github.com/rooware-io/solstake"
+                  rel="noopener noreferrer" target="_blank"
                 >
                   <GitHub style={styles.largeIcon} />
                 </IconButton>
@@ -157,6 +158,7 @@ export function Landing() {
                 </IconButton>
                 <IconButton
                   href="https://twitter.com/solstakeio"
+                  rel="noopener noreferrer" target="_blank"
                 >
                   <Twitter style={styles.largeIcon} />
                 </IconButton>
