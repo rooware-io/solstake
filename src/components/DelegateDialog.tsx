@@ -3,7 +3,7 @@ import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import React, { useEffect, useState } from "react";
 import { sendTransaction, useConnection, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
 import { Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo, VoteAccountStatus } from "@solana/web3.js";
-import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box } from '@material-ui/core';
+import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPriceNumber, shortenAddress } from '../utils/utils';
@@ -63,6 +63,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   }, [connection]);
 
   useEffect(() => {
+    setSelectedIndex(undefined);
     setFilteredVoteAccount(voteAccountStatus?.current.filter(info => info.commission <= maxComission && (searchCriteria ? info.votePubkey.includes(searchCriteria) : true)));
   }, [voteAccountStatus, maxComission, searchCriteria]);
 
@@ -224,7 +225,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
             );
           }}
         >
-          Delegate
+          {sending ? <CircularProgress color="secondary" size={14} /> : "Delegate"}
         </Button>
       </DialogActions>
     </Dialog>
