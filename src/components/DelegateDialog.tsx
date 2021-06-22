@@ -158,9 +158,11 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                 <Column label="name or vote account" dataKey="name" width={240} headerRenderer={basicHeaderRenderer} cellRenderer={(props: TableCellProps) => {
                     return (
                       <div>
-                        <Link color="secondary" href={`https://explorer.solana.com/address/${props.cellData.votePubkey}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
-                          {props.cellData.name}
-                        </Link>
+                        <Typography>
+                          <Link color="secondary" href={`https://explorer.solana.com/address/${props.cellData.votePubkey}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
+                            {props.cellData.name}
+                          </Link>
+                        </Typography>
                       </div>
                     );
                   }}
@@ -169,9 +171,11 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                 <Column label="Fee" dataKey="commission" width={120} headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer} />
                 <Column label="Website" dataKey="website" width={200} headerRenderer={basicHeaderRenderer} cellRenderer={(props: TableCellProps) => {
                   return (
-                    <Link color="secondary" href={props.cellData} rel="noopener noreferrer" target="_blank">
-                      {props.cellData}
-                    </Link>
+                    <Typography>
+                      <Link color="secondary" href={props.cellData} rel="noopener noreferrer" target="_blank">
+                        {props.cellData}
+                      </Link>
+                    </Typography>
                   );
                 }} />
                 <Column label="APY (Coming soon)" dataKey="apy" headerRenderer={basicHeaderRenderer} width={200} />
