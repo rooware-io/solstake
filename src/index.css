@@ -1,14 +1,16 @@
 @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display&display=swap');
 
-body {
-  margin: 0;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
 html {
   height: 100%;
-  background: linear-gradient(352deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
+  background-color: rgba(31,64,64,1);
+}
+
+body {
+  margin: 0;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(360deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
 }
 
 code {
@@ -21,5 +23,5 @@ code {
 }
 
 #app {
-  background: linear-gradient(352deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
+  background: linear-gradient(360deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
 }

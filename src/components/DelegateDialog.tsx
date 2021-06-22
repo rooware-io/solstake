@@ -3,12 +3,12 @@ import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import React, { useEffect, useState } from "react";
 import { sendTransaction, useConnection, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
 import { Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo, VoteAccountStatus } from "@solana/web3.js";
-import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box } from '@material-ui/core';
+import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPriceNumber, shortenAddress } from '../utils/utils';
-import { Column, Table, TableHeaderProps, TableCellProps, defaultTableRowRenderer, TableRowProps } from 'react-virtualized';
-import { defaultCellRenderer, defaultRowRenderer } from 'react-virtualized/dist/es/Table';
+import { Column, Table, TableHeaderProps, TableCellProps } from 'react-virtualized';
+import { defaultRowRenderer } from 'react-virtualized/dist/es/Table';
 
 const CONFIG_PROGRAM_ID = new PublicKey('Config1111111111111111111111111111111111111');
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
@@ -53,7 +53,6 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   const [filteredVoteAccounts, setFilteredVoteAccount] = useState<VoteAccountInfo[]>();
   const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>();
   const [selectedIndex, setSelectedIndex] = useState<number>();
-  const [hoverRowIndex, setHoverRowIndex] = useState<number>();
   const [searchCriteria, setSearchCriteria] = useState<string>('');
 
   useEffect(() => {
@@ -64,6 +63,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   }, [connection]);
 
   useEffect(() => {
+    setSelectedIndex(undefined);
     setFilteredVoteAccount(voteAccountStatus?.current.filter(info => info.commission <= maxComission && (searchCriteria ? info.votePubkey.includes(searchCriteria) : true)));
   }, [voteAccountStatus, maxComission, searchCriteria]);
 
@@ -144,11 +144,8 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                   };
                 }}
                 onRowClick={({index}) => { setSelectedIndex(index) }}
-                onRowMouseOver={({index}) => {
-                  setHoverRowIndex(index)
-                }}
                 rowRenderer={props => {
-                  const className = props.index === selectedIndex ? ' clickedItem': '';
+                  const className = props.index === selectedIndex ? ' clickedItem': ' item';
                   return defaultRowRenderer({...props, className: props.className + className});
                 }}
               >
@@ -162,9 +159,11 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                 <Column label="name or vote account" dataKey="name" width={240} headerRenderer={basicHeaderRenderer} cellRenderer={(props: TableCellProps) => {
                     return (
                       <div>
-                        <Link color="secondary" href={`https://explorer.solana.com/address/${props.cellData.votePubkey}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
-                          {props.cellData.name}
-                        </Link>
+                        <Typography>
+                          <Link color="secondary" href={`https://explorer.solana.com/address/${props.cellData.votePubkey}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
+                            {props.cellData.name}
+                          </Link>
+                        </Typography>
                       </div>
                     );
                   }}
@@ -173,9 +172,11 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                 <Column label="Fee" dataKey="commission" width={120} headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer} />
                 <Column label="Website" dataKey="website" width={200} headerRenderer={basicHeaderRenderer} cellRenderer={(props: TableCellProps) => {
                   return (
-                    <Link color="secondary" href={props.cellData} rel="noopener noreferrer" target="_blank">
-                      {props.cellData}
-                    </Link>
+                    <Typography>
+                      <Link color="secondary" href={props.cellData} rel="noopener noreferrer" target="_blank">
+                        {props.cellData}
+                      </Link>
+                    </Typography>
                   );
                 }} />
                 <Column label="APY (Coming soon)" dataKey="apy" headerRenderer={basicHeaderRenderer} width={200} />
@@ -224,7 +225,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
             );
           }}
         >
-          Delegate
+          {sending ? <CircularProgress color="secondary" size={14} /> : "Delegate"}
         </Button>
       </DialogActions>
     </Dialog>
