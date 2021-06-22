@@ -7,9 +7,11 @@ import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, 
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPriceNumber, shortenAddress } from '../utils/utils';
-import { Column, Table, TableCellProps } from 'react-virtualized';
+import { Column, Table, TableHeaderProps, TableCellProps, defaultTableRowRenderer, TableRowProps } from 'react-virtualized';
+import { defaultCellRenderer, defaultRowRenderer } from 'react-virtualized/dist/es/Table';
 
 const CONFIG_PROGRAM_ID = new PublicKey('Config1111111111111111111111111111111111111');
+const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
 
 async function getValidatorInfos(connection: Connection) {
   const validatorInfoAccounts = await connection.getProgramAccounts(CONFIG_PROGRAM_ID);
@@ -19,6 +21,22 @@ async function getValidatorInfos(connection: Connection) {
     const validatorInfo = ValidatorInfo.fromConfigData(validatorInfoAccount.account.data);
     return validatorInfo ? [validatorInfo] : [];
   })
+}
+
+function basicCellRenderer(props: TableCellProps) {
+  return (
+    <Typography>
+      {props.cellData}
+    </Typography>
+  );
+}
+
+function basicHeaderRenderer(props: TableHeaderProps) {
+  return (
+    <Typography>
+      {props.label}
+    </Typography>
+  );
 }
 
 export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, handleClose: () => void}) {
@@ -35,6 +53,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   const [filteredVoteAccounts, setFilteredVoteAccount] = useState<VoteAccountInfo[]>();
   const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>();
   const [selectedIndex, setSelectedIndex] = useState<number>();
+  const [hoverRowIndex, setHoverRowIndex] = useState<number>();
   const [searchCriteria, setSearchCriteria] = useState<string>('');
 
   useEffect(() => {
@@ -62,8 +81,6 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
       });
   }, [connection]);
 
-  const imgSrcDefault = 'placeholder-questionmark.png';
-
   return (
     <Dialog
       open={open}
@@ -72,9 +89,9 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
       maxWidth="lg"
     >
       <DialogTitle>
-        Validators
+        Choose a validator
       </DialogTitle>
-      <DialogContent style={{height: '80vh'}}>
+      <DialogContent>
         <div>
           <Typography>
             Max commission %
@@ -99,9 +116,9 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
           }}
         />
 
-        <Box m={1} />
+        <Box m={2} />
 
-        <div style={{height: '85%'}}>
+        <div style={{height: '60vh'}}>
           <AutoSizer>
             {({height, width}) => (
               <Table
@@ -122,49 +139,58 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                     commission: `${voteAccountInfo.commission}%`,
                     imgSrc: validatorInfo?.info?.keybaseUsername ?
                       `https://keybase.io/${validatorInfo?.info?.keybaseUsername}/picture`
-                      : imgSrcDefault,
+                      : IMG_SRC_DEFAULT,
                     website: validatorInfo?.info?.website,
                   };
                 }}
                 onRowClick={({index}) => { setSelectedIndex(index) }}
+                onRowMouseOver={({index}) => {
+                  setHoverRowIndex(index)
+                }}
+                rowRenderer={props => {
+                  const className = props.index === selectedIndex ? ' clickedItem': '';
+                  return defaultRowRenderer({...props, className: props.className + className});
+                }}
               >
                 <Column dataKey="imgSrc" width={150} cellRenderer={(props: TableCellProps) => {
-                  
-                  // TODO: Fix with placeholder when picture does not exist
                   return (
                     <object height="60px" data={props.cellData} type="image/png">
-                      <img src={imgSrcDefault} alt="validator logo" />
+                      <img src={IMG_SRC_DEFAULT} alt="validator logo" />
                     </object>
                   );
                 }} />
-                <Column label="name or public key" dataKey="name" width={200} cellRenderer={(props: TableCellProps) => {
+                <Column label="name or vote account" dataKey="name" width={240} headerRenderer={basicHeaderRenderer} cellRenderer={(props: TableCellProps) => {
                     return (
-                      <Link color="secondary" href={`https://explorer.solana.com/address/${props.cellData.votePubkey}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
-                        {props.cellData.name}
-                      </Link>
+                      <div>
+                        <Link color="secondary" href={`https://explorer.solana.com/address/${props.cellData.votePubkey}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
+                          {props.cellData.name}
+                        </Link>
+                      </div>
                     );
                   }}
                 />
-                <Column label="Activated stake (SOL)" dataKey="activatedStake" width={200} />
-                <Column label="Commission" dataKey="commission" width={120} />
-                <Column label="Website" dataKey="website" width={200} cellRenderer={(props: TableCellProps) => {
+                <Column label="Activated stake (SOL)" dataKey="activatedStake" width={200} headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer} />
+                <Column label="Fee" dataKey="commission" width={120} headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer} />
+                <Column label="Website" dataKey="website" width={200} headerRenderer={basicHeaderRenderer} cellRenderer={(props: TableCellProps) => {
                   return (
                     <Link color="secondary" href={props.cellData} rel="noopener noreferrer" target="_blank">
                       {props.cellData}
                     </Link>
                   );
                 }} />
-                <Column dataKey="APY (Coming soon)" width={120} />
+                <Column label="APY (Coming soon)" dataKey="apy" headerRenderer={basicHeaderRenderer} width={200} />
               </Table>
             )}
           </AutoSizer>
         </div>
 
-        {(filteredVoteAccounts && selectedIndex && filteredVoteAccounts[selectedIndex]) && (
-          <Typography variant="h6">
-            Selected votePubkey  {filteredVoteAccounts[selectedIndex].votePubkey}
-          </Typography>
-        )}
+        <Box m={2}>
+          {(filteredVoteAccounts && selectedIndex && filteredVoteAccounts[selectedIndex]) && (
+            <Typography variant="h6">
+              Selected {shortenAddress(filteredVoteAccounts[selectedIndex].votePubkey)}
+            </Typography>
+          )}
+        </Box>
       </DialogContent>
 
       <DialogActions>
