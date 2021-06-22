@@ -7,8 +7,8 @@ import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, 
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPriceNumber, shortenAddress } from '../utils/utils';
-import { Column, Table, TableHeaderProps, TableCellProps, defaultTableRowRenderer, TableRowProps } from 'react-virtualized';
-import { defaultCellRenderer, defaultRowRenderer } from 'react-virtualized/dist/es/Table';
+import { Column, Table, TableHeaderProps, TableCellProps } from 'react-virtualized';
+import { defaultRowRenderer } from 'react-virtualized/dist/es/Table';
 
 const CONFIG_PROGRAM_ID = new PublicKey('Config1111111111111111111111111111111111111');
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
@@ -53,7 +53,6 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   const [filteredVoteAccounts, setFilteredVoteAccount] = useState<VoteAccountInfo[]>();
   const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>();
   const [selectedIndex, setSelectedIndex] = useState<number>();
-  const [hoverRowIndex, setHoverRowIndex] = useState<number>();
   const [searchCriteria, setSearchCriteria] = useState<string>('');
 
   useEffect(() => {
@@ -144,11 +143,8 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                   };
                 }}
                 onRowClick={({index}) => { setSelectedIndex(index) }}
-                onRowMouseOver={({index}) => {
-                  setHoverRowIndex(index)
-                }}
                 rowRenderer={props => {
-                  const className = props.index === selectedIndex ? ' clickedItem': '';
+                  const className = props.index === selectedIndex ? ' clickedItem': ' item';
                   return defaultRowRenderer({...props, className: props.className + className});
                 }}
               >
