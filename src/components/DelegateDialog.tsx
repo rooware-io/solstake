@@ -126,6 +126,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                     website: validatorInfo?.info?.website,
                   };
                 }}
+                onRowClick={({index}) => { setSelectedIndex(index) }}
               >
                 <Column dataKey="imgSrc" width={150} cellRenderer={(props: TableCellProps) => {
                   
