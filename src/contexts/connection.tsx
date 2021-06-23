@@ -1,6 +1,5 @@
 import { useLocalStorageState } from "./../utils/utils";
 import {
-  Account,
   Cluster,
   clusterApiUrl,
   Connection,
@@ -8,7 +7,7 @@ import {
   Transaction,
   TransactionInstruction,
 } from "@solana/web3.js";
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useMemo } from "react";
 import { WalletAdapter } from "../wallet-adapters/walletAdapter";
 
 export type ExtendedCluster = Cluster | "localnet";
@@ -71,40 +70,6 @@ export function ConnectionProvider({ children = undefined as any }) {
   const endpoint =
     ENDPOINTS.find((end) => end.url === url) || ENDPOINTS[0];
 
-  // The websocket library solana/web3.js uses closes its websocket connection when the subscription list
-  // is empty after opening its first time, preventing subsequent subscriptions from receiving responses.
-  // This is a hack to prevent the list from every getting empty
-  useEffect(() => {
-    const id = connection.onAccountChange(new Account().publicKey, () => {});
-    return () => {
-      connection.removeAccountChangeListener(id);
-    };
-  }, [connection]);
-
-  useEffect(() => {
-    const id = connection.onSlotChange(() => null);
-    return () => {
-      connection.removeSlotChangeListener(id);
-    };
-  }, [connection]);
-
-  useEffect(() => {
-    const id = sendConnection.onAccountChange(
-      new Account().publicKey,
-      () => {}
-    );
-    return () => {
-      sendConnection.removeAccountChangeListener(id);
-    };
-  }, [sendConnection]);
-
-  useEffect(() => {
-    const id = sendConnection.onSlotChange(() => null);
-    return () => {
-      sendConnection.removeSlotChangeListener(id);
-    };
-  }, [sendConnection]);
-
   return (
     <ConnectionContext.Provider
       value={{
@@ -121,11 +86,11 @@ export function ConnectionProvider({ children = undefined as any }) {
 }
 
 export function useConnection() {
-  return useContext(ConnectionContext).connection as Connection;
+  return useContext(ConnectionContext).connection;
 }
 
 export function useSendConnection() {
-  return useContext(ConnectionContext)?.sendConnection;
+  return useContext(ConnectionContext).sendConnection;
 }
 
 export function useConnectionConfig() {

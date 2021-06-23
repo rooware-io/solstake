@@ -22,8 +22,9 @@ export function EpochProvider({ children = undefined as any }) {
   const [epochStartTime, setEpochStartTime] = useState<number>();
 
   useEffect(() => {
-      setEpochInfo(undefined);
-      connection.getEpochInfo().then(setEpochInfo);
+    setEpochInfo(undefined);
+    connection.getEpochInfo()
+      .then(setEpochInfo);
   }, [connection]);
 
   useEffect(() => {
@@ -33,15 +34,15 @@ export function EpochProvider({ children = undefined as any }) {
   }, [connection]);
 
   useEffect(() => {
-    if(!epochInfo || !epochSchedule) {
-      setEpochStartTime(undefined);
+    setEpochStartTime(undefined);
+    if(!epochInfo?.epoch || !epochSchedule) {
       return;
     }
 
     const slot = epochSchedule.getFirstSlotInEpoch(epochInfo.epoch);
     getFirstBlockTime(connection, slot)
       .then(setEpochStartTime);
-  }, [connection, epochInfo, epochSchedule]);
+  }, [connection, epochInfo?.epoch, epochSchedule]);
 
   return (
     <EpochContext.Provider

@@ -25,46 +25,53 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
 
   const [rewardsOpen, setRewardsOpen] = useState(false);
   const [open, setOpen] = useState(false);
-  const [APY, setAPY] = useState<number | null>();
   const [stakeActivationData, setStakeActivationData] = useState<StakeActivationData>();
   const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [activatedBlockTime, setActivatedBlockTime] = useState<number>();
 
   function formatEpoch(epoch: BN) {
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
   }
 
   useEffect(() => {
+    console.log(`${(connection as any)._rpcEndpoint}, ${stakeAccountMeta.address.toBase58()}`);
     connection.getStakeActivation(stakeAccountMeta.address)
-      .then(setStakeActivationData);
+      .then(setStakeActivationData)
+      .catch(error => {
+        console.log(`Failed: ${error}`);
+        setStakeActivationData(undefined);
+      });
     // Hidden dependency as we update only the underlying data
     // eslint-disable-next-line
-  }, [connection, stakeAccountMeta.stakeAccount]);
+  }, [connection, stakeAccountMeta, stakeAccountMeta.stakeAccount]);
 
   const totalRewards = useMemo(() => {
     return stakeAccountMeta.inflationRewards.reduce((sum, current) => sum + current.amount, 0)
   }, [stakeAccountMeta]);
 
   useEffect(() => {
-    setAPY(null);
-    const initialStake = stakeAccountMeta.lamports - totalRewards;
-    if(!stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch || !epochSchedule || !epochStartTime || !totalRewards) {
+    setActivatedBlockTime(undefined);
+    if(!stakeAccountMeta.stakeAccount.info.stake || !epochSchedule) {
       return;
     }
-    const firstActivatedSlot = epochSchedule.getFirstSlotInEpoch(
-      stakeAccountMeta.stakeAccount.info.stake?.delegation.activationEpoch.toNumber() + 1
-    );
 
+    const firstActivatedSlot = epochSchedule.getFirstSlotInEpoch(
+      stakeAccountMeta.stakeAccount.info.stake.delegation.activationEpoch.toNumber() + 1
+    );
     getFirstBlockTime(connection, firstActivatedSlot)
-      .then(activatedBlockTime => {
-        if(!activatedBlockTime) {
-          return;
-        }
-        const timePeriod = epochStartTime - activatedBlockTime;
-        console.log(`timePeriod: ${timePeriod}, epochStartTime: ${epochStartTime}, activatedBlockTime: ${activatedBlockTime}`);
-        const apy = totalRewards / initialStake / timePeriod * 365 * 24 * 60 * 60;
-        setAPY(apy);
-      });
-  }, [connection, stakeAccountMeta, totalRewards, epochSchedule, epochStartTime])
+      .then(setActivatedBlockTime);
+  }, [connection, stakeAccountMeta, epochSchedule]);
+
+  const APY = useMemo(() => {
+    const initialStake = stakeAccountMeta.lamports - totalRewards;
+    if(!epochStartTime || !activatedBlockTime) {
+      return;
+    }
+
+    const timePeriod = epochStartTime - activatedBlockTime;
+    console.log(`timePeriod: ${timePeriod}, epochStartTime: ${epochStartTime}, activatedBlockTime: ${activatedBlockTime}`);
+    return totalRewards / initialStake / timePeriod * 365 * 24 * 60 * 60;
+  }, [stakeAccountMeta, totalRewards, epochStartTime, activatedBlockTime])
   
   return (
     <Box m={1}>
