@@ -23,7 +23,7 @@ async function getSOLPriceUSD(): Promise<number | undefined> {
   // TODO: Switch to mainnet when available
   const connection = new Connection(clusterApiUrl('devnet'));
 
-  const SOLUSDPriceAccountKey = new PublicKey('BdgHsXrH1mXqhdosXavYxZgX6bGqTdj5mh2sxDhF8bJy');
+  const SOLUSDPriceAccountKey = new PublicKey('J83w4HKfqxwcq3BEMMkPFSppX3gqekLyLJBexebFVkix');
   const priceAccountInfo = await connection.getAccountInfo(SOLUSDPriceAccountKey);
   if (!priceAccountInfo) {
     return;
