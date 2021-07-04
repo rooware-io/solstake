@@ -1,14 +1,16 @@
 import 'react-virtualized/styles.css';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import React, { useEffect, useState } from "react";
-import { sendTransaction, useConnection, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
+import { sendTransaction, useConnection, useConnectionConfig, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
 import { Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo, VoteAccountStatus } from "@solana/web3.js";
-import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress } from '@material-ui/core';
+import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress, SvgIcon } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPriceNumber, shortenAddress } from '../utils/utils';
 import { Column, Table, TableHeaderProps, TableCellProps } from 'react-virtualized';
 import { defaultRowRenderer } from 'react-virtualized/dist/es/Table';
+import { getValidatorScores, ValidatorScore } from '../utils/validatorsApp';
+import { ValidatorScoreTray } from './ValidatorScoreTray';
 
 const CONFIG_PROGRAM_ID = new PublicKey('Config1111111111111111111111111111111111111');
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
@@ -39,10 +41,17 @@ function basicHeaderRenderer(props: TableHeaderProps) {
   );
 }
 
+function scoreCellRenderer(props: TableCellProps) {
+  return props.cellData ? 
+    <ValidatorScoreTray validatorScore={props.cellData} />
+    : "N.A.";
+}
+
 export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, handleClose: () => void}) {
   const {stakePubkey, open, handleClose} = props;
 
   const connection = useConnection();
+  const { cluster } = useConnectionConfig();
   const sendConnection = useSendConnection();
   const {wallet} = useWallet();
   const {monitorTransaction, sending} = useMonitorTransaction();
@@ -52,6 +61,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   const [voteAccountStatus, setVoteAccountStatus] = useState<VoteAccountStatus>();
   const [filteredVoteAccounts, setFilteredVoteAccount] = useState<VoteAccountInfo[]>();
   const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>();
+  const [validatorScores, setValidatorScores] = useState<ValidatorScore[]>();
   const [selectedIndex, setSelectedIndex] = useState<number>();
   const [searchCriteria, setSearchCriteria] = useState<string>('');
 
@@ -80,6 +90,11 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
         setValidatorInfos(validatorInfos);
       });
   }, [connection]);
+
+  useEffect(() => {
+    getValidatorScores(cluster)
+      .then(setValidatorScores);
+  }, [cluster]);
 
   return (
     <Dialog
@@ -131,7 +146,10 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                   if(!filteredVoteAccounts) return;
 
                   const voteAccountInfo = filteredVoteAccounts[index];
-                  const validatorInfo = validatorInfos?.find(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+                  const nodePubkey = new PublicKey(voteAccountInfo.nodePubkey);
+
+                  const validatorInfo = validatorInfos?.find(validatorInfo => validatorInfo.key.equals(nodePubkey));
+                  const validatorScore = validatorScores?.find(score => (new PublicKey(score.account)).equals(nodePubkey));
 
                   return {
                     name: {name: validatorInfo?.info.name || shortenAddress(voteAccountInfo.votePubkey), votePubkey: voteAccountInfo.votePubkey},
@@ -141,6 +159,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                       `https://keybase.io/${validatorInfo?.info?.keybaseUsername}/picture`
                       : IMG_SRC_DEFAULT,
                     website: validatorInfo?.info?.website,
+                    validatorScore,
                   };
                 }}
                 onRowClick={({index}) => { setSelectedIndex(index) }}
@@ -179,7 +198,15 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                     </Typography>
                   );
                 }} />
-                <Column label="APY (Coming soon)" dataKey="apy" headerRenderer={basicHeaderRenderer} width={200} />
+                <Column label="Score" dataKey="validatorScore" width={200} headerRenderer={() => (
+                  <Typography>
+                    Score (Max 11)
+                    <Link href="https://validators.app/faq" rel="noopener noreferrer" target="_blank">
+                      <img height="15px" src="va-logo.png" style={{verticalAlign: "middle"}}/>
+                    </Link>
+                  </Typography>
+
+                )} cellRenderer={scoreCellRenderer} />
               </Table>
             )}
           </AutoSizer>
