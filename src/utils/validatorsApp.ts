@@ -1,8 +1,10 @@
 import { type, string, number, nullable, array, Infer } from 'superstruct';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const BASE_URL = 'https://www.validators.app/api/v1/validators'
 
 // TODO: Add tests
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const TEST_DATA = `[{
   "network":"testnet",
   "account":"123vij84ecQEKUvQ7gYMKxKwKF6PbYSzCzzURYA4xULY",
@@ -48,9 +50,11 @@ const ValidatorScore = type({
   published_information_score: number(),
   security_report_score: number(),
 });
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 export type ValidatorScore = Infer<typeof ValidatorScore>;
 
 export const ValidatorList = array(ValidatorScore);
+// eslint-disable-next-line @typescript-eslint/no-redeclare
 type ValidatorList = Infer<typeof ValidatorList>;
 
 export async function getValidatorScores(cluster: string): Promise<ValidatorList> {
