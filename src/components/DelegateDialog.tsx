@@ -47,13 +47,18 @@ function scoreCellRenderer(props: TableCellProps) {
     : "N.A.";
 }
 
+function ImageWithFallback({height, src}: {height: string, src: string}) {
+  const [currentSrc, setCurrentSrc] = useState(src);
+  return <img height={height} src={currentSrc} onError={event => {setCurrentSrc(IMG_SRC_DEFAULT)}} alt="validator logo" />;
+}
+
 interface ValidatorMeta {
   voteAccountInfo: VoteAccountInfo;
   validatorInfo: ValidatorInfo | undefined;
   validatorScore: ValidatorScore | undefined;
 };
 
-const BATCH_SIZE = 50;
+const BATCH_SIZE = 100;
 
 export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, handleClose: () => void}) {
   const {stakePubkey, open, handleClose} = props;
@@ -67,7 +72,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   
   const [maxComission, setMaxComission] = useState<number>(100);
   const [voteAccountStatus, setVoteAccountStatus] = useState<VoteAccountStatus>();
-  const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>();
+  const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>([]);
   const [validatorScores, setValidatorScores] = useState<ValidatorScore[]>([]);
   const [validatorMetas, setValidatorMetas] = useState<ValidatorMeta[]>([]);
   const [filteredValidatorMetas, setFilteredValidatorMetas] = useState<ValidatorMeta[]>([]);
@@ -103,10 +108,11 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
     }
     let validatorMetas: ValidatorMeta[] = [];
     let remainingVoteAccountInfos = [...voteAccountStatus.current];
+    let remainingValidatorInfos = [...validatorInfos];
 
     async function batchMatch() {
       console.log('scores', validatorScores.length)
-      for(let i = 0; i < (validatorScores.length ?? 0); i++) {
+      for(let i = 0; i < validatorScores.length; i++) {
         const validatorScore = validatorScores[i];
         const voteAccountIndex = remainingVoteAccountInfos.findIndex(info => info.nodePubkey === validatorScore.account);
         if (voteAccountIndex < 0) {
@@ -114,7 +120,10 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
           continue;
         }
         const [voteAccountInfo] = remainingVoteAccountInfos.splice(voteAccountIndex, 1);
-        const validatorInfo = validatorInfos?.find(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+
+        const validatorInfoIndex = remainingValidatorInfos.findIndex(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+        let validatorInfo: ValidatorInfo | undefined;
+        [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
 
         validatorMetas.push({
           voteAccountInfo,
@@ -129,9 +138,12 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
         }
       }
   
-      for(let i = 0; i < (remainingVoteAccountInfos.length ?? 0); i++) {
+      for(let i = 0; i < remainingVoteAccountInfos.length; i++) {
         const voteAccountInfo = remainingVoteAccountInfos[i];
-        const validatorInfo = validatorInfos?.find(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+
+        const validatorInfoIndex = remainingValidatorInfos.findIndex(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+        let validatorInfo: ValidatorInfo | undefined;
+        [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
   
         validatorMetas.push({
           voteAccountInfo,
@@ -228,13 +240,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                     `https://keybase.io/${rowData.validatorInfo?.info?.keybaseUsername}/picture`
                     : IMG_SRC_DEFAULT
                   }
-                  cellRenderer={(props: TableCellProps) => {
-                    return (
-                      <object height="60px" data={props.cellData} type="image/png">
-                        <img src={IMG_SRC_DEFAULT} alt="validator logo" />
-                      </object>
-                    );
-                  }}
+                  cellRenderer={(props: TableCellProps) => <ImageWithFallback height="60px" src={props.cellData as string} />}
                 />
                 <Column
                   label="name or account"
