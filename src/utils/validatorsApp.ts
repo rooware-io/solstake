@@ -1,7 +1,7 @@
 import { type, string, number, nullable, array, Infer } from 'superstruct';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const BASE_URL = 'https://www.validators.app/api/v1/validators'
+const BASE_URL = 'https://cors-anywhere.herokuapp.com/https://www.validators.app/api/v1/validators'
 
 // TODO: Add tests
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -58,7 +58,11 @@ export const ValidatorList = array(ValidatorScore);
 type ValidatorList = Infer<typeof ValidatorList>;
 
 export async function getValidatorScores(cluster: string): Promise<ValidatorList> {
-  const response = await fetch('validatorsapp_validators.json'); // `${BASE_URL}/${cluster}.json?order=score`);
+  const response = await fetch(`${BASE_URL}/${cluster}.json?order=score`, {
+    headers: {
+      'Token': 'XTrLiy8bhfpJcwD73JMWtsAg'
+    }
+  }); // `${BASE_URL}/${cluster}.json?order=score`); validatorsapp_validators.json
   const data = await response.json();
   const validatorList = ValidatorList.create(data);
   return validatorList;

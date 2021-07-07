@@ -90,7 +90,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   }, [connection]);
 
   useEffect(() => {
-    getValidatorScores(cluster)
+    getValidatorScores(cluster) // Once implemented we will be able to get the scores in batches
       .then(setValidatorScores);
   }, [cluster]);
 
@@ -223,7 +223,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
               >
                 <Column
                   dataKey="img"
-                  width={150}
+                  width={80}
                   cellDataGetter={({rowData}) => rowData.validatorInfo?.info?.keybaseUsername ?
                     `https://keybase.io/${rowData.validatorInfo?.info?.keybaseUsername}/picture`
                     : IMG_SRC_DEFAULT
@@ -237,17 +237,17 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                   }}
                 />
                 <Column
-                  label="name or vote account"
+                  label="name or account"
                   dataKey="name"
                   width={240}
                   headerRenderer={basicHeaderRenderer}
-                  cellDataGetter={({rowData}) => ({votePubkey: rowData.voteAccountInfo.votePubkey, name: rowData.validatorInfo?.info?.name || rowData.voteAccountInfo.votePubkey})}
+                  cellDataGetter={({rowData}) => ({votePubkey: rowData.voteAccountInfo.votePubkey, name: rowData.validatorInfo?.info?.name})}
                   cellRenderer={(props: TableCellProps) => {
                     return (
                       <div>
                         <Typography>
                           <Link color="secondary" href={`https://explorer.solana.com/address/${props.cellData.votePubkey}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
-                            {props.cellData.name}
+                            {props.cellData.name ? props.cellData.name : shortenAddress(props.cellData.votePubkey, 6)}
                           </Link>
                         </Typography>
                       </div>
@@ -255,19 +255,19 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                   }}
                 />
                 <Column
-                  label="Activated stake (SOL)"
+                  label="Stake (SOL)"
                   dataKey="activatedStake"
                   headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer}
                   cellDataGetter={({rowData}) => formatPriceNumber.format(rowData.voteAccountInfo.activatedStake / LAMPORTS_PER_SOL)}
-                  width={200}
+                  width={120}
                 />
                 <Column
                   label="Fee"
                   dataKey="commission"
                   headerRenderer={basicHeaderRenderer}
-                  cellDataGetter={({rowData}) => `${rowData.voteAccountInfo.commission}`}
+                  cellDataGetter={({rowData}) => `${rowData.voteAccountInfo.commission}%`}
                   cellRenderer={basicCellRenderer}
-                  width={120}
+                  width={80}
                 />
                 <Column
                   label="Website"
@@ -283,7 +283,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                       </Typography>
                     );
                   }}
-                  width={200}
+                  width={250}
                 />
                 <Column
                   label="Score"

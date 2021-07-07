@@ -15,8 +15,6 @@ import { AppSettings } from '../components/AppSettings';
 import { ENDPOINTS, useConnection, useConnectionConfig } from '../contexts/connection';
 import { SummaryCard } from '../components/SummaryCard';
 import HelpDialog from '../components/HelpDialog';
-import { getValidatorScores } from '../utils/validatorsApp';
-import { ValidatorScoreTray } from '../components/ValidatorScoreTray';
 
 const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 
@@ -82,8 +80,6 @@ function DApp() {
 
   useEffect(() => {
     setStakeAccounts(null);
-    getValidatorScores('')
-      .then(scores => console.log(scores))
     const newPublicKey = connected ? wallet?.publicKey : publicKey;
     if (newPublicKey) {
       setLoading(true);
@@ -173,27 +169,6 @@ function DApp() {
           stakeAccountMetas={stakeAccounts}
           addStakeAccount={addStakeAccount}
         />
-
-        <Card>
-          <CardContent>
-            <Typography>
-              <ValidatorScoreTray validatorScore={{
-                  account: "123",
-                  total_score: 11,
-                  root_distance_score: 0,
-                  vote_distance_score: 1,
-                  skipped_slot_score: 2,
-                  software_version: "1.7.3",
-                  software_version_score: 1,
-                  stake_concentration_score: -1,
-                  data_center_concentration_score: -2,
-                  published_information_score: 0,
-                  security_report_score: 1,
-                }}
-              />
-            </Typography>
-          </CardContent>
-        </Card>
         <Container>
           {loading && (
             <Box m={1}>
@@ -207,7 +182,11 @@ function DApp() {
           )}
         </Container>
       </Container>
-      
+
+      <Box m="1">
+        <br />
+      </Box>
+
       <HelpDialog
         open={open}
         handleClose={() => setOpen(false)}
