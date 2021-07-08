@@ -49,3 +49,23 @@
 .clickedItem {
   background-color: rgba(0, 0, 0, .2);
 }
+
+.text-danger {
+  color: #ff5262 !important;
+}
+
+.text-warning {
+  color: #ffc107 !important;
+}
+
+.score-0 {
+  color: #cacaca;
+}
+
+.score-1 {
+  color: #0091f2;
+}
+
+.score-2 {
+  color: green;
+}

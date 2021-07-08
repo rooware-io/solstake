@@ -1,27 +1,20 @@
 import 'react-virtualized/styles.css';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
-import React, { useEffect, useState } from "react";
-import { sendTransaction, useConnection, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
-import { Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo, VoteAccountStatus } from "@solana/web3.js";
+import React, { useContext, useEffect, useState } from "react";
+import { sendTransaction, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
+import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo } from "@solana/web3.js";
 import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
-import { formatPriceNumber, shortenAddress } from '../utils/utils';
+import { formatPct, formatPriceNumber, shortenAddress, sleep } from '../utils/utils';
 import { Column, Table, TableHeaderProps, TableCellProps } from 'react-virtualized';
 import { defaultRowRenderer } from 'react-virtualized/dist/es/Table';
+import { ValidatorScore } from '../utils/validatorsApp';
+import { ValidatorScoreTray } from './ValidatorScoreTray';
+import { ValidatorsContext } from '../contexts/validators';
+import { useAsync } from 'react-async-hook';
 
-const CONFIG_PROGRAM_ID = new PublicKey('Config1111111111111111111111111111111111111');
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
-
-async function getValidatorInfos(connection: Connection) {
-  const validatorInfoAccounts = await connection.getProgramAccounts(CONFIG_PROGRAM_ID);
-
-  console.log(validatorInfoAccounts.length);
-  return validatorInfoAccounts.flatMap(validatorInfoAccount => {
-    const validatorInfo = ValidatorInfo.fromConfigData(validatorInfoAccount.account.data);
-    return validatorInfo ? [validatorInfo] : [];
-  })
-}
 
 function basicCellRenderer(props: TableCellProps) {
   return (
@@ -39,47 +32,129 @@ function basicHeaderRenderer(props: TableHeaderProps) {
   );
 }
 
+function scoreCellRenderer(props: TableCellProps) {
+  return props.cellData ? 
+    <ValidatorScoreTray validatorScore={props.cellData} />
+    : "N.A.";
+}
+
+function ImageWithFallback({height, src}: {height: string, src: string}) {
+  const [currentSrc, setCurrentSrc] = useState(src);
+  return <img height={height} src={currentSrc} onError={event => {setCurrentSrc(IMG_SRC_DEFAULT)}} alt="validator logo" />;
+}
+
+interface ValidatorMeta {
+  voteAccountInfo: VoteAccountInfo;
+  validatorInfo: ValidatorInfo | undefined;
+  validatorScore: ValidatorScore | undefined;
+};
+
+const BATCH_SIZE = 100;
+
+async function batchMatcher(
+  voteAccountStatus: VoteAccountInfo[],
+  validatorInfos: ValidatorInfo[],
+  validatorScores: ValidatorScore[],
+  onValidatorMetas: (metas: ValidatorMeta[]) => void
+  ) {
+  let validatorMetas: ValidatorMeta[] = [];
+  let remainingVoteAccountInfos = [...voteAccountStatus];
+  let remainingValidatorInfos = [...validatorInfos];
+
+  console.log('scores', validatorScores.length)
+
+  for(let i = 0; i < validatorScores.length; i++) {
+    const validatorScore = validatorScores[i];
+    const voteAccountIndex = remainingVoteAccountInfos.findIndex(info => info.nodePubkey === validatorScore.account);
+    if (voteAccountIndex < 0) {
+      // If score does not match anything then it goes into the no score bucket
+      continue;
+    }
+    const [voteAccountInfo] = remainingVoteAccountInfos.splice(voteAccountIndex, 1);
+
+    const validatorInfoIndex = remainingValidatorInfos.findIndex(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+    let validatorInfo: ValidatorInfo | undefined;
+    [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
+
+    validatorMetas.push({
+      voteAccountInfo,
+      validatorInfo,
+      validatorScore,
+    });
+
+    if (i % BATCH_SIZE === 0) {
+      await sleep(1);
+      console.log(`batch index: ${i}`);
+      onValidatorMetas([...validatorMetas]);
+    }
+  }
+
+  for(let i = 0; i < remainingVoteAccountInfos.length; i++) {
+    const voteAccountInfo = remainingVoteAccountInfos[i];
+
+    const validatorInfoIndex = remainingValidatorInfos.findIndex(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+    let validatorInfo: ValidatorInfo | undefined;
+    [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
+
+    validatorMetas.push({
+      voteAccountInfo,
+      validatorInfo,
+      validatorScore: undefined,
+    });
+
+    if (i % BATCH_SIZE === 0) {
+      await sleep(1);
+      console.log(`batch index: ${i}`);
+      onValidatorMetas([...validatorMetas]);
+    }
+  }
+  return validatorMetas;
+}
+
 export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, handleClose: () => void}) {
   const {stakePubkey, open, handleClose} = props;
-
-  const connection = useConnection();
   const sendConnection = useSendConnection();
   const {wallet} = useWallet();
   const {monitorTransaction, sending} = useMonitorTransaction();
   const urlSuffix = useSolanaExplorerUrlSuffix();
   
   const [maxComission, setMaxComission] = useState<number>(100);
-  const [voteAccountStatus, setVoteAccountStatus] = useState<VoteAccountStatus>();
-  const [filteredVoteAccounts, setFilteredVoteAccount] = useState<VoteAccountInfo[]>();
-  const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>();
+
+  const { voteAccountInfos, validatorInfos, validatorScores, totalActivatedStake} = useContext(ValidatorsContext);
+
+  const [validatorMetas, setValidatorMetas] = useState<ValidatorMeta[]>([]);
+  const [filteredValidatorMetas, setFilteredValidatorMetas] = useState<ValidatorMeta[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>();
   const [searchCriteria, setSearchCriteria] = useState<string>('');
 
-  useEffect(() => {
-    connection.getVoteAccounts()
-      .then(voteAccountStatus => {
-        setVoteAccountStatus(voteAccountStatus);
-      });
-  }, [connection]);
+  // Batched validator meta building
+  // Order is VoteAccountInfo[] order, until validatorScores is available
+  // VoteAccountInfo with no available score go at the bottom of the list
+  useAsync(async () => {
+    const validatorMetas = await batchMatcher(
+      voteAccountInfos,
+      validatorInfos,
+      validatorScores,
+      (validatorMetas) => setValidatorMetas(validatorMetas)
+    );
+    setValidatorMetas(validatorMetas);
+  }, [voteAccountInfos, validatorInfos, validatorScores]);
 
   useEffect(() => {
     setSelectedIndex(undefined);
-    setFilteredVoteAccount(voteAccountStatus?.current.filter(info => info.commission <= maxComission && (searchCriteria ? info.votePubkey.includes(searchCriteria) : true)));
-  }, [voteAccountStatus, maxComission, searchCriteria]);
+    setFilteredValidatorMetas(validatorMetas.filter(meta => {
+      const votePubkeyMatches = searchCriteria ? meta.voteAccountInfo.votePubkey.includes(searchCriteria) : true;
+      const nameMatches = searchCriteria ? meta.validatorInfo?.info.name.toLowerCase().includes(searchCriteria.toLowerCase()) : true;
+
+      return (meta.voteAccountInfo.commission <= maxComission) && (votePubkeyMatches || nameMatches);
+    }));
+  }, [validatorMetas, maxComission, searchCriteria]);
 
   useEffect(() => {
-    if(selectedIndex && selectedIndex >= (filteredVoteAccounts?.length ?? 0)) {
+    if(selectedIndex !== undefined && selectedIndex >= filteredValidatorMetas.length) {
       setSelectedIndex(undefined);
     }
-  }, [filteredVoteAccounts, selectedIndex]);
-
-  useEffect(() => {
-    getValidatorInfos(connection)
-      .then(validatorInfos => {
-        console.log(`validatorInfos.length: ${validatorInfos.length}`);
-        setValidatorInfos(validatorInfos);
-      });
-  }, [connection]);
+  }, [filteredValidatorMetas, selectedIndex]);
 
   return (
     <Dialog
@@ -105,11 +180,14 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
             step={1}
             valueLabelDisplay="auto"
           />
+          <Typography>
+            The top 200 validators in terms of APY offer between 7.0 and 8.1% APY (even with fees)
+          </Typography>
         </div>
 
         <TextField
           title="Search"
-          placeholder="Vote account public key"
+          placeholder="Name or vote account"
           value={searchCriteria}
           onChange={(e) => {
             setSearchCriteria(e.target.value);
@@ -125,23 +203,10 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                 width={width}
                 height={height}
                 headerHeight={20}
-                rowHeight={60}
-                rowCount={filteredVoteAccounts?.length ?? 0}
+                rowHeight={70}
+                rowCount={filteredValidatorMetas.length}
                 rowGetter={({index}) => {
-                  if(!filteredVoteAccounts) return;
-
-                  const voteAccountInfo = filteredVoteAccounts[index];
-                  const validatorInfo = validatorInfos?.find(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
-
-                  return {
-                    name: {name: validatorInfo?.info.name || shortenAddress(voteAccountInfo.votePubkey), votePubkey: voteAccountInfo.votePubkey},
-                    activatedStake: formatPriceNumber.format(voteAccountInfo.activatedStake / LAMPORTS_PER_SOL),
-                    commission: `${voteAccountInfo.commission}%`,
-                    imgSrc: validatorInfo?.info?.keybaseUsername ?
-                      `https://keybase.io/${validatorInfo?.info?.keybaseUsername}/picture`
-                      : IMG_SRC_DEFAULT,
-                    website: validatorInfo?.info?.website,
-                  };
+                  return filteredValidatorMetas[index];
                 }}
                 onRowClick={({index}) => { setSelectedIndex(index) }}
                 rowRenderer={props => {
@@ -149,46 +214,88 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                   return defaultRowRenderer({...props, className: props.className + className});
                 }}
               >
-                <Column dataKey="imgSrc" width={150} cellRenderer={(props: TableCellProps) => {
-                  return (
-                    <object height="60px" data={props.cellData} type="image/png">
-                      <img src={IMG_SRC_DEFAULT} alt="validator logo" />
-                    </object>
-                  );
-                }} />
-                <Column label="name or vote account" dataKey="name" width={240} headerRenderer={basicHeaderRenderer} cellRenderer={(props: TableCellProps) => {
+                <Column
+                  dataKey="img"
+                  width={80}
+                  cellDataGetter={({rowData}) => rowData.validatorInfo?.info?.keybaseUsername ?
+                    `https://keybase.io/${rowData.validatorInfo?.info?.keybaseUsername}/picture`
+                    : IMG_SRC_DEFAULT
+                  }
+                  cellRenderer={(props: TableCellProps) => <ImageWithFallback height="60px" src={props.cellData as string} />}
+                />
+                <Column
+                  label="name or account"
+                  dataKey="name"
+                  width={240}
+                  headerRenderer={basicHeaderRenderer}
+                  cellDataGetter={({rowData}) => ({votePubkey: rowData.voteAccountInfo.votePubkey, name: rowData.validatorInfo?.info?.name})}
+                  cellRenderer={(props: TableCellProps) => {
                     return (
                       <div>
                         <Typography>
                           <Link color="secondary" href={`https://explorer.solana.com/address/${props.cellData.votePubkey}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
-                            {props.cellData.name}
+                            {props.cellData.name ? props.cellData.name : shortenAddress(props.cellData.votePubkey, 6)}
                           </Link>
                         </Typography>
                       </div>
                     );
                   }}
                 />
-                <Column label="Activated stake (SOL)" dataKey="activatedStake" width={200} headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer} />
-                <Column label="Fee" dataKey="commission" width={120} headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer} />
-                <Column label="Website" dataKey="website" width={200} headerRenderer={basicHeaderRenderer} cellRenderer={(props: TableCellProps) => {
-                  return (
+                <Column
+                  label="Stake (SOL)"
+                  dataKey="activatedStake"
+                  headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer}
+                  cellDataGetter={({rowData}) => `${formatPriceNumber.format(rowData.voteAccountInfo.activatedStake / LAMPORTS_PER_SOL)} (${formatPct.format(rowData.voteAccountInfo.activatedStake / totalActivatedStake)})`}
+                  width={180}
+                />
+                <Column
+                  label="Fee"
+                  dataKey="commission"
+                  headerRenderer={basicHeaderRenderer}
+                  cellDataGetter={({rowData}) => `${rowData.voteAccountInfo.commission}%`}
+                  cellRenderer={basicCellRenderer}
+                  width={80}
+                />
+                <Column
+                  label="Website"
+                  dataKey="website"
+                  headerRenderer={basicHeaderRenderer}
+                  cellDataGetter={({rowData}) => rowData.validatorInfo?.info?.website}
+                  cellRenderer={(props: TableCellProps) => {
+                    return (
+                      <Typography>
+                        <Link color="secondary" href={props.cellData} rel="noopener noreferrer" target="_blank">
+                          {props.cellData}
+                        </Link>
+                      </Typography>
+                    );
+                  }}
+                  width={300}
+                />
+                <Column
+                  label="Score"
+                  dataKey="validatorScore"
+                  headerRenderer={() => (
                     <Typography>
-                      <Link color="secondary" href={props.cellData} rel="noopener noreferrer" target="_blank">
-                        {props.cellData}
+                      Score (Max 11)
+                      <Link href="https://validators.app/faq" rel="noopener noreferrer" target="_blank">
+                        <img height="15px" src="va-logo.png" alt="" style={{verticalAlign: "middle"}}/>
                       </Link>
                     </Typography>
-                  );
-                }} />
-                <Column label="APY (Coming soon)" dataKey="apy" headerRenderer={basicHeaderRenderer} width={200} />
+                  )}
+                  cellDataGetter={({rowData}) => rowData.validatorScore}
+                  cellRenderer={scoreCellRenderer}
+                  width={200}
+                />
               </Table>
             )}
           </AutoSizer>
         </div>
 
         <Box m={2}>
-          {(filteredVoteAccounts && selectedIndex && filteredVoteAccounts[selectedIndex]) && (
+          {(selectedIndex && filteredValidatorMetas[selectedIndex]) && (
             <Typography variant="h6">
-              Selected {shortenAddress(filteredVoteAccounts[selectedIndex].votePubkey)}
+              Selected {shortenAddress(filteredValidatorMetas[selectedIndex].voteAccountInfo.votePubkey)}
             </Typography>
           )}
         </Box>
@@ -199,14 +306,14 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
         <Button
           disabled={selectedIndex === undefined || sending}
           onClick={async () => {
-            if(!wallet?.publicKey || !filteredVoteAccounts || selectedIndex === undefined || !filteredVoteAccounts[selectedIndex]) {
+            if(!wallet?.publicKey || selectedIndex === undefined || !filteredValidatorMetas[selectedIndex]) {
               return;
             }
 
             const transaction = StakeProgram.delegate({
               stakePubkey,
               authorizedPubkey: wallet.publicKey,
-              votePubkey: new PublicKey(filteredVoteAccounts[selectedIndex].votePubkey)
+              votePubkey: new PublicKey(filteredValidatorMetas[selectedIndex].voteAccountInfo.votePubkey)
             });
 
             await monitorTransaction(

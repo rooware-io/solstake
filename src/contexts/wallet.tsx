@@ -127,28 +127,30 @@ export function WalletProvider({ children = null as any }) {
             };
 
             return (
-              <Box m={1}>
-                <Button
-                  size="large"
-                  onClick={onClick}
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    width: "100%",
-                    textAlign: "left",
-                  }}
-                  variant="contained"
-                >
-                  <img
-                    alt={`${provider.name}`}
-                    width={40}
-                    height={40}
-                    src={provider.icon}
-                    style={{ marginRight: 20 }}
-                  />
-                  {provider.name}
-                </Button>
-              </Box>
+              <div key={provider.name}>
+                <Box m={1}>
+                  <Button
+                    size="large"
+                    onClick={onClick}
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      width: "100%",
+                      textAlign: "left",
+                    }}
+                    variant="contained"
+                  >
+                    <img
+                      alt={`${provider.name}`}
+                      width={40}
+                      height={40}
+                      src={provider.icon}
+                      style={{ marginRight: 20 }}
+                    />
+                    {provider.name}
+                  </Button>
+                </Box>
+              </div>
             );
           })}
         </DialogContent>

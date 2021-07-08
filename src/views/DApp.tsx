@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-//import logo from './logo.svg';
 import '../App.css';
 import { AppBar, Box, Button, Card, CardContent, CircularProgress, Container, IconButton, Toolbar, Tooltip, Typography } from '@material-ui/core';
 import { PublicKey } from '@solana/web3.js';
@@ -170,7 +169,6 @@ function DApp() {
           stakeAccountMetas={stakeAccounts}
           addStakeAccount={addStakeAccount}
         />
-
         <Container>
           {loading && (
             <Box m={1}>
@@ -184,7 +182,11 @@ function DApp() {
           )}
         </Container>
       </Container>
-      
+
+      <Box m="1">
+        <br />
+      </Box>
+
       <HelpDialog
         open={open}
         handleClose={() => setOpen(false)}
