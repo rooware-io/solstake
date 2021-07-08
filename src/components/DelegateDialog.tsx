@@ -12,6 +12,7 @@ import { defaultRowRenderer } from 'react-virtualized/dist/es/Table';
 import { ValidatorScore } from '../utils/validatorsApp';
 import { ValidatorScoreTray } from './ValidatorScoreTray';
 import { ValidatorsContext } from '../contexts/validators';
+import { useAsync } from 'react-async-hook';
 
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
 
@@ -129,17 +130,14 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   // Batched validator meta building
   // Order is VoteAccountInfo[] order, until validatorScores is available
   // VoteAccountInfo with no available score go at the bottom of the list
-  useEffect(() => {
-    async function getMetas() {
-      const validatorMetas = await batchMatcher(
-        voteAccountInfos,
-        validatorInfos,
-        validatorScores,
-        (validatorMetas) => setValidatorMetas(validatorMetas)
-      );
-      setValidatorMetas(validatorMetas);
-    }
-    getMetas();
+  useAsync(async () => {
+    const validatorMetas = await batchMatcher(
+      voteAccountInfos,
+      validatorInfos,
+      validatorScores,
+      (validatorMetas) => setValidatorMetas(validatorMetas)
+    );
+    setValidatorMetas(validatorMetas);
   }, [voteAccountInfos, validatorInfos, validatorScores]);
 
   useEffect(() => {
@@ -183,7 +181,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
             valueLabelDisplay="auto"
           />
           <Typography>
-            The top 200 validators in terms of APY offer between 7.0 and 8.1% APY
+            The top 200 validators in terms of APY offer between 7.0 and 8.1% APY (even with fees)
           </Typography>
         </div>
 
