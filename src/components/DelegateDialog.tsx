@@ -38,11 +38,6 @@ function scoreCellRenderer(props: TableCellProps) {
     : "N.A.";
 }
 
-function ImageWithFallback({height, src}: {height: string, src: string}) {
-  const [currentSrc, setCurrentSrc] = useState(src);
-  return <img height={height} src={currentSrc} onError={event => {setCurrentSrc(IMG_SRC_DEFAULT)}} alt="validator logo" />;
-}
-
 interface ValidatorMeta {
   voteAccountInfo: VoteAccountInfo;
   validatorInfo: ValidatorInfo | undefined;
@@ -215,13 +210,19 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                 }}
               >
                 <Column
-                  dataKey="img"
+                  dataKey="validatorInfo"
                   width={80}
                   cellDataGetter={({rowData}) => rowData.validatorInfo?.info?.keybaseUsername ?
                     `https://keybase.io/${rowData.validatorInfo?.info?.keybaseUsername}/picture`
                     : IMG_SRC_DEFAULT
                   }
-                  cellRenderer={(props: TableCellProps) => <ImageWithFallback height="60px" src={props.cellData as string} />}
+                  cellRenderer={(props: TableCellProps) => (
+                    <img
+                      height="60px"
+                      src={props.cellData as string}
+                      alt=""
+                    />)
+                  }
                 />
                 <Column
                   label="name or account"
