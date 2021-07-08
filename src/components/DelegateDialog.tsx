@@ -1,29 +1,19 @@
 import 'react-virtualized/styles.css';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
-import React, { useEffect, useState } from "react";
-import { sendTransaction, useConnection, useConnectionConfig, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
-import { Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo, VoteAccountStatus } from "@solana/web3.js";
+import React, { useContext, useEffect, useState } from "react";
+import { sendTransaction, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
+import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo } from "@solana/web3.js";
 import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPriceNumber, shortenAddress, sleep } from '../utils/utils';
 import { Column, Table, TableHeaderProps, TableCellProps } from 'react-virtualized';
 import { defaultRowRenderer } from 'react-virtualized/dist/es/Table';
-import { getValidatorScores, ValidatorScore } from '../utils/validatorsApp';
+import { ValidatorScore } from '../utils/validatorsApp';
 import { ValidatorScoreTray } from './ValidatorScoreTray';
+import { ValidatorsContext } from '../contexts/validators';
 
-const CONFIG_PROGRAM_ID = new PublicKey('Config1111111111111111111111111111111111111');
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
-
-async function getValidatorInfos(connection: Connection) {
-  const validatorInfoAccounts = await connection.getProgramAccounts(CONFIG_PROGRAM_ID);
-
-  console.log(validatorInfoAccounts.length);
-  return validatorInfoAccounts.flatMap(validatorInfoAccount => {
-    const validatorInfo = ValidatorInfo.fromConfigData(validatorInfoAccount.account.data);
-    return validatorInfo ? [validatorInfo] : [];
-  })
-}
 
 function basicCellRenderer(props: TableCellProps) {
   return (
@@ -60,107 +50,97 @@ interface ValidatorMeta {
 
 const BATCH_SIZE = 100;
 
+async function batchMatcher(
+  voteAccountStatus: VoteAccountInfo[],
+  validatorInfos: ValidatorInfo[],
+  validatorScores: ValidatorScore[],
+  onValidatorMetas: (metas: ValidatorMeta[]) => void
+  ) {
+  let validatorMetas: ValidatorMeta[] = [];
+  let remainingVoteAccountInfos = [...voteAccountStatus];
+  let remainingValidatorInfos = [...validatorInfos];
+
+  console.log('scores', validatorScores.length)
+
+  for(let i = 0; i < validatorScores.length; i++) {
+    const validatorScore = validatorScores[i];
+    const voteAccountIndex = remainingVoteAccountInfos.findIndex(info => info.nodePubkey === validatorScore.account);
+    if (voteAccountIndex < 0) {
+      // If score does not match anything then it goes into the no score bucket
+      continue;
+    }
+    const [voteAccountInfo] = remainingVoteAccountInfos.splice(voteAccountIndex, 1);
+
+    const validatorInfoIndex = remainingValidatorInfos.findIndex(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+    let validatorInfo: ValidatorInfo | undefined;
+    [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
+
+    validatorMetas.push({
+      voteAccountInfo,
+      validatorInfo,
+      validatorScore,
+    });
+
+    if (i % BATCH_SIZE === 0) {
+      await sleep(1);
+      console.log(`batch index: ${i}`);
+      onValidatorMetas([...validatorMetas]);
+    }
+  }
+
+  for(let i = 0; i < remainingVoteAccountInfos.length; i++) {
+    const voteAccountInfo = remainingVoteAccountInfos[i];
+
+    const validatorInfoIndex = remainingValidatorInfos.findIndex(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
+    let validatorInfo: ValidatorInfo | undefined;
+    [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
+
+    validatorMetas.push({
+      voteAccountInfo,
+      validatorInfo,
+      validatorScore: undefined,
+    });
+
+    if (i % BATCH_SIZE === 0) {
+      await sleep(1);
+      console.log(`batch index: ${i}`);
+      onValidatorMetas([...validatorMetas]);
+    }
+  }
+  return validatorMetas;
+}
+
 export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, handleClose: () => void}) {
   const {stakePubkey, open, handleClose} = props;
-
-  const connection = useConnection();
-  const { cluster } = useConnectionConfig();
   const sendConnection = useSendConnection();
   const {wallet} = useWallet();
   const {monitorTransaction, sending} = useMonitorTransaction();
   const urlSuffix = useSolanaExplorerUrlSuffix();
   
   const [maxComission, setMaxComission] = useState<number>(100);
-  const [voteAccountStatus, setVoteAccountStatus] = useState<VoteAccountStatus>();
-  const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>([]);
-  const [validatorScores, setValidatorScores] = useState<ValidatorScore[]>([]);
+
+  const { voteAccountInfos, validatorInfos, validatorScores} = useContext(ValidatorsContext);
+
   const [validatorMetas, setValidatorMetas] = useState<ValidatorMeta[]>([]);
   const [filteredValidatorMetas, setFilteredValidatorMetas] = useState<ValidatorMeta[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>();
   const [searchCriteria, setSearchCriteria] = useState<string>('');
 
-  useEffect(() => {
-    connection.getVoteAccounts()
-      .then(voteAccountStatus => {
-        setVoteAccountStatus(voteAccountStatus);
-      });
-  }, [connection]);
-
-  useEffect(() => {
-    getValidatorInfos(connection)
-      .then(validatorInfos => {
-        console.log(`validatorInfos.length: ${validatorInfos.length}`);
-        setValidatorInfos(validatorInfos);
-      });
-  }, [connection]);
-
-  useEffect(() => {
-    getValidatorScores(cluster) // Once implemented we will be able to get the scores in batches
-      .then(setValidatorScores);
-  }, [cluster]);
-
   // Batched validator meta building
   // Order is VoteAccountInfo[] order, until validatorScores is available
   // VoteAccountInfo with no available score go at the bottom of the list
   useEffect(() => {
-    if (!voteAccountStatus?.current) {
-      return;
+    async function getMetas() {
+      const validatorMetas = await batchMatcher(
+        voteAccountInfos,
+        validatorInfos,
+        validatorScores,
+        (validatorMetas) => setValidatorMetas(validatorMetas)
+      );
+      setValidatorMetas(validatorMetas);
     }
-    let validatorMetas: ValidatorMeta[] = [];
-    let remainingVoteAccountInfos = [...voteAccountStatus.current];
-    let remainingValidatorInfos = [...validatorInfos];
-
-    async function batchMatch() {
-      console.log('scores', validatorScores.length)
-      for(let i = 0; i < validatorScores.length; i++) {
-        const validatorScore = validatorScores[i];
-        const voteAccountIndex = remainingVoteAccountInfos.findIndex(info => info.nodePubkey === validatorScore.account);
-        if (voteAccountIndex < 0) {
-          // If score does not match anything then it goes into the no score bucket
-          continue;
-        }
-        const [voteAccountInfo] = remainingVoteAccountInfos.splice(voteAccountIndex, 1);
-
-        const validatorInfoIndex = remainingValidatorInfos.findIndex(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
-        let validatorInfo: ValidatorInfo | undefined;
-        [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
-
-        validatorMetas.push({
-          voteAccountInfo,
-          validatorInfo,
-          validatorScore,
-        });
-
-        if (i % BATCH_SIZE === 0) {
-          await sleep(1);
-          console.log(`batch index: ${i}`);
-          setValidatorMetas([...validatorMetas]);
-        }
-      }
-  
-      for(let i = 0; i < remainingVoteAccountInfos.length; i++) {
-        const voteAccountInfo = remainingVoteAccountInfos[i];
-
-        const validatorInfoIndex = remainingValidatorInfos.findIndex(validatorInfo => validatorInfo.key.equals(new PublicKey(voteAccountInfo.nodePubkey)));
-        let validatorInfo: ValidatorInfo | undefined;
-        [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
-  
-        validatorMetas.push({
-          voteAccountInfo,
-          validatorInfo,
-          validatorScore: undefined,
-        });
-
-        if (i % BATCH_SIZE === 0) {
-          await sleep(1);
-          console.log(`batch index: ${i}`);
-          setValidatorMetas([...validatorMetas]);
-        }
-      }
-      setValidatorMetas([...validatorMetas]);
-    }
-    batchMatch();
-  }, [voteAccountStatus, validatorInfos, validatorScores]);
+    getMetas();
+  }, [voteAccountInfos, validatorInfos, validatorScores]);
 
   useEffect(() => {
     setSelectedIndex(undefined);
@@ -222,7 +202,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                 width={width}
                 height={height}
                 headerHeight={20}
-                rowHeight={60}
+                rowHeight={70}
                 rowCount={filteredValidatorMetas.length}
                 rowGetter={({index}) => {
                   return filteredValidatorMetas[index];
