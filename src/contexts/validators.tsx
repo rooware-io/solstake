@@ -21,18 +21,21 @@ interface Validators {
   voteAccountInfos: VoteAccountInfo[],
   validatorInfos: ValidatorInfo[],
   validatorScores: ValidatorScore[],
+  totalActivatedStake: number,
 };
 
 export const ValidatorsContext = createContext<Validators>({
   voteAccountInfos: [],
   validatorInfos: [],
   validatorScores: [],
+  totalActivatedStake: 0,
 });
 
 export function ValidatorsProvider({ children = null as any }) {
   const [voteAccountInfos, setVoteAccountInfos] = useState<VoteAccountInfo[]>([]);
   const [validatorInfos, setValidatorInfos] = useState<ValidatorInfo[]>([]);
   const [validatorScores, setValidatorScores] = useState<ValidatorScore[]>([]);
+  const [totalActivatedStake, setTotalActivatedStake] = useState(0);
 
   const connection = useConnection();
   const { cluster } = useConnectionConfig();
@@ -42,7 +45,10 @@ export function ValidatorsProvider({ children = null as any }) {
     if (!connected) { return; }
     connection.getVoteAccounts()
       .then(voteAccountStatus => {
-        setVoteAccountInfos(voteAccountStatus?.current ?? []);
+        const activatedStake = voteAccountStatus.current.concat(voteAccountStatus.delinquent).reduce((sum, current) => sum + current.activatedStake, 0);
+        console.log('totalActivatedStake', activatedStake);
+        setTotalActivatedStake(activatedStake);
+        setVoteAccountInfos(voteAccountStatus.current ?? []);
       });
   }, [connected, connection]);
   
@@ -67,6 +73,7 @@ export function ValidatorsProvider({ children = null as any }) {
         voteAccountInfos,
         validatorInfos,
         validatorScores,
+        totalActivatedStake
       }}
     >
       {children}

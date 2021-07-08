@@ -32,6 +32,10 @@ export const ValidatorList = array(ValidatorScore);
 type ValidatorList = Infer<typeof ValidatorList>;
 
 export async function getValidatorScores(cluster: string): Promise<ValidatorList> {
+  if (cluster === 'mainnet-beta') {
+    cluster = 'mainnet'; // Rename cluster to validators app convention
+  }
+
   const response = await fetch(`${BASE_URL}/${cluster}.json?order=score`, {
     headers: {
       'Token': process.env.REACT_APP_VALIDATORS_APP_TOKEN as string

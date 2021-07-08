@@ -6,7 +6,7 @@ import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountIn
 import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
-import { formatPriceNumber, shortenAddress, sleep } from '../utils/utils';
+import { formatPct, formatPriceNumber, shortenAddress, sleep } from '../utils/utils';
 import { Column, Table, TableHeaderProps, TableCellProps } from 'react-virtualized';
 import { defaultRowRenderer } from 'react-virtualized/dist/es/Table';
 import { ValidatorScore } from '../utils/validatorsApp';
@@ -119,7 +119,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   
   const [maxComission, setMaxComission] = useState<number>(100);
 
-  const { voteAccountInfos, validatorInfos, validatorScores} = useContext(ValidatorsContext);
+  const { voteAccountInfos, validatorInfos, validatorScores, totalActivatedStake} = useContext(ValidatorsContext);
 
   const [validatorMetas, setValidatorMetas] = useState<ValidatorMeta[]>([]);
   const [filteredValidatorMetas, setFilteredValidatorMetas] = useState<ValidatorMeta[]>([]);
@@ -182,6 +182,9 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
             step={1}
             valueLabelDisplay="auto"
           />
+          <Typography>
+            The top 200 validators in terms of APY offer between 7.0 and 8.1% APY
+          </Typography>
         </div>
 
         <TextField
@@ -244,8 +247,8 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                   label="Stake (SOL)"
                   dataKey="activatedStake"
                   headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer}
-                  cellDataGetter={({rowData}) => formatPriceNumber.format(rowData.voteAccountInfo.activatedStake / LAMPORTS_PER_SOL)}
-                  width={120}
+                  cellDataGetter={({rowData}) => `${formatPriceNumber.format(rowData.voteAccountInfo.activatedStake / LAMPORTS_PER_SOL)} (${formatPct.format(rowData.voteAccountInfo.activatedStake / totalActivatedStake)})`}
+                  width={180}
                 />
                 <Column
                   label="Fee"
@@ -269,7 +272,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                       </Typography>
                     );
                   }}
-                  width={250}
+                  width={300}
                 />
                 <Column
                   label="Score"

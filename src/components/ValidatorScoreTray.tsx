@@ -21,22 +21,22 @@ function ScoreIcon(props: {header: string, score: number}) {
   }
 
 export function ValidatorScoreTray(props: {validatorScore: ValidatorScore}) {
-    const { validatorScore } = props;
-    return (
-      <Typography>
-        <ScoreIcon header="Root Distance" score={validatorScore.root_distance_score} />
-        <ScoreIcon header="Vote Distance" score={validatorScore.vote_distance_score} />
-        <ScoreIcon header="Skipped Slot" score={validatorScore.skipped_slot_score} />
-        <ScoreIcon header="Published Info" score={validatorScore.published_information_score} />
-        <ScoreIcon header="Software Version" score={validatorScore.software_version_score} />
-        <ScoreIcon header="Security Report" score={validatorScore.security_report_score} />
-        {validatorScore.stake_concentration_score < 0 &&
-          <ScoreIcon header="Stake concentration" score={validatorScore.stake_concentration_score} />
-        }
-        {(validatorScore?.data_center_concentration_score && (validatorScore.data_center_concentration_score < 0)) &&
-          <ScoreIcon header="Data Center Centration" score={validatorScore.data_center_concentration_score} />
-        }
-        ({validatorScore.total_score})
-      </Typography>
-    );
-  }
+  const { validatorScore } = props;
+  return (
+    <Typography>
+      <ScoreIcon header="Root Distance" score={validatorScore.root_distance_score} />
+      <ScoreIcon header="Vote Distance" score={validatorScore.vote_distance_score} />
+      <ScoreIcon header="Skipped Slot" score={validatorScore.skipped_slot_score} />
+      <ScoreIcon header="Published Info" score={validatorScore.published_information_score} />
+      <ScoreIcon header="Software Version" score={validatorScore.software_version_score} />
+      <ScoreIcon header="Security Report" score={validatorScore.security_report_score} />
+      {validatorScore.stake_concentration_score < 0 &&
+        <ScoreIcon header="Stake concentration" score={validatorScore.stake_concentration_score} />
+      }
+      {(validatorScore.data_center_concentration_score ?? 0) < 0 &&
+        <ScoreIcon header="Data Center Centration" score={validatorScore.data_center_concentration_score ?? 0} />
+      }
+      ({validatorScore.total_score})
+    </Typography>
+  );
+}
