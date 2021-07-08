@@ -4,9 +4,10 @@ import '../App.css';
 import {
   Link
 } from 'react-router-dom';
-import { Box, Button, TextField, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles, Snackbar } from '@material-ui/core';
+import { Box, Button, TextField, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles, Snackbar, SvgIcon } from '@material-ui/core';
 import { ReactComponent as SolstakeLogoMainSvg } from '../assets/logo-white.svg';
 import { GitHub, Send, Twitter, YouTube } from '@material-ui/icons';
+import { ReactComponent as Discord } from '../assets/discord-brands.svg';
 import { validateEmail } from '../utils/email';
 import { Alert } from '@material-ui/lab';
 import { Color } from '@material-ui/lab/Alert';
@@ -155,6 +156,14 @@ export function Landing() {
                   onClick={() => setOpenVideo(true)}
                 >
                   <YouTube style={styles.largeIcon} />
+                </IconButton>
+                <IconButton
+                  href="https://discord.gg/r5fZHdfu"
+                  rel="noopener noreferrer" target="_blank"
+                >
+                  <SvgIcon style={styles.largeIcon}>
+                    <Discord />
+                  </SvgIcon>
                 </IconButton>
                 <IconButton
                   href="https://twitter.com/solstakeio"
