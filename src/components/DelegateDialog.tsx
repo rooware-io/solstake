@@ -12,7 +12,7 @@ import { defaultRowRenderer } from 'react-virtualized/dist/es/Table';
 import { ValidatorScore } from '../utils/validatorsApp';
 import { ValidatorScoreTray } from './ValidatorScoreTray';
 import { ValidatorsContext } from '../contexts/validators';
-import { useAsync } from 'react-async-hook';
+import { useAsyncAbortable } from 'react-async-hook';
 import { useParams } from 'react-router-dom';
 
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
@@ -51,7 +51,8 @@ async function batchMatcher(
   voteAccountStatus: VoteAccountInfo[],
   validatorInfos: ValidatorInfo[],
   validatorScores: ValidatorScore[],
-  onValidatorMetas: (metas: ValidatorMeta[]) => void
+  onValidatorMetas: (metas: ValidatorMeta[]) => void,
+  abortSignal: AbortSignal
   ) {
   let validatorMetas: ValidatorMeta[] = [];
   let remainingVoteAccountInfos = [...voteAccountStatus];
@@ -83,6 +84,10 @@ async function batchMatcher(
       console.log(`batch index: ${i}`);
       onValidatorMetas([...validatorMetas]);
     }
+
+    if (abortSignal.aborted) {
+      return;
+    }
   }
 
   for(let i = 0; i < remainingVoteAccountInfos.length; i++) {
@@ -102,6 +107,10 @@ async function batchMatcher(
       await sleep(1);
       console.log(`batch index: ${i}`);
       onValidatorMetas([...validatorMetas]);
+    }
+
+    if (abortSignal.aborted) {
+      return;
     }
   }
   return validatorMetas;
@@ -127,14 +136,17 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   // Batched validator meta building
   // Order is VoteAccountInfo[] order, until validatorScores is available
   // VoteAccountInfo with no available score go at the bottom of the list
-  useAsync(async () => {
+  useAsyncAbortable(async (abortSignal) => {
     const validatorMetas = await batchMatcher(
       voteAccountInfos,
       validatorInfos,
       validatorScores,
-      (validatorMetas) => setValidatorMetas(validatorMetas)
+      (validatorMetas) => setValidatorMetas(validatorMetas),
+      abortSignal
     );
-    setValidatorMetas(validatorMetas);
+    if (validatorMetas) {
+      setValidatorMetas(validatorMetas);
+    }
   }, [voteAccountInfos, validatorInfos, validatorScores]);
 
   useEffect(() => {
