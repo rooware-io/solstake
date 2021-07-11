@@ -16,6 +16,7 @@ interface SummaryCardProps {
   setPublicKeyString: (publicKeyString: string | undefined) => void;
   setPublicKey: (publicKey: PublicKey | null) => void;
   stakeAccountMetas: StakeAccountMeta[] | null;
+  addStakeAccount: (stakePubkey: PublicKey, seed: string) => void;
 }
 
 async function getSOLPriceUSD(): Promise<number | undefined> {
@@ -51,7 +52,7 @@ export function SummaryCard(props : SummaryCardProps) {
   const connection = useConnection();
   const sendConnection = useSendConnection();
   const {wallet, connected} = useWallet();
-  const {publicKeyString, setPublicKeyString, setPublicKey, stakeAccountMetas} = props;
+  const {publicKeyString, setPublicKeyString, setPublicKey, stakeAccountMetas, addStakeAccount} = props;
   
   const {systemProgramAccountInfo} = useContext(AccountsContext);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
@@ -205,6 +206,11 @@ export function SummaryCard(props : SummaryCardProps) {
                   sendConnection={sendConnection}
                   wallet={wallet}
                   onSuccess={async () => {
+                    if (!wallet.publicKey) {
+                      return;
+                    }
+                    const newStakeAccountPubkey = await PublicKey.createWithSeed(wallet.publicKey, seed, STAKE_PROGRAM_ID);
+                    addStakeAccount(newStakeAccountPubkey, seed);
                   }}
                 />
               }
