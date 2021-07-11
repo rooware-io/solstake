@@ -3,7 +3,7 @@ import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import React, { useContext, useEffect, useState } from "react";
 import { sendTransaction, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
 import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo } from "@solana/web3.js";
-import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress } from '@material-ui/core';
+import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress, InputAdornment } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPct, formatPriceNumber, shortenAddress, sleep } from '../utils/utils';
@@ -12,7 +12,8 @@ import { defaultRowRenderer } from 'react-virtualized/dist/es/Table';
 import { ValidatorScore } from '../utils/validatorsApp';
 import { ValidatorScoreTray } from './ValidatorScoreTray';
 import { ValidatorsContext } from '../contexts/validators';
-import { useAsync } from 'react-async-hook';
+import { useAsyncAbortable } from 'react-async-hook';
+import { useParams } from 'react-router-dom';
 
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
 
@@ -50,7 +51,8 @@ async function batchMatcher(
   voteAccountStatus: VoteAccountInfo[],
   validatorInfos: ValidatorInfo[],
   validatorScores: ValidatorScore[],
-  onValidatorMetas: (metas: ValidatorMeta[]) => void
+  onValidatorMetas: (metas: ValidatorMeta[]) => void,
+  abortSignal: AbortSignal
   ) {
   let validatorMetas: ValidatorMeta[] = [];
   let remainingVoteAccountInfos = [...voteAccountStatus];
@@ -82,6 +84,10 @@ async function batchMatcher(
       console.log(`batch index: ${i}`);
       onValidatorMetas([...validatorMetas]);
     }
+
+    if (abortSignal.aborted) {
+      return;
+    }
   }
 
   for(let i = 0; i < remainingVoteAccountInfos.length; i++) {
@@ -102,6 +108,10 @@ async function batchMatcher(
       console.log(`batch index: ${i}`);
       onValidatorMetas([...validatorMetas]);
     }
+
+    if (abortSignal.aborted) {
+      return;
+    }
   }
   return validatorMetas;
 }
@@ -120,20 +130,31 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   const [validatorMetas, setValidatorMetas] = useState<ValidatorMeta[]>([]);
   const [filteredValidatorMetas, setFilteredValidatorMetas] = useState<ValidatorMeta[]>([]);
   const [selectedIndex, setSelectedIndex] = useState<number>();
+  const { validator } = useParams() as any;
   const [searchCriteria, setSearchCriteria] = useState<string>('');
 
   // Batched validator meta building
   // Order is VoteAccountInfo[] order, until validatorScores is available
   // VoteAccountInfo with no available score go at the bottom of the list
-  useAsync(async () => {
+  useAsyncAbortable(async (abortSignal) => {
     const validatorMetas = await batchMatcher(
       voteAccountInfos,
       validatorInfos,
       validatorScores,
-      (validatorMetas) => setValidatorMetas(validatorMetas)
+      (validatorMetas) => setValidatorMetas(validatorMetas),
+      abortSignal
     );
-    setValidatorMetas(validatorMetas);
+    if (validatorMetas) {
+      setValidatorMetas(validatorMetas);
+    }
   }, [voteAccountInfos, validatorInfos, validatorScores]);
+
+  useEffect(() => {
+    if(validator) {
+      setSearchCriteria(validator);
+      setSelectedIndex(0);
+    }
+  }, [validator])
 
   useEffect(() => {
     setSelectedIndex(undefined);
@@ -182,10 +203,27 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
 
         <TextField
           title="Search"
+          fullWidth
           placeholder="Name or vote account"
           value={searchCriteria}
           onChange={(e) => {
             setSearchCriteria(e.target.value);
+          }}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <Button
+                  onClick={() =>
+                    setSearchCriteria('')
+                  }
+                >
+                  Clear
+                </Button>
+              </InputAdornment>
+            ),
+            inputProps: {
+              step: 0.1,
+            },
           }}
         />
 
@@ -294,7 +332,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
         </div>
 
         <Box m={2}>
-          {(selectedIndex && filteredValidatorMetas[selectedIndex]) && (
+          {(selectedIndex !== undefined && filteredValidatorMetas[selectedIndex]) && (
             <Typography variant="h6">
               Selected {shortenAddress(filteredValidatorMetas[selectedIndex].voteAccountInfo.votePubkey)}
             </Typography>

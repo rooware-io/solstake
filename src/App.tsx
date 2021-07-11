@@ -27,7 +27,7 @@ function App() {
                 <ThemeProvider theme={theme}>
                   <Router>
                     <Route exact path='/' component={Landing} />
-                    <Route path='/app' component={DApp} />
+                    <Route path={['/app/validator/:validator', '/app']} component={DApp} />
                   </Router>
                 </ThemeProvider>
               </SnackbarProvider>
