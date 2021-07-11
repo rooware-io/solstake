@@ -121,7 +121,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
           >
             <>
               <div
-                hidden={stakeActivationData?.state === "active"}
+                hidden={stakeActivationData?.state === "active" || stakeActivationData?.state === "deactivating"}
               >
                 <Button
                   variant="outlined"
@@ -132,7 +132,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                 </Button>
               </div>
               <div
-                hidden={stakeActivationData?.state === "inactive"}
+                hidden={stakeActivationData?.state === "inactive" || stakeActivationData?.state === "deactivating"}
               >
                 <Button
                   variant="outlined"

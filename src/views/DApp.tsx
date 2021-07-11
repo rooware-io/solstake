@@ -66,6 +66,8 @@ function DApp() {
     }
   }, [connection, connected, wallet?.publicKey, publicKey]);
 
+  // https://overreacted.io/making-setinterval-declarative-with-react-hooks/#refs-to-the-rescue
+
   useEffect(() => {
     if (!wallet?.publicKey) {
       return;
@@ -129,11 +131,11 @@ function DApp() {
     };
   }, [connection, wallet, stakeAccounts]);
 
-  // Unfortunately we need to listen 
+  // Unfortunately we need to listen
   useEffect(() => {
     const subscriptionIds = stakeAccounts?.map(stakeAccountMeta => {
       return connection.onAccountChange(stakeAccountMeta.address, async () => {
-        console.log(`StakeAccount update for ${stakeAccountMeta.address.toBase58()}`);
+        console.log(`StakeAccount update for ${stakeAccountMeta.address.toBase58()} but ignore all but removed account`);
         const index = stakeAccounts?.findIndex(extistingStakeAccountMeta => 
           extistingStakeAccountMeta.address.equals(stakeAccountMeta.address)
         );

@@ -28,10 +28,10 @@ export default function HelpDialog(props: {open: boolean, handleClose: () => voi
         <Box m={2} />
 
         <Typography variant="h5">
-          Coming soon
+          What you can do
         </Typography>
         <Typography>
-          Create stake accounts, delegate to validators, unstake, reward overview... All from any popular wallet: solflare, sollet, phantom, ledger... 
+          Create stake accounts, delegate to validators, unstake, check your rewards... All from any popular wallet: solflare, sollet, phantom, ledger...
         </Typography>
 
         <Box m={2} />
