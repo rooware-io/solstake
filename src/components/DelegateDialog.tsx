@@ -1,9 +1,9 @@
 import 'react-virtualized/styles.css';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import React, { useContext, useEffect, useState } from "react";
-import { sendTransaction, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
-import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo } from "@solana/web3.js";
-import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress, InputAdornment } from '@material-ui/core';
+import { sendTransaction, useSendConnection, useSolanaExplorerUrlSuffix } from '../contexts/connection';
+import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo } from '@solana/web3.js';
+import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress, InputAdornment, Tooltip } from '@material-ui/core';
 import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPct, formatPriceNumber, shortenAddress, sleep } from '../utils/utils';
@@ -14,6 +14,7 @@ import { ValidatorScoreTray } from './ValidatorScoreTray';
 import { ValidatorsContext } from '../contexts/validators';
 import { useAsyncAbortable } from 'react-async-hook';
 import { useParams } from 'react-router-dom';
+import { ValidatorApy } from '../utils/stakeviewApp';
 
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
 
@@ -43,6 +44,7 @@ interface ValidatorMeta {
   voteAccountInfo: VoteAccountInfo;
   validatorInfo: ValidatorInfo | undefined;
   validatorScore: ValidatorScore | undefined;
+  validatorApy: ValidatorApy | undefined;
 };
 
 const BATCH_SIZE = 100;
@@ -51,12 +53,14 @@ async function batchMatcher(
   voteAccountStatus: VoteAccountInfo[],
   validatorInfos: ValidatorInfo[],
   validatorScores: ValidatorScore[],
+  validatorApys: ValidatorApy[],
   onValidatorMetas: (metas: ValidatorMeta[]) => void,
   abortSignal: AbortSignal
   ) {
   let validatorMetas: ValidatorMeta[] = [];
   let remainingVoteAccountInfos = [...voteAccountStatus];
   let remainingValidatorInfos = [...validatorInfos];
+  let remainingValidatorApys = [...validatorApys];
 
   console.log('scores', validatorScores.length)
 
@@ -73,10 +77,15 @@ async function batchMatcher(
     let validatorInfo: ValidatorInfo | undefined;
     [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
 
+    const validatorApyIndex = remainingValidatorApys.findIndex(validatorApy => validatorApy.id === voteAccountInfo.nodePubkey);
+    let validatorApy: ValidatorApy | undefined;
+    [validatorApy] = validatorApyIndex > -1 ? remainingValidatorApys.splice(validatorApyIndex, 1) : [];
+
     validatorMetas.push({
       voteAccountInfo,
       validatorInfo,
       validatorScore,
+      validatorApy
     });
 
     if (i % BATCH_SIZE === 0) {
@@ -97,10 +106,15 @@ async function batchMatcher(
     let validatorInfo: ValidatorInfo | undefined;
     [validatorInfo] = validatorInfoIndex > -1 ? remainingValidatorInfos.splice(validatorInfoIndex, 1) : [];
 
+    const validatorApyIndex = remainingValidatorApys.findIndex(validatorApy => validatorApy.id === voteAccountInfo.nodePubkey);
+    let validatorApy: ValidatorApy | undefined;
+    [validatorApy] = validatorApyIndex > -1 ? remainingValidatorApys.splice(validatorApyIndex, 1) : [];
+
     validatorMetas.push({
       voteAccountInfo,
       validatorInfo,
       validatorScore: undefined,
+      validatorApy
     });
 
     if (i % BATCH_SIZE === 0) {
@@ -125,7 +139,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
   
   const [maxComission, setMaxComission] = useState<number>(100);
 
-  const { voteAccountInfos, validatorInfos, validatorScores, totalActivatedStake} = useContext(ValidatorsContext);
+  const { voteAccountInfos, validatorInfos, validatorScores, validatorApys, totalActivatedStake} = useContext(ValidatorsContext);
 
   const [validatorMetas, setValidatorMetas] = useState<ValidatorMeta[]>([]);
   const [filteredValidatorMetas, setFilteredValidatorMetas] = useState<ValidatorMeta[]>([]);
@@ -141,6 +155,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
       voteAccountInfos,
       validatorInfos,
       validatorScores,
+      validatorApys,
       (validatorMetas) => setValidatorMetas(validatorMetas),
       abortSignal
     );
@@ -235,7 +250,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
               <Table
                 width={width}
                 height={height}
-                headerHeight={20}
+                headerHeight={30}
                 rowHeight={70}
                 rowCount={filteredValidatorMetas.length}
                 rowGetter={({index}) => {
@@ -283,7 +298,8 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                 <Column
                   label="Stake (SOL)"
                   dataKey="activatedStake"
-                  headerRenderer={basicHeaderRenderer} cellRenderer={basicCellRenderer}
+                  headerRenderer={basicHeaderRenderer}
+                  cellRenderer={basicCellRenderer}
                   cellDataGetter={({rowData}) => `${formatPriceNumber.format(rowData.voteAccountInfo.activatedStake / LAMPORTS_PER_SOL)} (${formatPct.format(rowData.voteAccountInfo.activatedStake / totalActivatedStake)})`}
                   width={180}
                 />
@@ -292,6 +308,25 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                   dataKey="commission"
                   headerRenderer={basicHeaderRenderer}
                   cellDataGetter={({rowData}) => `${rowData.voteAccountInfo.commission}%`}
+                  cellRenderer={basicCellRenderer}
+                  width={80}
+                />
+                <Column
+                  label="APY"
+                  dataKey="apy"
+                  headerRenderer={() => {
+                    return (
+                      <Typography>
+                        APY{' '}
+                        <Tooltip title={<Typography>Stakeview.app APY averaged over last 3 epoch</Typography>}>
+                          <Link href="https://www.stakeview.app" rel="noopener noreferrer" target="_blank">
+                            <img height="30px" src="stakeviewapp.png" alt="" style={{verticalAlign: "middle"}}/>
+                          </Link>
+                        </Tooltip>
+                      </Typography>
+                    )
+                  }}
+                  cellDataGetter={({rowData}) => rowData.validatorApy?.apy ? formatPct.format(rowData.validatorApy.apy) : '-'}
                   cellRenderer={basicCellRenderer}
                   width={80}
                 />
@@ -318,13 +353,13 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                     <Typography>
                       Score (Max 11)
                       <Link href="https://validators.app/faq" rel="noopener noreferrer" target="_blank">
-                        <img height="15px" src="va-logo.png" alt="" style={{verticalAlign: "middle"}}/>
+                        <img height="20px" src="va-logo.png" alt="" style={{verticalAlign: "middle"}}/>
                       </Link>
                     </Typography>
                   )}
                   cellDataGetter={({rowData}) => rowData.validatorScore}
                   cellRenderer={scoreCellRenderer}
-                  width={200}
+                  width={170}
                 />
               </Table>
             )}
