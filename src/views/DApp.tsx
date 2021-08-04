@@ -54,7 +54,7 @@ async function onStakeAccountChangeCallback(connection: Connection, keyedAccount
   let updatedStakeAccounts = stakeAccounts ? [...stakeAccounts] : [];
 
   // Ideally we should just subscribe as jsonParsed, but that isn't available through web3.js
-  const {value, context} = await connection.getParsedAccountInfo(accountId);
+  const {value} = await connection.getParsedAccountInfo(accountId);
   const parsedAccountInfo = value;
   console.log(accountInfo.lamports, accountInfo.data, accountInfo.owner.toBase58());
   if (!parsedAccountInfo) {
