@@ -250,7 +250,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
               <Table
                 width={width}
                 height={height}
-                headerHeight={20}
+                headerHeight={30}
                 rowHeight={70}
                 rowCount={filteredValidatorMetas.length}
                 rowGetter={({index}) => {
@@ -320,7 +320,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                         APY{' '}
                         <Tooltip title={<Typography>Stakeview.app APY averaged over last 3 epoch</Typography>}>
                           <Link href="https://www.stakeview.app" rel="noopener noreferrer" target="_blank">
-                            <img height="20px" src="stakeviewapp.png" alt="" style={{verticalAlign: "middle"}}/>
+                            <img height="30px" src="stakeviewapp.png" alt="" style={{verticalAlign: "middle"}}/>
                           </Link>
                         </Tooltip>
                       </Typography>
@@ -353,13 +353,13 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                     <Typography>
                       Score (Max 11)
                       <Link href="https://validators.app/faq" rel="noopener noreferrer" target="_blank">
-                        <img height="15px" src="va-logo.png" alt="" style={{verticalAlign: "middle"}}/>
+                        <img height="20px" src="va-logo.png" alt="" style={{verticalAlign: "middle"}}/>
                       </Link>
                     </Typography>
                   )}
                   cellDataGetter={({rowData}) => rowData.validatorScore}
                   cellRenderer={scoreCellRenderer}
-                  width={150}
+                  width={170}
                 />
               </Table>
             )}
