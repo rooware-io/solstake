@@ -1,4 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.solBoxBlue {
+  @apply bg-gradient-to-r from-solblue-darker2 via-solblue-2 to-solblue-darker2 text-white shadow-solbluelight rounded-lg;
+}
+
+.solBoxGray {
+  @apply bg-solgray-light text-solblue-dark shadow-solbluelight rounded-lg;
+}
+
+.solBtnGray {
+  @apply bg-gradient-to-t from-solgray-dark to-solgray-light text-solblue-darker uppercase py-1 px-4 text-sm rounded-full;
+  /** leading-none rounded-lg flex md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 2xl:w-2/3  **/
+}
+.solBtnGray:hover {
+  @apply bg-gradient-to-t from-solgray-lightest to-solgray-light shadow-solbluelight ;
+}
+
+.solBtnRewards {
+  @apply bg-gradient-to-r from-solgray to-solgray-light text-solblue-darker uppercase py-1 px-4 text-sm rounded-b-lg;
+}
+.solBtnRewards:hover {
+  @apply bg-gradient-to-t from-solacid to-solacid-light shadow-solbluelight ;
+}
 
 html {
   height: 100%;
