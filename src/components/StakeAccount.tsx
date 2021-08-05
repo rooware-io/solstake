@@ -24,7 +24,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   const { epochSchedule, epochStartTime } = useContext(EpochContext);
 
   const [rewardsOpen, setRewardsOpen] = useState(false);
-  const [open, setOpen] = useState(false);
+  const [delegateOpen, setDelegateOpen] = useState(false);
   const [stakeActivationData, setStakeActivationData] = useState<StakeActivationData>();
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [activatedBlockTime, setActivatedBlockTime] = useState<number>();
@@ -72,6 +72,10 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
     console.log(`timePeriod: ${timePeriod}, epochStartTime: ${epochStartTime}, activatedBlockTime: ${activatedBlockTime}`);
     return totalRewards / initialStake / timePeriod * 365 * 24 * 60 * 60;
   }, [stakeAccountMeta, totalRewards, epochStartTime, activatedBlockTime])
+
+  const voteAccountAddress = useMemo(() => {
+    return stakeAccountMeta.stakeAccount.info.stake?.delegation.voter
+  }, [stakeAccountMeta])
   
   return (
     <div className="bg-transparent w-full font-light pb-3">
@@ -89,15 +93,93 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         <div className="w-full pb-6 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap leading-5">
           {stakeAccountMeta.stakeAccount.info.stake && (
             <>
-              <p>Validator: <a href="https://google.com" className="font-bold">{shortenAddress(stakeAccountMeta.stakeAccount.info.stake.delegation.voter.toBase58() ?? '')}</a></p>
+              <p>Validator:{' '}
+                <a
+                  href={`https://explorer.solana.com/address/${voteAccountAddress?.toBase58()}${urlSuffix}`}
+                  rel="noopener noreferrer" target="_blank"
+                  className="font-bold"
+                >
+                  {shortenAddress(voteAccountAddress?.toBase58() ?? '')}
+                </a>
+              </p>
               <p>Activation Epoch: <span className="font-bold">{formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.activationEpoch)}</span></p>
             </>
           )}
         </div>
         {/* Stake accounts - always visible */}
         <div className="w-full pb-5 md:pb-2 md:pt-2 md:w-4/12 md:pr-10 md:text-right">
-          {/* Deactive button */}
-          <button className="solBtnGray whitespace-nowrap">Deactivate</button>
+
+          <button
+            className="solBtnGray whitespace-nowrap"
+            hidden={stakeActivationData?.state === "active" || stakeActivationData?.state === "deactivating"}
+            onClick={() => setDelegateOpen(true)}
+            disabled={!connected}
+          >
+            {stakeActivationData?.state === "activating" && "Re-"}Delegate
+          </button>
+
+          <button
+            className="solBtnGray whitespace-nowrap"
+            hidden={stakeActivationData?.state === "inactive" || stakeActivationData?.state === "deactivating"}
+            onClick={async () => {
+              if(!wallet?.publicKey) {
+                return;
+              }
+
+              const transaction = StakeProgram.deactivate({
+                stakePubkey: stakeAccountMeta.address,
+                authorizedPubkey: wallet.publicKey,
+              });
+
+              await monitorTransaction(
+                sendTransaction(
+                  sendConnection,
+                  wallet,
+                  transaction.instructions,
+                  []
+                ),
+                {
+                  onSuccess: () => {},
+                  onError: () => {}
+                }
+              );
+            }} 
+            disabled={!connected}
+          >
+            Deactivate
+          </button>
+
+          <button
+            className="solBtnGray whitespace-nowrap"
+            hidden={stakeActivationData?.state !== "inactive"}
+            onClick={() => {
+              setWithdrawOpen(true);
+            }}
+          >
+            Withdraw
+          </button>
+
+          {wallet?.publicKey && withdrawOpen && (
+            <WithdrawDialog
+              wallet={wallet}
+              userPublicKey={wallet.publicKey}
+              stakePubkey={stakeAccountMeta.address}
+              stakeAccountLamports={stakeAccountMeta.lamports}
+              handleClose={() => {
+                setWithdrawOpen(false);
+              }}
+            />
+          )}
+          {delegateOpen && 
+            <DelegateDialog
+              stakePubkey={stakeAccountMeta.address}
+              open={delegateOpen}
+              handleClose={() => {
+                setDelegateOpen(false);
+              }}
+            />
+          }
+
           {/* Copy button */}
           <button className="solBtnGray pb-0.5 whitespace-nowrap">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-0.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -114,12 +196,16 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
           <p className="truncate overflow-ellipsis pt-3" style={{direction: 'rtl'}}>{shortenAddress(stakeAccountMeta.address.toBase58())}</p>
         </div>
       </div>
-      {/* Dropdown Area --- codepen.io/QJan84/pen/zYvRMMw */}
+
       <div className="w-full">
         <div className="w-full">
           <ul className="shadow-box">   
-            <li className="relative" x-data="{selected:null}">
-              <button type="button" className="w-full solBtnRewards uppercase font-light focus:outline-none">
+            <li className="relative">
+              <button type="button"
+                className="w-full solBtnRewards uppercase font-light focus:outline-none"
+                onClick={() => setRewardsOpen(!rewardsOpen)}
+                style={{backgroundColor: '#D5E300'}}
+              >
                 <div className="flex items-center justify-between">
                   <span>
                     <span className="ml-4">Rewards </span>
@@ -134,12 +220,16 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                 </div>
               </button>
               {/* Dropdown hidden area */}
-              <div className="relative overflow-hidden transition-all max-h-0 duration-700">
-                <div className="p-6">
-                  <p>
-                    Content
-                  </p>
-                </div>
+              <div className="relative transition-all duration-700">
+                <Collapse in={rewardsOpen} timeout="auto" unmountOnExit>
+                  <List component="div" disablePadding>
+                    {stakeAccountMeta.inflationRewards.map(inflationReward => (
+                      <ListItem style={{paddingLeft: 4}} key={inflationReward.epoch}>
+                        <ListItemText primary={`Epoch: ${inflationReward.epoch}, reward: ${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Collapse>
               </div>
             </li>
           </ul>
@@ -147,139 +237,6 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
       </div>
     </div>
   );
-
-  // return (
-  //   <Box m={1}>
-  //     <Card variant="outlined">
-  //       <CardContent>
-  //         <Typography component="h1" gutterBottom>
-  //           Seed: {stakeAccountMeta.seed}
-  //         </Typography>
-  //         <Typography variant="h6" component="h2">
-  //           {`Balance: ${stakeAccountMeta.lamports / LAMPORTS_PER_SOL} SOL`} 
-  //         </Typography>
-  //         <Typography color="textSecondary">
-  //           Type: {stakeAccountMeta.stakeAccount.type}
-  //         </Typography>
-  //         {stakeAccountMeta.stakeAccount.info.stake && (
-  //           <Typography color="textSecondary">
-  //             Activation epoch: {formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.activationEpoch)},
-  //             Deactivation epoch: {formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.deactivationEpoch)},
-  //             Voter: {stakeAccountMeta.stakeAccount.info.stake.delegation.voter.toBase58()}
-  //           </Typography>
-  //         )}
-  //         <Typography>
-  //           State: {stakeActivationData?.state}
-  //         </Typography>
-
-  //         <Button onClick={() => setRewardsOpen(!rewardsOpen)}>
-  //           Rewards {totalRewards / LAMPORTS_PER_SOL} SOL, {(APY && formatPct.format(APY)) || '-'} APY
-  //           {rewardsOpen ? <ExpandLess /> : <ExpandMore />}
-  //         </Button>
-  //         <Collapse in={rewardsOpen} timeout="auto" unmountOnExit>
-  //           <List component="div" disablePadding>
-  //             {stakeAccountMeta.inflationRewards.map(inflationReward => (
-  //             <ListItem style={{paddingLeft: 4}} key={inflationReward.epoch}>
-  //               <ListItemText primary={`Epoch: ${inflationReward.epoch}, reward: ${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
-  //             </ListItem>
-  //             ))}
-  //           </List>
-  //         </Collapse>
-  //       </CardContent>
-
-  //       <CardActions>
-  //         <Link color="secondary" href={`https://explorer.solana.com/address/${stakeAccountMeta.address.toBase58()}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
-  //           <OpenInNew />
-  //         </Link>
-  //         <Tooltip
-  //           title={connected ? "Delegate stake account to a vote account": "Connect wallet to interact with stake accounts"}
-  //         >
-  //           <>
-  //             <div
-  //               hidden={stakeActivationData?.state === "active" || stakeActivationData?.state === "deactivating"}
-  //             >
-  //               <Button
-  //                 variant="outlined"
-  //                 onClick={() => setOpen(true)}
-  //                 disabled={!connected}
-  //               >
-  //                 {stakeActivationData?.state === "activating" && "Re-"}Delegate
-  //               </Button>
-  //             </div>
-  //             <div
-  //               hidden={stakeActivationData?.state === "inactive" || stakeActivationData?.state === "deactivating"}
-  //             >
-  //               <Button
-  //                 variant="outlined"
-  //                 onClick={async () => {
-  //                   if(!wallet?.publicKey) {
-  //                     return;
-  //                   }
-
-  //                   const transaction = StakeProgram.deactivate({
-  //                     stakePubkey: stakeAccountMeta.address,
-  //                     authorizedPubkey: wallet.publicKey,
-  //                   });
-
-  //                   await monitorTransaction(
-  //                     sendTransaction(
-  //                       sendConnection,
-  //                       wallet,
-  //                       transaction.instructions,
-  //                       []
-  //                     ),
-  //                     {
-  //                       onSuccess: () => {
-
-  //                       },
-  //                       onError: () => {}
-  //                     }
-  //                   );
-  //                 }} 
-  //                 disabled={!connected}
-  //               >
-  //                 Undelegate
-  //               </Button>
-  //             </div>
-  //             <div
-  //               hidden={stakeActivationData?.state !== "inactive"}
-  //             >
-  //               <Button
-  //                 variant="outlined"
-  //                 onClick={() => {
-  //                   setWithdrawOpen(true);
-  //                 }}
-  //               >
-  //                 Withdraw
-  //               </Button>
-  //               {wallet?.publicKey && withdrawOpen && (
-  //                 <WithdrawDialog
-  //                   wallet={wallet}
-  //                   userPublicKey={wallet.publicKey}
-  //                   stakePubkey={stakeAccountMeta.address}
-  //                   stakeAccountLamports={stakeAccountMeta.lamports}
-  //                   handleClose={() => {
-  //                     setWithdrawOpen(false);
-  //                   }}
-  //                 />
-  //               )}
-  //             </div>
-  //           </>
-  //         </Tooltip>
-
-  //         {open && 
-  //           <DelegateDialog
-  //             stakePubkey={stakeAccountMeta.address}
-  //             open={open}
-  //             handleClose={() => {
-  //               setOpen(false);
-  //             }}
-  //           />    
-  //         }
-
-  //       </CardActions>
-  //     </Card>
-  //   </Box>)
 }
 
 interface WithdrawDialogProps {
