@@ -77,7 +77,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
     <div className="bg-transparent w-full font-light pb-3">
       <div className="solBoxGray rounded-b-none rounded-t-lg w-full bg-white uppercase flex flex-wrap md:justify-between items-center text-center md:text-left">
         {/* Seed account info */}
-        <div className="w-full pb-3 pt-3 md:pt-0 md:pb-0 md:w-2/12 md:pl-5 whitespace-nowrap">
+        <div className="w-full pb-3 pt-3 md:pt-0 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap">
           <span className="text-sm leading-6">SEED {stakeAccountMeta.seed}</span><br />
           <span className="text-lg font-bold leading-3">${stakeAccountMeta.lamports / LAMPORTS_PER_SOL} SOL</span><br />
           <span className="text-xs leading-none">$X</span>
@@ -86,7 +86,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
           <p>State: <span className="font-bold">{stakeActivationData?.state}</span></p>
           <p>Type: <span className="font-bold">{stakeAccountMeta.stakeAccount.type}</span></p>
         </div>
-        <div className="w-full pb-6 md:pb-0 md:w-4/12 md:pl-5 whitespace-nowrap leading-5">
+        <div className="w-full pb-6 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap leading-5">
           {stakeAccountMeta.stakeAccount.info.stake && (
             <>
               <p>Validator: <a href="https://google.com" className="font-bold">{shortenAddress(stakeAccountMeta.stakeAccount.info.stake.delegation.voter.toBase58() ?? '')}</a></p>
@@ -111,7 +111,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
             </svg>
           </button>
           {/* Address */}
-          <p className="truncate overflow-ellipsis pt-3" style={{direction: 'rtl'}}>8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW</p>
+          <p className="truncate overflow-ellipsis pt-3" style={{direction: 'rtl'}}>{shortenAddress(stakeAccountMeta.address.toBase58())}</p>
         </div>
       </div>
       {/* Dropdown Area --- codepen.io/QJan84/pen/zYvRMMw */}

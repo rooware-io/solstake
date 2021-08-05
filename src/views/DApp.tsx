@@ -17,6 +17,9 @@ import { SummaryCard } from '../components/SummaryCard';
 import HelpDialog from '../components/HelpDialog';
 import { STAKE_PROGRAM_ID } from '../utils/ids';
 import { sleep } from '../utils/utils';
+import Epoch from '../components/Epoch';
+import Wallet from '../components/WalletSummary';
+import WalletSummary from '../components/WalletSummary';
 
 const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 
@@ -235,21 +238,7 @@ function DApp() {
       <div className="h-full p-10 text-center">
 
         <div className="leading-none flex flex-wrap md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 2xl:w-2/3">
-          {/* Epoch area */}
-          <div className="h-full w-full mb-3 solBoxBlue">
-            <div className="p-5">
-              <p className='text-3xl uppercase'>Epoch 201</p>
-            </div>
-            {/* Progress bar */}
-            <p className="pb-2 text-xl">55%</p>
-            <div className="mx-5 mb-2 bg-white rounded-full">
-              <div className="shadow w-full bg-grey-light">
-                <div className="bg-solacid rounded-full text-xs leading-none border-4 border-white py-1 text-center text-solblue-dark" style={{width: '55%'}}></div>
-              </div>
-            </div>
-            <p className="pb-3 text-xs text-solgray-light">estimated time remaining <span className="font-bold">2d 10h 2m</span></p>
-          </div>
-
+          <Epoch />
 
           {/* Connect area */}
           <div className="h-full w-full my-3 flex flex-wrap justify-between text-center">
@@ -289,61 +278,21 @@ function DApp() {
             </div>       
           </div>
 
-          {/* Wallet balance */}
-          <div className="solBoxGray w-full font-light flex flex-wrap md:justify-between items-center text-center">
-            <div className="w-0 md:w-1/3"></div>
-            <div className="pb-3 pt-4 w-full md:w-1/3 md:pl-5">
-              <p className="uppercase">Wallet Balance</p>
-              <p className="font-normal text-xl">32.23 SOL</p>
-              <p className="text-xs">$653.32</p>
-            </div>
-            <div className="w-full pb-5 md:pb-0 md:w-1/3 md:pr-10 md:text-right">
-              <button className="solBtnGray whitespace-nowrap">Create Stake Account</button>
-            </div>
-          </div>
+          <WalletSummary
+            stakeAccountMetas={stakeAccounts}
+            addStakeAccount={addStakeAccount}
+          />
 
-          <div className="w-full mt-3 flex flex-wrap md:justify-between items-center text-center">
-            <div className="w-full pb-3 lg:border-r-4 lg:border-transparent">
-              {/* pie chart */}
-              <div className="solBoxGray h-44 p-3.5 w-full font-light items-center text-center uppercase flex flex-wrap justify-center">
-                {/* pie chart - css from added.css */}
-                <div className="px-5">
-                  {/* Percentage setting */}
-                  <div className="chart x-65">
-                    <p className="pb-1">
-                      <span className="text-xs leading-none">Total<br />Staked</span>
-                      <br />
-                      <span className="font-bold leading-6">231.11 SOL</span>
-                      <br />
-                      <span className="text-xs">$43,231.11</span>
-                    </p>
-                  </div>
-                </div>
-                <div className="px-5">
-                  <div className="text-left uppercase leading-5 pb-3">
-                    <p>
-                        <p className="bg-solblue-dark w-3 h-3 inline-block"></p>
-                        <span className="text-light text-gray-400 leading-6 pl-1">Initial Stake</span>
-                        <br />
-                        <span className="font-bold pl-5">231.11 SOL</span>
-                        <br />
-                        <span className="text-xs text-light text-gray-400 pl-5">$43,231.11</span>
-                    </p>
-                  </div>
-                  <div className="text-left uppercase leading-5">
-                    <p>
-                      <p className="bg-solacid w-3 h-3 inline-block"></p>
-                      <span className="text-light text-gray-400 leading-6 pl-1">Total Rewards</span>
-                      <br />
-                      <span className="font-bold pl-5">231.11 SOL</span>
-                      <br />
-                      <span className="text-xs text-light text-gray-400 pl-5">$43,231.11 / 6.3% APY</span>
-                    </p>
-                  </div>
-                </div>
+          {loading && (
+            <Box m={1}>
+              <div style={{display: 'flex', justifyContent: 'center'}}>
+                <CircularProgress />
               </div>
-            </div>
-          </div>
+            </Box>
+          )}
+          {stakeAccounts && (
+            <StakeAccounts stakeAccountMetas={stakeAccounts} />
+          )}
 
         </div>
       </div>
@@ -387,16 +336,7 @@ function DApp() {
           addStakeAccount={addStakeAccount}
         />
         <Container>
-          {loading && (
-            <Box m={1}>
-              <div style={{display: 'flex', justifyContent: 'center'}}>
-                <CircularProgress />
-              </div>
-            </Box>
-          )}
-          {stakeAccounts && (
-            <StakeAccounts stakeAccountMetas={stakeAccounts} />
-          )}
+
         </Container>
       </Container>
 

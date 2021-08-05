@@ -57,22 +57,9 @@ export function SummaryCard(props : SummaryCardProps) {
   const {systemProgramAccountInfo} = useContext(AccountsContext);
   const [errorInfo, setErrorInfo] = useState<string | null>(null);
   const [SOLPriceUSD, setSOLPriceUSD] = useState<number>();
-  const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo | null>();
+
   const [seed, setSeed] = useState('0');
   const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    setDashboardEpochInfo(null);
-    async function update() {
-      setDashboardEpochInfo(
-        await getDashboardEpochInfo(connection)
-      );
-    }
-    update();
-
-    const id = setInterval(update, 30000)
-    return () => clearInterval(id);
-  }, [connection]);
 
   useEffect(() => {
     getSOLPriceUSD()
@@ -115,26 +102,6 @@ export function SummaryCard(props : SummaryCardProps) {
   return (
     <Card>
       <CardContent>
-        <div>
-          <Typography variant="h5">
-            Epoch {dashboardEpochInfo?.epochInfo.epoch}
-          </Typography>
-          <Typography>
-            ETA {dashboardEpochInfo?.epochTimeRemaining && humanizeDuration.humanize(dashboardEpochInfo?.epochTimeRemaining)}
-          </Typography>
-          <Typography>
-            {dashboardEpochInfo?.epochProgress && formatPct.format(dashboardEpochInfo?.epochProgress)}
-          </Typography>
-          <LinearProgress
-            style={{height: 10, borderRadius: 5}}
-            color="secondary"
-            variant="determinate"
-            value={(dashboardEpochInfo?.epochProgress ?? 0) * 100}
-          />
-        </div>
-
-        <Box m={2}></Box>
-
         {!connected && (
           <TextField
             id="standard-basic"
