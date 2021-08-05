@@ -13,13 +13,12 @@ import { Connector } from '../components/Connector';
 import { useWallet } from '../contexts/wallet';
 import { AppSettings } from '../components/AppSettings';
 import { ENDPOINTS, useConnection, useConnectionConfig } from '../contexts/connection';
-import { SummaryCard } from '../components/SummaryCard';
 import HelpDialog from '../components/HelpDialog';
 import { STAKE_PROGRAM_ID } from '../utils/ids';
 import { sleep } from '../utils/utils';
 import Epoch from '../components/Epoch';
-import Wallet from '../components/WalletSummary';
 import WalletSummary from '../components/WalletSummary';
+import WalletConnector from '../components/WalletConnector';
 
 const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 
@@ -41,8 +40,8 @@ function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta
   return (
     <>
       {stakeAccountMetas.map(
-        meta => (<StakeAccountCard key={meta.address.toBase58()} stakeAccountMeta={meta} />))
-      }
+        meta => <StakeAccountCard key={meta.address.toBase58()} stakeAccountMeta={meta} />
+      )}
     </>
   );
 }
@@ -228,10 +227,6 @@ function DApp() {
         <div className="h-full w-1/6">
           <SolstakeLogoSvg />
         </div>
-
-        <div>
-          <span>connect</span>
-        </div>
       </div>
 
       {/* Main flex wrapper */}
@@ -240,43 +235,7 @@ function DApp() {
         <div className="leading-none flex flex-wrap md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 2xl:w-2/3">
           <Epoch />
 
-          {/* Connect area */}
-          <div className="h-full w-full my-3 flex flex-wrap justify-between text-center">
-            {/* Input wallet key */}
-            <div className="w-full lg:w-4/5 text-solblue-dark">
-              <div className="border-b border-gray-600">
-                <input className="w-full h-7 px-5 text-xs placeholder-gray-600 border-none bg-transparent" type="text" placeholder="Public Key / Wallet Address"/>
-              </div>
-              {/* <!-- <span className="text-xs text-red-700">Public Key not valid. Please check.</span> --> */}
-            </div>
-
-            {/* Connect wallet button */}
-            <div className="pb-4 pt-2 lg:pt-0 text-center lg:text-right w-full lg:w-1/5">
-              <button className="solBtnGray pb-0.5">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-0.5 mr-1.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
-                Connect Wallet
-              </button>
-            </div>
-
-            {/* connectED wallet */}
-            <div className="solBoxBlue w-full font-light flex flex-wrap justify-between items-center">
-              <div className="pl-5 pt-1">
-                <span>
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-0.5 mr-1.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
-                  8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WspanvxW
-                </span>
-              </div>
-              {/* buttons change/disconect */}
-              <div className="w-full lg:w-2/5 p-3 text-center md:text-right">
-                <button className="solBtnGray mr-2">Change Wallet</button>
-                <button className="solBtnGray">Disconect</button>
-              </div>
-            </div>       
-          </div>
+          <WalletConnector />
 
           <WalletSummary
             stakeAccountMetas={stakeAccounts}
@@ -326,23 +285,6 @@ function DApp() {
             </div>
         </Toolbar>
       </AppBar>
-      <Box m={1} />
-      <Container maxWidth="md">
-        <SummaryCard
-          publicKeyString={publicKeyString}
-          setPublicKeyString={setPublicKeyString}
-          setPublicKey={setPublicKey}
-          stakeAccountMetas={stakeAccounts}
-          addStakeAccount={addStakeAccount}
-        />
-        <Container>
-
-        </Container>
-      </Container>
-
-      <Box m="1">
-        <br />
-      </Box>
 
       <HelpDialog
         open={open}

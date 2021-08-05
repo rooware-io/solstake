@@ -95,11 +95,11 @@ export default function WalletSummary(props: WalletSummaryProps) {
           <p className="font-normal text-xl">{balance} SOL</p>
           <p className="text-xs">
             ${balance && SOLPriceUSD ? formatPriceNumber.format(balance * SOLPriceUSD) : '-'} ({SOLPriceUSD ? formatPriceNumber.format(SOLPriceUSD) : '-'} $/SOL)
-            <Tooltip title="On-chain SOL price from pyth.network oracle">
-              <div style={{display: 'inline', verticalAlign: 'middle', textAlign: 'center'}}>
+            {/* <Tooltip title="On-chain SOL price from pyth.network oracle">
+              <div>
                 <img src="pyth-icon-48x48.png" alt="PythNetwork" />
               </div>
-            </Tooltip>
+            </Tooltip> */}
           </p>
         </div>
         <div className="w-full pb-5 md:pb-0 md:w-1/3 md:pr-10 md:text-right">
@@ -155,7 +155,7 @@ export default function WalletSummary(props: WalletSummaryProps) {
                   <p className="bg-solblue-dark w-3 h-3 inline-block"></p>
                   <span className="text-light text-gray-400 leading-6 pl-1">Initial Stake</span>
                   <br />
-                  <span className="font-bold pl-5">231.11 SOL</span>
+                  <span className="font-bold pl-5">123.11 SOL</span>
                   <br />
                   <span className="text-xs text-light text-gray-400 pl-5">$43,231.11</span>
                 </p>
@@ -165,7 +165,7 @@ export default function WalletSummary(props: WalletSummaryProps) {
                   <p className="bg-solacid w-3 h-3 inline-block"></p>
                   <span className="text-light text-gray-400 leading-6 pl-1">Total Rewards</span>
                   <br />
-                  <span className="font-bold pl-5">231.11 SOL</span>
+                  <span className="font-bold pl-5">123.11 SOL</span>
                   <br />
                   <span className="text-xs text-light text-gray-400 pl-5">$43,231.11 / 6.3% APY</span>
                 </p>
