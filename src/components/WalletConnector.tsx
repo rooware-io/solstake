@@ -1,11 +1,11 @@
-import { ENDPOINTS, useConnectionConfig } from '../contexts/connection';
+import { PublicKey } from '@solana/web3.js';
+import { useState } from 'react';
 import { useWallet } from '../contexts/wallet';
 
-
-export default function WalletConnector() {
+export default function WalletConnector(props: {publicKeyString: string, setPublicKeyString: (pk: string) => void}) {
   const { publicKey, connected, select, disconnect } = useWallet();
-  const { url, setUrl } = useConnectionConfig();
-  
+  const [error, setError] = useState(false);
+
   return (
     <div className="h-full w-full my-3 flex flex-wrap justify-between text-center">
       {!connected ? (
@@ -13,9 +13,25 @@ export default function WalletConnector() {
           {/* Input wallet key */}
           <div className="w-full lg:w-4/5 text-solblue-dark">
             <div className="border-b border-gray-600">
-              <input className="w-full h-7 px-5 text-xs placeholder-gray-600 border-none bg-transparent" type="text" placeholder="Public Key / Wallet Address"/>
+              <input
+                className="w-full h-7 px-5 text-xs placeholder-gray-700 border-none bg-transparent"
+                type="text"
+                placeholder="Public Key / Wallet Address"
+                value={props.publicKeyString}
+                onChange={(event) => {
+                  const newPublicKeyString = event.target.value
+                  try {
+                    new PublicKey(newPublicKeyString)
+                    setError(false)
+                  }
+                  catch {
+                    setError(Boolean(newPublicKeyString))
+                  }
+                  props.setPublicKeyString(newPublicKeyString);
+                }}
+              />
             </div>
-            {/* <!-- <span className="text-xs text-red-700">Public Key not valid. Please check.</span> --> */}
+            <span hidden={!error} className="text-xs text-red-700">Public Key not valid.</span>
           </div>
 
           {/* Connect wallet button */}
@@ -43,17 +59,6 @@ export default function WalletConnector() {
           </div>
           {/* buttons cluster/disconect */}
           <div className="w-full lg:w-2/5 p-3 text-center md:text-right">
-            <select
-              className="solBtnGray"
-              value={url}
-              onChange={e => setUrl(e.target.value as string)}
-            >
-              {ENDPOINTS.map(({ name, url }) => (
-                <option value={url} key={url}>
-                  {name}
-                </option>
-              ))}
-            </select>
             <button className="solBtnGray" onClick={disconnect}>Disconnect</button>
           </div>
         </div> 

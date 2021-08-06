@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-// import '../App.css';
-import { AppBar, Box, Button, Card, CardContent, CircularProgress, IconButton, Tooltip, Typography } from '@material-ui/core';
+import { Button, CircularProgress, IconButton, Tooltip } from '@material-ui/core';
 import { AccountInfo, Connection, Context, KeyedAccountInfo, ParsedAccountData, PublicKey } from '@solana/web3.js';
 import {
   Link as RouterLink
@@ -23,15 +22,13 @@ const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[]}) {
   if (stakeAccountMetas.length === 0) {
     return (
-      <Box m={1}>
-        <Card>
-          <CardContent>
-            <Typography>
-              No stake account found
-            </Typography>
-          </CardContent>
-        </Card>
-      </Box>
+      <div className="solBoxGray w-full font-light flex flex-wrap md:justify-between items-center text-center">
+        <div className="pb-3 pt-4 w-full md:pl-5">
+          <p>
+            No stake account found
+          </p>
+        </div>
+      </div>
     );
   }
 
@@ -95,19 +92,43 @@ async function onStakeAccountChangeCallback(connection: Connection, keyedAccount
   return updatedStakeAccounts;
 }
 
+function ClusterSelector() {
+  const { url, setUrl } = useConnectionConfig();
+
+  return (
+    <select
+      className="solBtnGray"
+      value={url}
+      onChange={e => setUrl(e.target.value as string)}
+    >
+      {ENDPOINTS.map(({ name, url }) => (
+        <option value={url} key={url}>
+          {name}
+        </option>
+      ))}
+    </select>
+  );
+}
+
 function DApp() {
   const connection = useConnection();
   const { setUrl } = useConnectionConfig();
   const { wallet, connected, disconnect } = useWallet();
-  const [publicKeyString, setPublicKeyString] = useState<string>();
-  const [publicKey, setPublicKey] = useState<PublicKey | null>(null);
+  const [publicKeyString, setPublicKeyString] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[] | null>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setStakeAccounts(null);
-    const newPublicKey = connected ? wallet?.publicKey : publicKey;
+    let keyedPublicKey: PublicKey | undefined
+    if (publicKeyString) {
+      try {
+        keyedPublicKey = new PublicKey(publicKeyString)
+      }
+      catch {}
+    }
+    const newPublicKey = connected ? wallet?.publicKey : keyedPublicKey;
     if (newPublicKey) {
       setLoading(true);
       findStakeAccountMetas(connection, newPublicKey)
@@ -116,7 +137,7 @@ function DApp() {
           setLoading(false);
         });
     }
-  }, [connection, connected, wallet?.publicKey, publicKey]);
+  }, [connection, connected, wallet?.publicKey, publicKeyString]);
 
   async function addStakeAccount(stakeAccountPublicKey: PublicKey, seed: string) {
     if (!stakeAccounts) {
@@ -222,7 +243,7 @@ function DApp() {
     <div id="dapp" className="h-full">
       {/* Header */}
       <div className="h-20 flex flex-wrap justify-between px-10 py-4">
-        <div className="h-full w-1/6">
+        <div className="h-full xl:w-1/6 w-1/3">
           <RouterLink to="/">
             <SolstakeLogoSvg />
           </RouterLink>
@@ -244,16 +265,20 @@ function DApp() {
               Demo
             </Button>
           </Tooltip>
+          <ClusterSelector />
         </div>
       </div>
 
       {/* Main flex wrapper */}
       <div className="h-full p-10 text-center">
 
-        <div className="leading-none flex flex-wrap md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 2xl:w-2/3">
+        <div className="leading-none flex flex-wrap md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 2xl:w-3/5">
           <Epoch />
 
-          <WalletConnector />
+          <WalletConnector
+            publicKeyString={publicKeyString}
+            setPublicKeyString={setPublicKeyString}
+          />
 
           <WalletSummary
             stakeAccountMetas={stakeAccounts}
@@ -261,11 +286,9 @@ function DApp() {
           />
 
           {loading && (
-            <Box m={1}>
-              <div style={{display: 'flex', justifyContent: 'center'}}>
-                <CircularProgress />
-              </div>
-            </Box>
+            <div className="pb-3 pt-4 w-full md:pl-5">
+              <CircularProgress color="secondary" />
+            </div>
           )}
           {stakeAccounts && (
             <StakeAccounts stakeAccountMetas={stakeAccounts} />
