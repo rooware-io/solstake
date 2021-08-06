@@ -78,8 +78,8 @@ export default function WalletSummary(props: WalletSummaryProps) {
   }, [wallet?.publicKey, stakeAccountMetas]);
 
   const balance = useMemo(() => {
-    return systemProgramAccountInfo && systemProgramAccountInfo.lamports / LAMPORTS_PER_SOL;
-  }, [])
+    return systemProgramAccountInfo && (systemProgramAccountInfo.lamports / LAMPORTS_PER_SOL);
+  }, [systemProgramAccountInfo])
 
   if (!wallet || !systemProgramAccountInfo) {
     return <></>;
@@ -94,7 +94,7 @@ export default function WalletSummary(props: WalletSummaryProps) {
           <p className="uppercase">Wallet Balance</p>
           <p className="font-normal text-xl">{balance} SOL</p>
           <p className="text-xs">
-            ${balance && SOLPriceUSD ? formatPriceNumber.format(balance * SOLPriceUSD) : '-'} ({SOLPriceUSD ? formatPriceNumber.format(SOLPriceUSD) : '-'} $/SOL)
+            ${(balance && SOLPriceUSD) ? formatPriceNumber.format(balance * SOLPriceUSD) : '-'} ({SOLPriceUSD ? formatPriceNumber.format(SOLPriceUSD) : '-'} $/SOL)
             {/* <Tooltip title="On-chain SOL price from pyth.network oracle">
               <div>
                 <img src="pyth-icon-48x48.png" alt="PythNetwork" />

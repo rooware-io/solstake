@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 // import '../App.css';
-import { AppBar, Box, Button, Card, CardContent, CircularProgress, Container, IconButton, Toolbar, Tooltip, Typography } from '@material-ui/core';
+import { AppBar, Box, Button, Card, CardContent, CircularProgress, IconButton, Tooltip, Typography } from '@material-ui/core';
 import { AccountInfo, Connection, Context, KeyedAccountInfo, ParsedAccountData, PublicKey } from '@solana/web3.js';
 import {
   Link as RouterLink
@@ -9,9 +9,7 @@ import { accounInfoToStakeAccount as accountInfoToStakeAccount, findStakeAccount
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-white.svg';
 import { Info } from '@material-ui/icons';
-import { Connector } from '../components/Connector';
 import { useWallet } from '../contexts/wallet';
-import { AppSettings } from '../components/AppSettings';
 import { ENDPOINTS, useConnection, useConnectionConfig } from '../contexts/connection';
 import HelpDialog from '../components/HelpDialog';
 import { STAKE_PROGRAM_ID } from '../utils/ids';
@@ -225,7 +223,27 @@ function DApp() {
       {/* Header */}
       <div className="h-20 flex flex-wrap justify-between px-10 py-4">
         <div className="h-full w-1/6">
-          <SolstakeLogoSvg />
+          <RouterLink to="/">
+            <SolstakeLogoSvg />
+          </RouterLink>
+        </div>
+        
+        <div>
+          <IconButton onClick={() => { setOpen(true); }}>
+            <Info />
+          </IconButton>
+          <Tooltip title="Use known stake account authority">
+            <Button
+              variant="contained"
+              onClick={() => {
+                disconnect();
+                setUrl(ENDPOINTS[0].url);
+                setPublicKeyString(DEMO_PUBLIC_KEY_STRING);
+              }}
+            >
+              Demo
+            </Button>
+          </Tooltip>
         </div>
       </div>
 
@@ -255,36 +273,6 @@ function DApp() {
 
         </div>
       </div>
-
-      <AppBar position="relative">
-        <Toolbar>
-            <RouterLink to="/" style={{width: '15%'}}>
-              <Box m={1}>
-                <SolstakeLogoSvg className="App-logo" />
-              </Box>
-            </RouterLink>
-            <div style={{flexGrow: 1}}></div>
-            <div style={{display: 'flex', gap: '10px', padding: '5px'}}>
-              <IconButton onClick={() => { setOpen(true); }}>
-                <Info />
-              </IconButton>
-              <Tooltip title="Use known stake account authority">
-                <Button
-                  variant="contained"
-                  onClick={() => {
-                    disconnect();
-                    setUrl(ENDPOINTS[0].url);
-                    setPublicKeyString(DEMO_PUBLIC_KEY_STRING);
-                  }}
-                >
-                  Demo
-                </Button>
-              </Tooltip>
-              <Connector />
-              <AppSettings />
-            </div>
-        </Toolbar>
-      </AppBar>
 
       <HelpDialog
         open={open}

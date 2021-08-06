@@ -41,9 +41,8 @@ export default function WalletConnector() {
               {publicKey?.toBase58()}
             </span>
           </div>
-          {/* buttons change/disconect */}
+          {/* buttons cluster/disconect */}
           <div className="w-full lg:w-2/5 p-3 text-center md:text-right">
-            {/* <button className="solBtnGray mr-2">Change Wallet</button> */}
             <select
               className="solBtnGray"
               value={url}

@@ -36,13 +36,12 @@ export function WalletProvider({ children = null as any }) {
     [providerUrl]
   );
 
-  const wallet = useMemo(
-    function () {
+  const wallet = useMemo(() => {
       if (provider) {
         return provider.adapter ? new provider.adapter() : new Wallet(providerUrl, url);
       }
     },
-    [provider, providerUrl, url]
+    [provider, providerUrl]
   );
 
   const [connected, setConnected] = useState(false);

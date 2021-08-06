@@ -1,4 +1,4 @@
-import { Box, Button, Card, CardActions, CardContent, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, Link, List, ListItem, ListItemText, TextField, Tooltip, Typography } from "@material-ui/core";
+import { Button, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, List, ListItem, ListItemText, TextField, Tooltip, Typography } from "@material-ui/core";
 import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
 import { LAMPORTS_PER_SOL, PublicKey, StakeActivationData, StakeProgram } from "@solana/web3.js";
 import BN from "bn.js";
@@ -79,7 +79,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   
   return (
     <div className="bg-transparent w-full font-light pb-3">
-      <div className="solBoxGray rounded-b-none rounded-t-lg w-full bg-white uppercase flex flex-wrap md:justify-between items-center text-center md:text-left">
+      <div className="solBoxGray rounded-b-none rounded-t-lg w-full bg-white uppercase flex flex-wrap md:justify-between items-center text-center md:text-left" style={{borderBottomLeftRadius: 0, borderBottomRightRadius: 0}}>
         {/* Seed account info */}
         <div className="w-full pb-3 pt-3 md:pt-0 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap">
           <span className="text-sm leading-6">SEED {stakeAccountMeta.seed}</span><br />
@@ -180,20 +180,18 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
             />
           }
 
-          {/* Copy button */}
-          <button className="solBtnGray pb-0.5 whitespace-nowrap">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-0.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-            </svg>
-          </button>
           {/* External button */}
-          <button className="solBtnGray pb-0.5 whitespace-nowrap">
+          <a className="solBtnGray pb-0.5 whitespace-nowrap cursor-pointer" href={`https://explorer.solana.com/address/${stakeAccountMeta.address?.toBase58()}${urlSuffix}`} rel="noopener noreferrer" target="_blank">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-0.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
-          </button>
-          {/* Address */}
-          <p className="truncate overflow-ellipsis pt-3" style={{direction: 'rtl'}}>{shortenAddress(stakeAccountMeta.address.toBase58())}</p>
+          </a>
+          <p className="truncate overflow-ellipsis pt-3" style={{direction: 'rtl'}}>
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-0.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+            </svg>
+            {shortenAddress(stakeAccountMeta.address.toBase58())}
+          </p>
         </div>
       </div>
 
