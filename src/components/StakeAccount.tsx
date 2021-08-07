@@ -93,7 +93,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
           <p>State: <span className="font-bold">{stakeActivationData?.state}</span></p>
           <p>Type: <span className="font-bold">{stakeAccountMeta.stakeAccount.type}</span></p>
         </div>
-        <div className="w-full pb-6 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap leading-5">
+        <div className="w-full m-2 pb-6 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap leading-5">
           {stakeAccountMeta.stakeAccount.info.stake && (
             <>
               <p>Validator:{' '}
@@ -106,6 +106,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                 </a>
               </p>
               <p>Activation Epoch: <span className="font-bold">{formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.activationEpoch)}</span></p>
+              <p>Deactivation Epoch: <span className="font-bold">{formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.deactivationEpoch)}</span></p>
             </>
           )}
         </div>

@@ -33,7 +33,7 @@ html {
 
 body {
   margin: 0;
-  height: 100%;
+  min-height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(360deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
