@@ -1,4 +1,30 @@
 @import url('https://fonts.googleapis.com/css2?family=Red+Hat+Display&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.solBoxBlue {
+  @apply bg-gradient-to-r from-solblue-darker2 via-solblue-2 to-solblue-darker2 text-white shadow-solbluelight rounded-lg;
+}
+
+.solBoxGray {
+  @apply bg-solgray-light text-solblue-dark shadow-solbluelight rounded-lg;
+}
+
+.solBtnGray {
+  @apply bg-gradient-to-t from-solgray-dark to-solgray-light text-solblue-darker uppercase py-1 px-4 text-sm rounded-full;
+  /** leading-none rounded-lg flex md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 2xl:w-2/3  **/
+}
+.solBtnGray:hover {
+  @apply bg-gradient-to-t from-solgray-lightest to-solgray-light shadow-solbluelight ;
+}
+
+.solBtnRewards {
+  @apply bg-gradient-to-r from-solgray to-solgray-light text-solblue-darker uppercase py-1 px-4 text-sm rounded-b-lg;
+}
+.solBtnRewards:hover {
+  @apply bg-gradient-to-t from-solacid to-solacid-light shadow-solbluelight ;
+}
 
 html {
   height: 100%;
@@ -7,7 +33,7 @@ html {
 
 body {
   margin: 0;
-  height: 100%;
+  min-height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background: linear-gradient(360deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
@@ -24,4 +50,42 @@ code {
 
 #app {
   background: linear-gradient(360deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
+}
+
+
+/* For pie chart */
+
+:root {
+  --size: 150px;
+  --bord: 25px;
+}
+
+.chart {
+  width: var(--size);
+  height: var(--size);
+  margin: 0em auto;
+  border-radius: 50%;
+  /* background-image: conic-gradient(#D5E300 var(--value), #103147 var(--value)); */
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chart::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - var(--bord));
+  height: calc(100% - var(--bord));
+  background: #F1F1F1;
+  border-radius: inherit;
+}
+
+p {
+  position: relative;
+  z-index: 1;
+  font-size: 1em;
 }

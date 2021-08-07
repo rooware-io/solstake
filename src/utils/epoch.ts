@@ -14,7 +14,7 @@ export async function getDashboardEpochInfo(connection: Connection) : Promise<Da
   const epochProgress = slotIndex / slotsInEpoch;
 
   //const samples = await connection.getRecentPerformanceSamples(360);
-  const samples = [{samplePeriodSecs: 689, numSlots: 1000}] // Hardcoded until mystery above is solved
+  const samples = [{samplePeriodSecs: 550, numSlots: 1000}] // Hardcoded until mystery above is solved
   const timePerSlotSamples = samples
     .filter((sample) => {
       return sample.numSlots !== 0;
