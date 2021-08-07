@@ -271,7 +271,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                   }
                   cellRenderer={(props: TableCellProps) => (
                     <img
-                      height="60px"
+                      style={{height: "65px"}}
                       src={props.cellData as string}
                       alt=""
                     />)
@@ -320,7 +320,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                         APY{' '}
                         <Tooltip title={<Typography>Stakeview.app APY averaged over last 3 epoch</Typography>}>
                           <Link href="https://www.stakeview.app" rel="noopener noreferrer" target="_blank">
-                            <img height="30px" src="stakeviewapp.png" alt="" style={{verticalAlign: "middle"}}/>
+                            <img className="inline" src="stakeviewapp.png" alt="" style={{verticalAlign: "middle", height: "30px"}}/>
                           </Link>
                         </Tooltip>
                       </Typography>
@@ -353,7 +353,7 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
                     <Typography>
                       Score (Max 11)
                       <Link href="https://validators.app/faq" rel="noopener noreferrer" target="_blank">
-                        <img height="20px" src="va-logo.png" alt="" style={{verticalAlign: "middle"}}/>
+                        <img className="inline" src="va-logo.png" alt="" style={{verticalAlign: "middle", height: "20px"}}/>
                       </Link>
                     </Typography>
                   )}

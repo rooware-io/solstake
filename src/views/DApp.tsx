@@ -253,18 +253,20 @@ function DApp() {
           <IconButton onClick={() => { setOpen(true); }}>
             <Info />
           </IconButton>
-          <Tooltip title="Use known stake account authority">
-            <Button
-              variant="contained"
-              onClick={() => {
-                disconnect();
-                setUrl(ENDPOINTS[0].url);
-                setPublicKeyString(DEMO_PUBLIC_KEY_STRING);
-              }}
-            >
-              Demo
-            </Button>
-          </Tooltip>
+          <div className="inline-block m-2">
+            <Tooltip title="Use known stake account authority">
+              <Button
+                variant="contained"
+                onClick={() => {
+                  disconnect();
+                  setUrl(ENDPOINTS[0].url);
+                  setPublicKeyString(DEMO_PUBLIC_KEY_STRING);
+                }}
+              >
+                Demo
+              </Button>
+            </Tooltip>
+          </div>
           <ClusterSelector />
         </div>
       </div>
@@ -272,7 +274,7 @@ function DApp() {
       {/* Main flex wrapper */}
       <div className="h-full p-10 text-center">
 
-        <div className="leading-none flex flex-wrap md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 2xl:w-3/5">
+        <div className="leading-none flex flex-wrap md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 max-w-screen-xl">
           <Epoch />
 
           <WalletConnector

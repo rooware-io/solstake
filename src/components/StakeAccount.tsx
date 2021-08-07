@@ -1,5 +1,5 @@
-import { Button, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, List, ListItem, ListItemText, TextField, Tooltip, Typography } from "@material-ui/core";
-import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
+import { Button, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, List, ListItem, ListItemText, TextField, Tooltip } from "@material-ui/core";
+//import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
 import { LAMPORTS_PER_SOL, PublicKey, StakeActivationData, StakeProgram } from "@solana/web3.js";
 import BN from "bn.js";
 import React, { useContext, useEffect, useMemo, useState } from "react";
@@ -10,8 +10,9 @@ import { getFirstBlockTime } from "../utils/block";
 import { useMonitorTransaction } from "../utils/notifications";
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 import { formatPct, shortenAddress } from "../utils/utils";
-import { WalletAdapter } from "../wallet-adapters/walletAdapter";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import { DelegateDialog } from "./DelegateDialog";
+import { WalletAdapter } from "../wallet-adapters/walletAdapter";
 
 const MAX_EPOCH = new BN(2).pow(new BN(64)).sub(new BN(1));
 
@@ -28,6 +29,8 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   const [stakeActivationData, setStakeActivationData] = useState<StakeActivationData>();
   const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [activatedBlockTime, setActivatedBlockTime] = useState<number>();
+
+  const [isCopied, setIsCopied] = useState(false);
 
   function formatEpoch(epoch: BN) {
     return epoch.eq(MAX_EPOCH) ? '-' : epoch.toString();
@@ -62,7 +65,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
       .then(setActivatedBlockTime);
   }, [connection, stakeAccountMeta, epochSchedule]);
 
-  const APY = useMemo(() => {
+  const APR = useMemo(() => {
     const initialStake = stakeAccountMeta.lamports - totalRewards;
     if(!epochStartTime || !activatedBlockTime) {
       return;
@@ -84,7 +87,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         <div className="w-full pb-3 pt-3 md:pt-0 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap">
           <span className="text-sm leading-6">SEED {stakeAccountMeta.seed}</span><br />
           <span className="text-lg font-bold leading-3">${stakeAccountMeta.lamports / LAMPORTS_PER_SOL} SOL</span><br />
-          <span className="text-xs leading-none">$X</span>
+          {/* <span className="text-xs leading-none">$X</span> */}
         </div>
         <div className="w-full pb-3 md:pb-0 md:w-2/12 md:pl-5 whitespace-nowrap leading-5">
           <p>State: <span className="font-bold">{stakeActivationData?.state}</span></p>
@@ -107,57 +110,60 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
           )}
         </div>
         {/* Stake accounts - always visible */}
-        <div className="w-full pb-5 md:pb-2 md:pt-2 md:w-4/12 md:pr-10 md:text-right">
+        <div className="w-full pb-5 md:pb-2 md:pt-2 md:w-3/12 md:pr-10 md:text-right">
+          {connected &&
+            <>
+              <button
+                className="solBtnGray whitespace-nowrap"
+                hidden={stakeActivationData?.state === "active" || stakeActivationData?.state === "deactivating"}
+                onClick={() => setDelegateOpen(true)}
+                disabled={!connected}
+              >
+                {stakeActivationData?.state === "activating" && "Re-"}Delegate
+              </button>
 
-          <button
-            className="solBtnGray whitespace-nowrap"
-            hidden={stakeActivationData?.state === "active" || stakeActivationData?.state === "deactivating"}
-            onClick={() => setDelegateOpen(true)}
-            disabled={!connected}
-          >
-            {stakeActivationData?.state === "activating" && "Re-"}Delegate
-          </button>
+              <button
+                className="solBtnGray whitespace-nowrap"
+                hidden={stakeActivationData?.state === "inactive" || stakeActivationData?.state === "deactivating"}
+                onClick={async () => {
+                  if(!wallet?.publicKey) {
+                    return;
+                  }
 
-          <button
-            className="solBtnGray whitespace-nowrap"
-            hidden={stakeActivationData?.state === "inactive" || stakeActivationData?.state === "deactivating"}
-            onClick={async () => {
-              if(!wallet?.publicKey) {
-                return;
-              }
+                  const transaction = StakeProgram.deactivate({
+                    stakePubkey: stakeAccountMeta.address,
+                    authorizedPubkey: wallet.publicKey,
+                  });
 
-              const transaction = StakeProgram.deactivate({
-                stakePubkey: stakeAccountMeta.address,
-                authorizedPubkey: wallet.publicKey,
-              });
+                  await monitorTransaction(
+                    sendTransaction(
+                      sendConnection,
+                      wallet,
+                      transaction.instructions,
+                      []
+                    ),
+                    {
+                      onSuccess: () => {},
+                      onError: () => {}
+                    }
+                  );
+                }} 
+                disabled={!connected}
+              >
+                Deactivate
+              </button>
 
-              await monitorTransaction(
-                sendTransaction(
-                  sendConnection,
-                  wallet,
-                  transaction.instructions,
-                  []
-                ),
-                {
-                  onSuccess: () => {},
-                  onError: () => {}
-                }
-              );
-            }} 
-            disabled={!connected}
-          >
-            Deactivate
-          </button>
-
-          <button
-            className="solBtnGray whitespace-nowrap"
-            hidden={stakeActivationData?.state !== "inactive"}
-            onClick={() => {
-              setWithdrawOpen(true);
-            }}
-          >
-            Withdraw
-          </button>
+              <button
+                className="solBtnGray whitespace-nowrap"
+                hidden={stakeActivationData?.state !== "inactive"}
+                onClick={() => {
+                  setWithdrawOpen(true);
+                }}
+              >
+                Withdraw
+              </button>
+            </>
+          }
 
           {wallet?.publicKey && withdrawOpen && (
             <WithdrawDialog
@@ -186,12 +192,31 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
             </svg>
           </a>
-          <p className="truncate overflow-ellipsis pt-3" style={{direction: 'rtl'}}>
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-0.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-            </svg>
-            {shortenAddress(stakeAccountMeta.address.toBase58())}
-          </p>
+
+          <CopyToClipboard text={stakeAccountMeta.address.toBase58()}
+              onCopy={() => {
+                setIsCopied(true)
+                setTimeout(() => {
+                  setIsCopied(false)
+                }, 1000)
+              }}
+            >
+            <Tooltip
+              title={isCopied
+                ? 'Copied'
+                : 'Copy to clipboard'
+              }
+            >
+              <button className="m-2 font-mono" style={{direction: 'rtl'}}>
+                <p>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-0.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
+                  </svg>
+                  {shortenAddress(stakeAccountMeta.address.toBase58())}
+                </p>
+              </button>
+            </Tooltip>
+          </CopyToClipboard>
         </div>
       </div>
 
@@ -199,7 +224,8 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         <div className="w-full">
           <ul className="shadow-box">   
             <li className="relative">
-              <button type="button"
+              <button
+                type="button"
                 className="w-full solBtnRewards uppercase font-light focus:outline-none"
                 onClick={() => setRewardsOpen(!rewardsOpen)}
                 style={{backgroundColor: '#D5E300'}}
@@ -208,9 +234,9 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                   <span>
                     <span className="ml-4">Rewards </span>
                     <span className="font-normal">{totalRewards / LAMPORTS_PER_SOL} SOL </span>
-                    <span className="text-xs">{(APY && formatPct.format(APY)) || '-'} APY </span>
+                    <span className="text-xs">{(APR && formatPct.format(APR)) || '-'} APR </span>
                   </span>
-                  <span className="ico-plus">
+                  <span className="ico-plus" hidden={stakeAccountMeta.inflationRewards.length === 0}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>

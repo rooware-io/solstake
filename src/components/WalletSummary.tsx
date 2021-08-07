@@ -1,4 +1,4 @@
-import { Tooltip } from '@material-ui/core';
+//import { Tooltip } from '@material-ui/core';
 import { parsePriceData } from '@pythnetwork/client';
 import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { useContext, useEffect, useMemo, useState } from 'react';
@@ -64,7 +64,7 @@ export default function WalletSummary(props: WalletSummaryProps) {
 
   const totalStakedSOL = useMemo(() => {
     const totalLamports = stakeAccountMetas?.reduce((sum, current) => sum + current.lamports, 0);
-    return totalLamports ? totalLamports / LAMPORTS_PER_SOL: 0;
+    return totalLamports !== undefined ? totalLamports / LAMPORTS_PER_SOL : undefined;
   }, [stakeAccountMetas]);
 
   // Yield first seed sequentially from unused seeds
@@ -80,6 +80,11 @@ export default function WalletSummary(props: WalletSummaryProps) {
   const balance = useMemo(() => {
     return systemProgramAccountInfo && (systemProgramAccountInfo.lamports / LAMPORTS_PER_SOL);
   }, [systemProgramAccountInfo])
+
+  const ratio = useMemo(() => {
+    if (totalStakedSOL === undefined || balance === null) return;
+    return Math.floor(totalStakedSOL / (totalStakedSOL + balance) * 100)
+  }, [balance, totalStakedSOL])
 
   if (!wallet || !systemProgramAccountInfo) {
     return <></>;
@@ -137,14 +142,14 @@ export default function WalletSummary(props: WalletSummaryProps) {
             {/* pie chart - css from added.css */}
             <div className="px-5">
               {/* Percentage setting */}
-              <div className="chart x-65">
+              <div className="chart" style={{backgroundImage: `conic-gradient(#D5E300 ${ratio}%, #103147 ${ratio}%)`}}>
                 <p className="pb-1">
                   <span className="text-xs leading-none">Total<br />Staked</span>
                   <br />
-                  <span className="font-bold leading-6">{formatPriceNumber.format(totalStakedSOL)} SOL</span>
+                  <span className="font-bold leading-6">{totalStakedSOL !== undefined ? formatPriceNumber.format(totalStakedSOL) : '-'} SOL</span>
                   <br />
                   <span className="text-xs">
-                    ${SOLPriceUSD && formatPriceNumber.format(totalStakedSOL * SOLPriceUSD)}
+                    ${(SOLPriceUSD && totalStakedSOL !== undefined) ? formatPriceNumber.format(totalStakedSOL * SOLPriceUSD) : '-'}
                   </span>
                 </p>
               </div>
@@ -153,21 +158,21 @@ export default function WalletSummary(props: WalletSummaryProps) {
               <div className="text-left uppercase leading-5 pb-3">
                 <p>
                   <p className="bg-solblue-dark w-3 h-3 inline-block"></p>
-                  <span className="text-light text-gray-400 leading-6 pl-1">Initial Stake</span>
-                  <br />
+                  <span className="text-light text-gray-400 leading-6 pl-1">Balance</span>
+                  {/* <br />
                   <span className="font-bold pl-5">123.11 SOL</span>
                   <br />
-                  <span className="text-xs text-light text-gray-400 pl-5">$43,231.11</span>
+                  <span className="text-xs text-light text-gray-400 pl-5">$43,231.11</span> */}
                 </p>
               </div>
               <div className="text-left uppercase leading-5">
                 <p>
                   <p className="bg-solacid w-3 h-3 inline-block"></p>
-                  <span className="text-light text-gray-400 leading-6 pl-1">Total Rewards</span>
-                  <br />
+                  <span className="text-light text-gray-400 leading-6 pl-1">Total staked</span>
+                  {/* <br />
                   <span className="font-bold pl-5">123.11 SOL</span>
                   <br />
-                  <span className="text-xs text-light text-gray-400 pl-5">$43,231.11 / 6.3% APY</span>
+                  <span className="text-xs text-light text-gray-400 pl-5">$43,231.11 / 6.3% APY</span> */}
                 </p>
               </div>
             </div>
