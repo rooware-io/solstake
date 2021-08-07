@@ -1,28 +1,27 @@
 {
   "files": {
-    "main.css": "/static/css/main.bb8f0a25.chunk.css",
-    "main.js": "/static/js/main.51636f72.chunk.js",
-    "main.js.map": "/static/js/main.51636f72.chunk.js.map",
-    "runtime-main.js": "/static/js/runtime-main.39b9f2d9.js",
-    "runtime-main.js.map": "/static/js/runtime-main.39b9f2d9.js.map",
-    "static/css/2.042623cf.chunk.css": "/static/css/2.042623cf.chunk.css",
-    "static/js/2.2ecb0f3f.chunk.js": "/static/js/2.2ecb0f3f.chunk.js",
-    "static/js/2.2ecb0f3f.chunk.js.map": "/static/js/2.2ecb0f3f.chunk.js.map",
-    "static/js/3.f55f9e09.chunk.js": "/static/js/3.f55f9e09.chunk.js",
-    "static/js/3.f55f9e09.chunk.js.map": "/static/js/3.f55f9e09.chunk.js.map",
+    "main.css": "/static/css/main.4709fe24.chunk.css",
+    "main.js": "/static/js/main.6f175a7d.chunk.js",
+    "main.js.map": "/static/js/main.6f175a7d.chunk.js.map",
+    "runtime-main.js": "/static/js/runtime-main.9293b1b9.js",
+    "runtime-main.js.map": "/static/js/runtime-main.9293b1b9.js.map",
+    "static/css/2.c39fcfe6.chunk.css": "/static/css/2.c39fcfe6.chunk.css",
+    "static/js/2.5245ff72.chunk.js": "/static/js/2.5245ff72.chunk.js",
+    "static/js/2.5245ff72.chunk.js.map": "/static/js/2.5245ff72.chunk.js.map",
+    "static/js/3.2bce37ff.chunk.js": "/static/js/3.2bce37ff.chunk.js",
+    "static/js/3.2bce37ff.chunk.js.map": "/static/js/3.2bce37ff.chunk.js.map",
     "index.html": "/index.html",
-    "static/css/2.042623cf.chunk.css.map": "/static/css/2.042623cf.chunk.css.map",
-    "static/css/main.bb8f0a25.chunk.css.map": "/static/css/main.bb8f0a25.chunk.css.map",
-    "static/js/2.2ecb0f3f.chunk.js.LICENSE.txt": "/static/js/2.2ecb0f3f.chunk.js.LICENSE.txt",
+    "static/css/2.c39fcfe6.chunk.css.map": "/static/css/2.c39fcfe6.chunk.css.map",
+    "static/css/main.4709fe24.chunk.css.map": "/static/css/main.4709fe24.chunk.css.map",
+    "static/js/2.5245ff72.chunk.js.LICENSE.txt": "/static/js/2.5245ff72.chunk.js.LICENSE.txt",
     "static/media/discord-brands.a6bf2a68.svg": "/static/media/discord-brands.a6bf2a68.svg",
-    "static/media/logo-gradient.a321f18b.svg": "/static/media/logo-gradient.a321f18b.svg",
     "static/media/logo-white.3c891f2a.svg": "/static/media/logo-white.3c891f2a.svg"
   },
   "entrypoints": [
-    "static/js/runtime-main.39b9f2d9.js",
-    "static/css/2.042623cf.chunk.css",
-    "static/js/2.2ecb0f3f.chunk.js",
-    "static/css/main.bb8f0a25.chunk.css",
-    "static/js/main.51636f72.chunk.js"
+    "static/js/runtime-main.9293b1b9.js",
+    "static/css/2.c39fcfe6.chunk.css",
+    "static/js/2.5245ff72.chunk.js",
+    "static/css/main.4709fe24.chunk.css",
+    "static/js/main.6f175a7d.chunk.js"
   ]
 }
