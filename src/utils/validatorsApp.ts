@@ -3,9 +3,6 @@ import { type, string, number, nullable, array, Infer } from 'superstruct';
 let BASE_URL = 'https://www.validators.app/api/v1/validators';
 if (process.env.NODE_ENV !== 'production') {
   BASE_URL = 'https://cors-anywhere.herokuapp.com/' + BASE_URL; // Do not forget to activate the endpoint
-  if (!process.env.REACT_APP_VALIDATORS_APP_TOKEN) {
-    throw new Error('Set REACT_APP_VALIDATORS_APP_TOKEN for local development');
-  }
 }
 else {
   console.log('Use production validators app endpoint')

@@ -86,7 +86,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
         {/* Seed account info */}
         <div className="w-full pb-3 pt-3 md:pt-0 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap">
           <span className="text-sm leading-6">SEED {stakeAccountMeta.seed}</span><br />
-          <span className="text-lg font-bold leading-3">${stakeAccountMeta.lamports / LAMPORTS_PER_SOL} SOL</span><br />
+          <span className="text-lg font-bold leading-3">{stakeAccountMeta.lamports / LAMPORTS_PER_SOL} SOL</span><br />
           {/* <span className="text-xs leading-none">$X</span> */}
         </div>
         <div className="w-full pb-3 md:pb-0 md:w-2/12 md:pl-5 whitespace-nowrap leading-5">
