@@ -23,7 +23,7 @@ export default function Epoch() {
   return (
     <div className="h-full w-full mb-3 solBoxBlue">
       <div className="p-5">
-        <p className='text-3xl uppercase'>Epoch {dashboardEpochInfo?.epochInfo.epoch}</p>
+        <p className='text-3xl uppercase'>Epoche {dashboardEpochInfo?.epochInfo.epoch}</p>
       </div>
       {/* Progress bar */}
       <p className="pb-2 text-xl">{dashboardEpochInfo?.epochProgress && formatPct.format(dashboardEpochInfo.epochProgress)}</p>
