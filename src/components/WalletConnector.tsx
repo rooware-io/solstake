@@ -12,9 +12,9 @@ export default function WalletConnector(props: {publicKeyString: string, setPubl
         <>
           {/* Input wallet key */}
           <div className="w-full lg:w-4/5 text-solblue-dark">
-            <div className="border-b border-gray-600">
+            <div className="border-b border-gray-600 dark:border-solblue">
               <input
-                className="w-full h-7 px-5 text-xs placeholder-gray-700 border-none bg-transparent"
+                className="w-full h-7 px-5 text-xs placeholder-gray-700 dark:placeholder-solblue border-none bg-transparent dark:text-solblue"
                 type="text"
                 placeholder="Public Key / Wallet Address"
                 value={props.publicKeyString}

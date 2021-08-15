@@ -27,9 +27,9 @@ export default function Epoch() {
       </div>
       {/* Progress bar */}
       <p className="pb-2 text-xl">{dashboardEpochInfo?.epochProgress && formatPct.format(dashboardEpochInfo.epochProgress)}</p>
-      <div className="mx-5 mb-2 bg-white rounded-full">
-        <div className="shadow w-full bg-grey-light">
-          <div className="bg-solacid rounded-full text-xs leading-none border-4 border-white py-1 text-center text-solblue-dark" style={{width: dashboardEpochInfo?.epochProgress && formatPct.format(dashboardEpochInfo.epochProgress)}}></div>
+      <div className="mx-5 mb-2 bg-white dark:bg-gray-600 rounded-full">
+        <div className="shadow dark:shadow-none w-full bg-grey-light">
+          <div className="bg-solacid rounded-full text-xs leading-none border-4 border-white dark:border-gray-600 py-1 text-center text-solblue-dark" style={{width: dashboardEpochInfo?.epochProgress && formatPct.format(dashboardEpochInfo.epochProgress)}}></div>
         </div>
       </div>
       <p className="pb-3 text-xs text-solgray-light">estimated time remaining{' '}

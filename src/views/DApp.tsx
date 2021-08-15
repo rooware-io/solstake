@@ -8,6 +8,7 @@ import { accounInfoToStakeAccount as accountInfoToStakeAccount, findStakeAccount
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-white.svg';
 import { Info } from '@material-ui/icons';
+import { Brightness6 } from '@material-ui/icons';
 import { useWallet } from '../contexts/wallet';
 import { ENDPOINTS, useConnection, useConnectionConfig } from '../contexts/connection';
 import HelpDialog from '../components/HelpDialog';
@@ -16,7 +17,6 @@ import { sleep } from '../utils/utils';
 import Epoch from '../components/Epoch';
 import WalletSummary from '../components/WalletSummary';
 import WalletConnector from '../components/WalletConnector';
-
 const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 
 function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[]}) {
@@ -238,25 +238,28 @@ function DApp() {
       })
     };
   }, [connection, stakeAccounts]);
-  
+
   return (
     <div id="dapp" className="h-full">
       {/* Header */}
       <div className="h-20 flex flex-wrap justify-between px-10 py-4">
-        <div className="h-full xl:w-1/6 w-1/3">
+        <div className="h-full xl:w-1/6 w-1/3 pt-2">
           <RouterLink to="/">
             <SolstakeLogoSvg />
           </RouterLink>
         </div>
         
-        <div>
-          <IconButton onClick={() => { setOpen(true); }}>
+        <div>    
+          <IconButton>
+            <Brightness6 />
+          </IconButton>        
+        
+          <IconButton onClick={() => {setOpen(true); }}>
             <Info />
           </IconButton>
           <div className="inline-block m-2">
             <Tooltip title="Use known stake account authority">
-              <Button
-                variant="contained"
+              <button className="solBtnGray p-0 m-0"
                 onClick={() => {
                   disconnect();
                   setUrl(ENDPOINTS[0].url);
@@ -264,7 +267,7 @@ function DApp() {
                 }}
               >
                 Demo
-              </Button>
+              </button>
             </Tooltip>
           </div>
           <ClusterSelector />
