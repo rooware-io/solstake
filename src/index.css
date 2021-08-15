@@ -4,31 +4,37 @@
 @tailwind utilities;
 
 .solBoxBlue {
-  @apply bg-gradient-to-r from-solblue-darker2 via-solblue-2 to-solblue-darker2 text-white shadow-solbluelight rounded-lg;
+  @apply bg-gradient-to-r from-solblue-darker2 via-solblue-2 to-solblue-darker2 text-white shadow-solbluelight rounded-lg dark:from-solblue-dark dark:via-solblue-darker dark:to-solblue-dark dark:shadow-solgray rounded-lg;
 }
 
 .solBoxGray {
-  @apply bg-solgray-light text-solblue-dark shadow-solbluelight rounded-lg;
+  @apply bg-solgray-light text-solblue-dark shadow-solbluelight rounded-lg dark:bg-solblue-darker2 dark:text-solblue dark:shadow-solblue-dark;
 }
 
 .solBtnGray {
-  @apply bg-gradient-to-t from-solgray-dark to-solgray-light text-solblue-darker uppercase py-1 px-4 text-sm rounded-full;
-  /** leading-none rounded-lg flex md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 2xl:w-2/3  **/
+  @apply bg-gradient-to-t from-solgray-dark to-solgray-light text-solblue-darker uppercase py-1 px-4 text-sm rounded-full dark:from-solblue-darker dark:to-solblue-dark dark:text-white dark:shadow-solgray;
 }
 .solBtnGray:hover {
-  @apply bg-gradient-to-t from-solgray-lightest to-solgray-light shadow-solbluelight ;
+  @apply bg-gradient-to-t from-solgray-lightest to-solgray-light shadow-solbluelight dark:from-solblue-darker2 dark:to-solblue-darker dark:text-solacid dark:shadow-solbluelight2;
+}
+
+.solBtnAcid {
+  @apply bg-gradient-to-t from-solacid-dark to-solacid text-solblue-darker uppercase py-1 px-4 text-sm rounded-full shadow-solacidlight;
+}
+.solBtnAcid:hover {
+  @apply bg-gradient-to-t from-solacid to-solacid-light shadow-solaciddark ;
 }
 
 .solBtnRewards {
-  @apply bg-gradient-to-r from-solgray to-solgray-light text-solblue-darker uppercase py-1 px-4 text-sm rounded-b-lg;
+  @apply bg-gradient-to-b from-solgray to-solgray-light text-solblue-darker uppercase py-1 px-4 text-sm rounded-b-lg dark:from-solblue-dark dark:to-solblue-darker dark:text-gray-200;
 }
 .solBtnRewards:hover {
-  @apply bg-gradient-to-t from-solacid to-solacid-light shadow-solbluelight ;
+  @apply bg-gradient-to-t from-solacid to-solacid-light shadow-solbluelight dark:from-solblue-dark dark:to-solblue-darker dark:text-solacid dark:shadow-none;
 }
 
 html {
   height: 100%;
-  background-color: rgba(31,64,64,1);
+  background-color: rgba(83,153,165,1);
 }
 
 body {
@@ -36,22 +42,12 @@ body {
   min-height: 100%;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(360deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
-
-#landing {
-  background: linear-gradient(10deg, rgba(0,50,70,1) 0%, rgba(61,150,160,1) 50%, rgba(125,255,255,1) 100%);
-}
-
-#app {
-  background: linear-gradient(360deg, rgba(31,64,64,1) 0%, rgba(1,12,19,1) 83%);
-}
-
 
 /* For pie chart */
 

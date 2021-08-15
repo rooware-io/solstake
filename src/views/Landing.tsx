@@ -14,8 +14,17 @@ import { Color } from '@material-ui/lab/Alert';
 import { submitEmail } from '../utils/email';
 
 const styles = {
+  smallIcon: {
+    fontSize: "1.4em",
+    color: "#0C2533"
+  },
+  mediumIcon: {
+    fontSize: "1.5em",
+    color: "#0C2533"
+  },
   largeIcon: {
-    fontSize: "2.5em"
+    fontSize: "1.7em",
+    color: "#0C2533"
   },
 };
 
@@ -89,33 +98,41 @@ export function Landing() {
             style={{minHeight: '100vh', textAlign: 'center', overflow: 'hidden'}}
           >
             <Grid item xs={8}>
-              <SolstakeLogoMainSvg />
+              <div className="flex justify-center text-center">
+                <div className="w-2/3 xl:w-1/2">
+                  <SolstakeLogoMainSvg />
+                </div>
+              </div>
               <Typography style={{visibility: 'hidden'}}>
-                Hack for non working svg scaling SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
+                  Hack for non working svg scaling SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
               </Typography>
-              <Typography color="primary" variant="h4">
-                Solstake makes staking on Solana easier than ever - no matter what wallet you’re using. 
-                Stake your SOL, manage accounts and earn rewards all in a single and easy-to-use app.
-              </Typography>
+
+              <div className="font-display uppercase text-6xl text-solblue-dark font-bold leading-tight">
+                <p className="inline px-2 md:block md:px-0">Stake your SOL </p>
+                <p className="inline px-2 md:block md:px-0">manage accounts </p>
+                <p className="inline px-2 md:block md:px-0">earn rewards</p>
+              </div>
+
+              <div className="uppercase text-solblue-dark text-3xl pt-3 font-light">
+                Staking Solana made easy
+              </div>
 
               <Box m={4} />
 
-              <Link style={{textDecoration: 'none'}} to="/app">
-                <Button variant="contained" size="large">
-                  <Typography variant="h5">
-                    Use Solstake
-                  </Typography>
-                </Button>
-              </Link>
+                <div className="flex justify-center text-center pb-24">
+                  <Link to="/app">
+                    <div className="solBtnAcid font-bold text-6xl">
+                      <span className="text-xl p-2">Use Solstake</span>
+                    </div>
+                  </Link>
+                </div>
     
-              <Box m={4} />
 
-              <Typography color="primary" variant="h5">
-                We’re just getting started around here. In the meantime stay updated on product releases, new features and more by subscribing below.
-              </Typography>
-    
-              <Box m={4} />
+              <div className="flex justify-center text-center pb-5">
+                <div className="w-4/6 text-lg text-solblue-darker">We’re just getting started around here. In the meantime stay updated on product releases, new features and more.</div>
+              </div>
 
+              {/*
               <TextField
                 label="Enter your email"
                 variant="outlined"
@@ -142,15 +159,15 @@ export function Landing() {
                   />
                 }}
               />
+              */}
     
-              <Box m={3} />
     
               <div>
                 <IconButton
                   href="https://github.com/rooware-io/solstake"
                   rel="noopener noreferrer" target="_blank"
                 >
-                  <GitHub style={styles.largeIcon} />
+                  <GitHub style={styles.smallIcon} />
                 </IconButton>
                 <IconButton
                   onClick={() => setOpenVideo(true)}
@@ -161,7 +178,7 @@ export function Landing() {
                   href="https://discord.gg/r5fZHdfu"
                   rel="noopener noreferrer" target="_blank"
                 >
-                  <SvgIcon style={styles.largeIcon}>
+                  <SvgIcon style={styles.smallIcon}>
                     <Discord />
                   </SvgIcon>
                 </IconButton>
@@ -169,7 +186,7 @@ export function Landing() {
                   href="https://twitter.com/solstakeio"
                   rel="noopener noreferrer" target="_blank"
                 >
-                  <Twitter style={styles.largeIcon} />
+                  <Twitter style={styles.mediumIcon} />
                 </IconButton>
               </div>
             </Grid>
