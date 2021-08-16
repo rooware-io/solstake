@@ -14,7 +14,7 @@ import { Color } from '@material-ui/lab/Alert';
 import { submitEmail } from '../utils/email';
 
 const styles = {
-  smallIcon: {
+    smallIcon: {
     fontSize: "1.4em",
     color: "#0C2533"
   },
@@ -97,9 +97,9 @@ export function Landing() {
             direction="column"
             style={{minHeight: '100vh', textAlign: 'center', overflow: 'hidden'}}
           >
-            <Grid item xs={8}>
-              <div className="flex justify-center text-center">
-                <div className="w-2/3 xl:w-1/2">
+            <Grid item xs={10}>
+              <div className="flex justify-center text-center p-0">
+                <div className="w-10/12 sm:1/4 md:w-3/4 lg:w-2/3 xl:w-1/3 pt-5 md:pt-0">
                   <SolstakeLogoMainSvg />
                 </div>
               </div>
@@ -107,13 +107,13 @@ export function Landing() {
                   Hack for non working svg scaling SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS
               </Typography>
 
-              <div className="font-display uppercase text-6xl text-solblue-dark font-bold leading-tight">
-                <p className="inline px-2 md:block md:px-0">Stake your SOL </p>
-                <p className="inline px-2 md:block md:px-0">manage accounts </p>
+              <div className="font-display uppercase text-4half sm:text-5xl md:text-6xl text-solblue-dark dark:text-solblue font-bold leading-tight">
+                <p className="inline px-2 md:block md:px-0">Stake your SOL</p>
+                <p className="inline px-2 md:block md:px-0">manage accounts</p>
                 <p className="inline px-2 md:block md:px-0">earn rewards</p>
               </div>
 
-              <div className="uppercase text-solblue-dark text-3xl pt-3 font-light">
+              <div className="uppercase text-solblue-dark dark:text-gray-300 text-2xl sm:text-3xl pt-3 md:font-light dark:font-normal">
                 Staking Solana made easy
               </div>
 
@@ -121,15 +121,15 @@ export function Landing() {
 
                 <div className="flex justify-center text-center pb-24">
                   <Link to="/app">
-                    <div className="solBtnAcid font-bold text-6xl">
-                      <span className="text-xl p-2">Use Solstake</span>
+                    <div className="solBtnAcid font-bold">
+                      <span className="text-md sm:text-xl p-2">Use Solstake</span>
                     </div>
                   </Link>
                 </div>
     
 
               <div className="flex justify-center text-center pb-5">
-                <div className="w-4/6 text-lg text-solblue-darker">We’re just getting started around here. In the meantime stay updated on product releases, new features and more.</div>
+                <div className="w-4/6 text-lg text-solblue-darker dark:text-gray-300">We’re just getting started around here. In the meantime stay updated on product releases, new features and more.</div>
               </div>
 
               {/*
