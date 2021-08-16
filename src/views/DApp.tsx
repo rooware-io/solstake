@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, CircularProgress, IconButton, Tooltip } from '@material-ui/core';
+import { CircularProgress, IconButton, Tooltip } from '@material-ui/core';
 import { AccountInfo, Connection, Context, KeyedAccountInfo, ParsedAccountData, PublicKey } from '@solana/web3.js';
 import {
   Link as RouterLink
@@ -16,7 +16,7 @@ import { sleep } from '../utils/utils';
 import Epoch from '../components/Epoch';
 import WalletSummary from '../components/WalletSummary';
 import WalletConnector from '../components/WalletConnector';
-
+import { ThemeToggler } from '../components/ThemeToggler';
 const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 
 function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[]}) {
@@ -238,25 +238,26 @@ function DApp() {
       })
     };
   }, [connection, stakeAccounts]);
-  
+
   return (
     <div id="dapp" className="h-full">
       {/* Header */}
       <div className="h-20 flex flex-wrap justify-between px-10 py-4">
-        <div className="h-full xl:w-1/6 w-1/3">
+        <div className="h-full xl:w-1/6 w-1/3 pt-2">
           <RouterLink to="/">
             <SolstakeLogoSvg />
           </RouterLink>
         </div>
         
-        <div>
-          <IconButton onClick={() => { setOpen(true); }}>
+        <div>    
+          <ThemeToggler />
+        
+          <IconButton onClick={() => {setOpen(true); }}>
             <Info />
           </IconButton>
           <div className="inline-block m-2">
             <Tooltip title="Use known stake account authority">
-              <Button
-                variant="contained"
+              <button className="solBtnGray p-0 m-0"
                 onClick={() => {
                   disconnect();
                   setUrl(ENDPOINTS[0].url);
@@ -264,7 +265,7 @@ function DApp() {
                 }}
               >
                 Demo
-              </Button>
+              </button>
             </Tooltip>
           </div>
           <ClusterSelector />

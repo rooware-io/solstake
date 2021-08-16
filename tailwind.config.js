@@ -2,12 +2,17 @@ const colors = require('tailwindcss/colors')
 
 module.exports = {
   purge: ['./src/**/*.{js,jsx,ts,tsx}', './public/index.html'],
-  darkMode: false, // or 'media' or 'class'
+  darkMode: 'class', // false or 'media' or 'class'
   theme: {
     extend: {
       fontFamily: {
-        'display': ['Quicksand', 'ui-sans-serif', 'system-ui]'],
+        'display': ['Oswald', 'ui-sans-serif', 'system-ui'],
         'body': ['Quicksand', 'ui-sans-serif', 'system-ui'],
+      },
+      fontSize: {
+        'xxs': '.5rem',
+        'xxxs': '.375rem',
+        '4half': '2.4rem',
       },
       colors: {
         transparent: 'transparent',
@@ -16,6 +21,7 @@ module.exports = {
           light: '#94FDFF',
           lighter: '#C0FFFF',
           brighter: '#73FFFF',
+          brighter2: '#4EC8C8',
           DEFAULT: '#5399A5',
           '2': '#457887',
           dark: '#103147',
@@ -35,10 +41,6 @@ module.exports = {
           lightest: '#F7F7F7',
         },
       },
-      fontSize: {
-        'xxs': '.5rem',
-        'xxxs': '.375rem',
-      },
       borderRadius: {
         'none': '0',
         'sm': '0.375rem',
@@ -51,12 +53,20 @@ module.exports = {
         sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
         DEFAULT: '5px 10px 20px 30px rgba(255, 255, 255, 0.05)',
         "solacid": '0px 5px 20px 0 rgba(213, 227, 0, 0.5)',
+        "solacidlight": '0px 5px 15px 0 rgba(223, 226, 129, 0.8)',
+        "solaciddark": '0px 5px 15px 0 rgba(166, 170, 0, 0.6)',
         "solbluelight": '0px 5px 20px 0 rgba(148, 253, 255, 0.6)',
+        "solbluelight2": '0px 2px 12px 0 rgba(148, 253, 255, 0.4)',
+        "solgray": '0px 5px 20px 0 rgba(30, 30, 30, 0.5)',
+        "solblue-dark": '0px 5px 20px 0 rgba(16, 49, 71, 0.6)',
       },
     },
   },
   variants: {
-    extend: {},
+    extend: {
+      boxShadow: ['dark'],
+      fontWeight: ['dark']
+    },
   },
   plugins: [],
 }
