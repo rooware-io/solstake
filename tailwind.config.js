@@ -9,6 +9,11 @@ module.exports = {
         'display': ['Oswald', 'ui-sans-serif', 'system-ui'],
         'body': ['Quicksand', 'ui-sans-serif', 'system-ui'],
       },
+      fontSize: {
+        'xxs': '.5rem',
+        'xxxs': '.375rem',
+        '4half': '2.4rem',
+      },
       colors: {
         transparent: 'transparent',
         current: 'currentColor',
@@ -36,10 +41,6 @@ module.exports = {
           lightest: '#F7F7F7',
         },
       },
-      fontSize: {
-        'xxs': '.5rem',
-        'xxxs': '.375rem',
-      },
       borderRadius: {
         'none': '0',
         'sm': '0.375rem',
@@ -63,7 +64,8 @@ module.exports = {
   },
   variants: {
     extend: {
-      boxShadow: ['dark']
+      boxShadow: ['dark'],
+      fontWeight: ['dark']
     },
   },
   plugins: [],
