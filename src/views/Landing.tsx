@@ -1,17 +1,14 @@
 import React, { useState } from 'react';
 import '../App.css';
-//import '../Stars.sass';
 import {
   Link
 } from 'react-router-dom';
-import { Box, Button, TextField, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles, Snackbar, SvgIcon } from '@material-ui/core';
+import { Box, Button, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles, Snackbar, SvgIcon } from '@material-ui/core';
 import { ReactComponent as SolstakeLogoMainSvg } from '../assets/logo-white.svg';
-import { GitHub, Send, Twitter, YouTube } from '@material-ui/icons';
+import { GitHub, Twitter, YouTube } from '@material-ui/icons';
 import { ReactComponent as Discord } from '../assets/discord-brands.svg';
-import { validateEmail } from '../utils/email';
 import { Alert } from '@material-ui/lab';
 import { Color } from '@material-ui/lab/Alert';
-import { submitEmail } from '../utils/email';
 
 const styles = {
     smallIcon: {
@@ -28,17 +25,6 @@ const styles = {
   },
 };
 
-function SendButton(props: {callback: () => Promise<void>, disabled: boolean}) {
-  return (
-    <Button
-      onClick={props.callback}
-      disabled={props.disabled}
-    >
-      <Send />
-    </Button>
-  );
-}
-
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
     root: {
@@ -54,8 +40,6 @@ interface Message {
 };
 
 export function Landing() {
-    const [email, setEmail] = useState('');
-    const [isEmailValid, setIsEmailValid] = useState(false);
     const [message, setMessage] = useState<Message>({open: false, content: '', severity: 'success'});
     const [open, setOpen] = useState(false);
     const [openVideo, setOpenVideo] = useState(false);
@@ -70,19 +54,6 @@ export function Landing() {
 
     function handleCloseSnackbar() {
       setMessage({open: false, content: '', severity: 'success'});
-    }
-
-    async function submitAndFeedback() {
-      if (email) {
-        const success = await submitEmail(email);
-        if (success) {
-          setEmail('');
-          setMessage({open: true, content: 'Your email has been sent, we will get back to you when solstake is released', severity: 'success'});
-        }
-        else {
-          setMessage({open: true, content: 'Failed to send email, please try again later', severity: 'error'});
-        }
-      }
     }
 
     const classes = useStyles();
@@ -131,37 +102,7 @@ export function Landing() {
               <div className="flex justify-center text-center pb-5">
                 <div className="w-4/6 text-lg text-solblue-darker dark:text-gray-300">We’re just getting started around here. In the meantime stay updated on product releases, new features and more.</div>
               </div>
-
-              {/*
-              <TextField
-                label="Enter your email"
-                variant="outlined"
-                style={{width: '40%'}}
-                error={email !== '' && !isEmailValid}
-                helperText={(email !== '' && !isEmailValid) ? 'Invalid' : null}
-                onKeyDown={async (event) => {
-                  if (event.key === 'Enter') {
-                    await submitAndFeedback();
-                  }
-                }}
-                onChange={(event) => {
-                  const email = event.target.value;
-                  setEmail(email);
-
-                  const isValid = validateEmail(email);
-                  setIsEmailValid(isValid);
-                }}
-                value={email}
-                InputProps={{
-                  endAdornment: <SendButton
-                    callback={submitAndFeedback}
-                    disabled={!isEmailValid}
-                  />
-                }}
-              />
-              */}
-    
-    
+  
               <div>
                 <IconButton
                   href="https://github.com/rooware-io/solstake"
