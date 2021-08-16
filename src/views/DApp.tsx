@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Button, CircularProgress, IconButton, Tooltip } from '@material-ui/core';
+import { CircularProgress, IconButton, Tooltip } from '@material-ui/core';
 import { AccountInfo, Connection, Context, KeyedAccountInfo, ParsedAccountData, PublicKey } from '@solana/web3.js';
 import {
   Link as RouterLink
@@ -8,7 +8,6 @@ import { accounInfoToStakeAccount as accountInfoToStakeAccount, findStakeAccount
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-white.svg';
 import { Info } from '@material-ui/icons';
-import { Brightness6 } from '@material-ui/icons';
 import { useWallet } from '../contexts/wallet';
 import { ENDPOINTS, useConnection, useConnectionConfig } from '../contexts/connection';
 import HelpDialog from '../components/HelpDialog';
