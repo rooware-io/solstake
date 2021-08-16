@@ -17,6 +17,7 @@ import { sleep } from '../utils/utils';
 import Epoch from '../components/Epoch';
 import WalletSummary from '../components/WalletSummary';
 import WalletConnector from '../components/WalletConnector';
+import { ThemeToggler } from '../components/ThemeToggler';
 const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 
 function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[]}) {
@@ -250,9 +251,7 @@ function DApp() {
         </div>
         
         <div>    
-          <IconButton>
-            <Brightness6 />
-          </IconButton>        
+          <ThemeToggler />
         
           <IconButton onClick={() => {setOpen(true); }}>
             <Info />
