@@ -125,7 +125,7 @@ function DApp() {
     const newPublicKey = connected ? wallet?.publicKey : manualPublicKey;
     if (newPublicKey) {
       setLoading(true);
-      findStakeAccountMetas(connection, newPublicKey)
+      findStakeAccountMetas(connection, newPublicKey, setStakeAccounts)
         .then(newStakeAccounts => {
           setStakeAccounts(newStakeAccounts);
           setLoading(false);

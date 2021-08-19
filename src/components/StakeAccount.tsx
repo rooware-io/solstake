@@ -49,8 +49,8 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   }, [connection, stakeAccountMeta, stakeAccountMeta.stakeAccount]);
 
   const totalRewards = useMemo(() => {
-    return stakeAccountMeta.inflationRewards.reduce((sum, current) => sum + current.amount, 0)
-  }, [stakeAccountMeta]);
+    return stakeAccountMeta.inflationRewards?.reduce((sum, current) => sum + current.amount, 0) ?? 0
+  }, [stakeAccountMeta.inflationRewards]);
 
   useEffect(() => {
     setActivatedBlockTime(undefined);
@@ -238,7 +238,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                     <span className="font-normal">{totalRewards / LAMPORTS_PER_SOL} SOL </span>
                     <span className="text-xs">{(APR && formatPct.format(APR)) || '-'} APR </span>
                   </span>
-                  <span className="ico-plus" hidden={stakeAccountMeta.inflationRewards.length === 0}>
+                  <span className="ico-plus" hidden={stakeAccountMeta.inflationRewards?.length === 0}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                       <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
@@ -249,7 +249,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
               <div className="relative transition-all duration-700 dark:text-solblue">
                 <Collapse in={rewardsOpen} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
-                    {stakeAccountMeta.inflationRewards.map(inflationReward => (
+                    {stakeAccountMeta.inflationRewards?.map(inflationReward => (
                       <ListItem style={{paddingLeft: 10}} key={inflationReward.epoch}>
                         <ListItemText primary={`Epoch: ${inflationReward.epoch}, reward: ${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
                       </ListItem>

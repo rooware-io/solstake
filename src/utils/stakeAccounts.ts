@@ -8,7 +8,7 @@ export interface StakeAccountMeta {
   seed: string;
   lamports: number;
   stakeAccount: StakeAccount;
-  inflationRewards: InflationReward[]
+  inflationRewards?: InflationReward[]
 }
 
 async function promiseAllInBatches<T>(tasks: (() => Promise<T>)[], batchSize: number) {
@@ -37,7 +37,7 @@ export function sortStakeAccountMetas(stakeAccountMetas: StakeAccountMeta[]) {
   });
 }
 
-export async function findStakeAccountMetas(connection: Connection, walletAddress: PublicKey): Promise<StakeAccountMeta[]> {
+export async function findStakeAccountMetas(connection: Connection, walletAddress: PublicKey, setStakeAccounts: (sam: StakeAccountMeta[]) => void): Promise<StakeAccountMeta[]> {
   let newStakeAccountMetas: StakeAccountMeta[] = [];
 
   // Create potential solflare seed PDAs
@@ -83,7 +83,6 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
       seed,
       lamports: balanceLamports,
       stakeAccount,
-      inflationRewards: []
     });
   });
   
@@ -92,6 +91,9 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
   const delegatedActivationEpochs = newStakeAccountMetas
     .filter(meta => meta.stakeAccount.info.stake?.delegation.activationEpoch)
     .map(meta => meta.stakeAccount.info.stake?.delegation.activationEpoch?.toNumber() ?? 1000) // null coallescing not possible here
+
+  sortStakeAccountMetas(newStakeAccountMetas);
+  setStakeAccounts(newStakeAccountMetas);
 
   if(delegatedActivationEpochs.length !== 0) {
     const minEpoch = Math.min(
@@ -110,15 +112,19 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
       ));
     }
 
-    sortStakeAccountMetas(newStakeAccountMetas);
-
     const inflationRewardsResults = await promiseAllInBatches(tasks, 4);
     inflationRewardsResults.forEach(inflationRewards => inflationRewards.forEach((inflationReward, index) => {
       if (inflationReward) {
-        newStakeAccountMetas[index].inflationRewards.push(inflationReward)
+        let inflationRewards = newStakeAccountMetas[index].inflationRewards
+        if (inflationRewards) {
+          inflationRewards.push(inflationReward);
+        }
+        else {
+          inflationRewards = [inflationReward];
+        }
       }
     }));
   }
 
-  return newStakeAccountMetas;
+  return newStakeAccountMetas.map(m => Object.assign({}, m));
 }
