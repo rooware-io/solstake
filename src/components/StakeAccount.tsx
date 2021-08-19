@@ -50,7 +50,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
 
   const totalRewards = useMemo(() => {
     return stakeAccountMeta.inflationRewards.reduce((sum, current) => sum + current.amount, 0)
-  }, [stakeAccountMeta]);
+  }, [stakeAccountMeta.inflationRewards]);
 
   useEffect(() => {
     setActivatedBlockTime(undefined);

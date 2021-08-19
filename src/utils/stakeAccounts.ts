@@ -37,7 +37,7 @@ export function sortStakeAccountMetas(stakeAccountMetas: StakeAccountMeta[]) {
   });
 }
 
-export async function findStakeAccountMetas(connection: Connection, walletAddress: PublicKey): Promise<StakeAccountMeta[]> {
+export async function findStakeAccountMetas(connection: Connection, walletAddress: PublicKey, setStakeAccounts: (sam: StakeAccountMeta[]) => void): Promise<StakeAccountMeta[]> {
   let newStakeAccountMetas: StakeAccountMeta[] = [];
 
   // Create potential solflare seed PDAs
@@ -93,6 +93,9 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
     .filter(meta => meta.stakeAccount.info.stake?.delegation.activationEpoch)
     .map(meta => meta.stakeAccount.info.stake?.delegation.activationEpoch?.toNumber() ?? 1000) // null coallescing not possible here
 
+  sortStakeAccountMetas(newStakeAccountMetas);
+  setStakeAccounts(newStakeAccountMetas);
+
   if(delegatedActivationEpochs.length !== 0) {
     const minEpoch = Math.min(
       ...delegatedActivationEpochs
@@ -109,8 +112,6 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
         'finalized'
       ));
     }
-
-    sortStakeAccountMetas(newStakeAccountMetas);
 
     const inflationRewardsResults = await promiseAllInBatches(tasks, 4);
     inflationRewardsResults.forEach(inflationRewards => inflationRewards.forEach((inflationReward, index) => {
