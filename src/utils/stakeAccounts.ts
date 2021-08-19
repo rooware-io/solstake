@@ -8,7 +8,7 @@ export interface StakeAccountMeta {
   seed: string;
   lamports: number;
   stakeAccount: StakeAccount;
-  inflationRewards: InflationReward[]
+  inflationRewards?: InflationReward[]
 }
 
 async function promiseAllInBatches<T>(tasks: (() => Promise<T>)[], batchSize: number) {
@@ -83,7 +83,6 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
       seed,
       lamports: balanceLamports,
       stakeAccount,
-      inflationRewards: []
     });
   });
   
@@ -116,10 +115,16 @@ export async function findStakeAccountMetas(connection: Connection, walletAddres
     const inflationRewardsResults = await promiseAllInBatches(tasks, 4);
     inflationRewardsResults.forEach(inflationRewards => inflationRewards.forEach((inflationReward, index) => {
       if (inflationReward) {
-        newStakeAccountMetas[index].inflationRewards.push(inflationReward)
+        let inflationRewards = newStakeAccountMetas[index].inflationRewards
+        if (inflationRewards) {
+          inflationRewards.push(inflationReward);
+        }
+        else {
+          inflationRewards = [inflationReward];
+        }
       }
     }));
   }
 
-  return newStakeAccountMetas;
+  return newStakeAccountMetas.map(m => Object.assign({}, m));
 }
