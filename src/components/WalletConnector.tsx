@@ -21,7 +21,7 @@ export default function WalletConnector() {
                 onChange={(event) => setManualPublicKeyString(event.target.value)}
               />
             </div>
-            <span hidden={manualPublicKey !== undefined} className="text-xs text-red-700">Public Key not valid.</span>
+            <span hidden={manualPublicKeyString === '' || manualPublicKey !== undefined} className="text-xs text-red-600 font-bold">Public Key not valid.</span>
           </div>
 
           {/* Connect wallet button */}
