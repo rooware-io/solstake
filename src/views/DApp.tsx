@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { CircularProgress, IconButton, Tooltip } from '@material-ui/core';
 import { AccountInfo, Connection, Context, KeyedAccountInfo, ParsedAccountData, PublicKey } from '@solana/web3.js';
 import {
@@ -17,6 +17,7 @@ import Epoch from '../components/Epoch';
 import WalletSummary from '../components/WalletSummary';
 import WalletConnector from '../components/WalletConnector';
 import { ThemeToggler } from '../components/ThemeToggler';
+import { AccountsContext } from '../contexts/accounts';
 const DEMO_PUBLIC_KEY_STRING = '8BaNJXqMAEVrV7cgzEjW66G589ZmDvwajmJ7t32WpvxW';
 
 function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[]}) {
@@ -114,21 +115,14 @@ function DApp() {
   const connection = useConnection();
   const { setUrl } = useConnectionConfig();
   const { wallet, connected, disconnect } = useWallet();
-  const [publicKeyString, setPublicKeyString] = useState<string>('');
+  const { manualPublicKey, setManualPublicKeyString } = useContext(AccountsContext);
   const [loading, setLoading] = useState<boolean>(false);
   const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[] | null>(null);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
     setStakeAccounts(null);
-    let keyedPublicKey: PublicKey | undefined
-    if (publicKeyString) {
-      try {
-        keyedPublicKey = new PublicKey(publicKeyString)
-      }
-      catch {}
-    }
-    const newPublicKey = connected ? wallet?.publicKey : keyedPublicKey;
+    const newPublicKey = connected ? wallet?.publicKey : manualPublicKey;
     if (newPublicKey) {
       setLoading(true);
       findStakeAccountMetas(connection, newPublicKey)
@@ -137,7 +131,7 @@ function DApp() {
           setLoading(false);
         });
     }
-  }, [connection, connected, wallet?.publicKey, publicKeyString]);
+  }, [connection, connected, wallet?.publicKey, manualPublicKey]);
 
   async function addStakeAccount(stakeAccountPublicKey: PublicKey, seed: string) {
     if (!stakeAccounts) {
@@ -261,7 +255,7 @@ function DApp() {
                 onClick={() => {
                   disconnect();
                   setUrl(ENDPOINTS[0].url);
-                  setPublicKeyString(DEMO_PUBLIC_KEY_STRING);
+                  setManualPublicKeyString(DEMO_PUBLIC_KEY_STRING);
                 }}
               >
                 Demo
@@ -278,10 +272,7 @@ function DApp() {
         <div className="leading-none flex flex-wrap md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 max-w-screen-xl">
           <Epoch />
 
-          <WalletConnector
-            publicKeyString={publicKeyString}
-            setPublicKeyString={setPublicKeyString}
-          />
+          <WalletConnector />
 
           <WalletSummary
             stakeAccountMetas={stakeAccounts}

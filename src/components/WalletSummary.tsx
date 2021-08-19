@@ -75,7 +75,7 @@ export default function WalletSummary(props: WalletSummaryProps) {
 
     findFirstAvailableSeed(wallet.publicKey, stakeAccountMetas)
       .then(setSeed);
-  }, [wallet?.publicKey, stakeAccountMetas]);
+  }, [wallet, stakeAccountMetas]);
 
   const balance = useMemo(() => {
     return systemProgramAccountInfo && (systemProgramAccountInfo.lamports / LAMPORTS_PER_SOL);
@@ -86,7 +86,7 @@ export default function WalletSummary(props: WalletSummaryProps) {
     return Math.floor(totalStakedSOL / (totalStakedSOL + balance) * 100)
   }, [balance, totalStakedSOL])
 
-  if (!wallet || !systemProgramAccountInfo) {
+  if (!systemProgramAccountInfo) {
     return <></>;
   }
 
@@ -117,7 +117,7 @@ export default function WalletSummary(props: WalletSummaryProps) {
         </div>
       </div>
 
-      { open &&
+      { wallet && open &&
         <CreateStakeAccountDialog
           seed={seed}
           open={open}

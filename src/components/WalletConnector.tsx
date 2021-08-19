@@ -1,10 +1,10 @@
-import { PublicKey } from '@solana/web3.js';
-import { useState } from 'react';
+import { useContext } from 'react';
+import { AccountsContext } from '../contexts/accounts';
 import { useWallet } from '../contexts/wallet';
 
-export default function WalletConnector(props: {publicKeyString: string, setPublicKeyString: (pk: string) => void}) {
+export default function WalletConnector() {
   const { publicKey, connected, select, disconnect } = useWallet();
-  const [error, setError] = useState(false);
+  const { manualPublicKey, manualPublicKeyString, setManualPublicKeyString } = useContext(AccountsContext);
 
   return (
     <div className="h-full w-full my-3 flex flex-wrap justify-between text-center">
@@ -17,21 +17,11 @@ export default function WalletConnector(props: {publicKeyString: string, setPubl
                 className="w-full h-7 px-5 text-xs placeholder-gray-700 dark:placeholder-solblue border-none bg-transparent dark:text-solblue"
                 type="text"
                 placeholder="Public Key / Wallet Address"
-                value={props.publicKeyString}
-                onChange={(event) => {
-                  const newPublicKeyString = event.target.value
-                  try {
-                    new PublicKey(newPublicKeyString)
-                    setError(false)
-                  }
-                  catch {
-                    setError(Boolean(newPublicKeyString))
-                  }
-                  props.setPublicKeyString(newPublicKeyString);
-                }}
+                value={manualPublicKeyString}
+                onChange={(event) => setManualPublicKeyString(event.target.value)}
               />
             </div>
-            <span hidden={!error} className="text-xs text-red-700">Public Key not valid.</span>
+            <span hidden={manualPublicKey !== undefined} className="text-xs text-red-700">Public Key not valid.</span>
           </div>
 
           {/* Connect wallet button */}
