@@ -10,6 +10,7 @@ export default function WalletConnector() {
     <div className="h-full w-full my-3 flex flex-wrap justify-between text-center">
       {!connected ? (
         <>
+        
           {/* Input wallet key */}
           <div className="w-full lg:w-4/5 text-solblue-dark">
             <div className="border-b border-gray-600 dark:border-solblue">
