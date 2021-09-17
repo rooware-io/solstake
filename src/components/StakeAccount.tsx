@@ -13,6 +13,7 @@ import { formatPct, shortenAddress } from "../utils/utils";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { DelegateDialog } from "./DelegateDialog";
 import { WalletAdapter } from "../wallet-adapters/walletAdapter";
+import * as mathjs from "mathjs";
 
 const MAX_EPOCH = new BN(2).pow(new BN(64)).sub(new BN(1));
 
@@ -279,7 +280,9 @@ function WithdrawDialog({wallet, userPublicKey, stakePubkey, stakeAccountLamport
 
   const [amount, setAmount] = useState('');
   const max = useMemo(() => {
-    return stakeAccountLamports / LAMPORTS_PER_SOL;
+    return mathjs.bignumber(stakeAccountLamports)
+      .div(LAMPORTS_PER_SOL)
+      .toString();
   }, [stakeAccountLamports]);
 
   return (
@@ -298,7 +301,7 @@ function WithdrawDialog({wallet, userPublicKey, stakePubkey, stakeAccountLamport
               <InputAdornment position="end">
                 <Button
                   onClick={() => 
-                    setAmount(max.toString())
+                    setAmount(max)
                   }
                 >
                   MAX
@@ -329,7 +332,9 @@ function WithdrawDialog({wallet, userPublicKey, stakePubkey, stakeAccountLamport
                   stakePubkey,
                   authorizedPubkey: userPublicKey,
                   toPubkey: userPublicKey,
-                  lamports: Number(amount) * LAMPORTS_PER_SOL,
+                  lamports: mathjs.bignumber(amount)
+                    .mul(LAMPORTS_PER_SOL)
+                    .toNumber(),
                 }).instructions,
                 []
               ),

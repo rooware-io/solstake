@@ -5,6 +5,7 @@ import { AccountsContext } from "../contexts/accounts";
 import { sendTransaction } from "../contexts/connection";
 import { useMonitorTransaction } from "../utils/notifications";
 import { WalletAdapter } from "../wallet-adapters/walletAdapter";
+import * as mathjs from "mathjs";
 
 interface CreateStakeAccountProps {
   seed: string;
@@ -82,7 +83,9 @@ export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connectio
               seed,
               StakeProgram.programId,
             );
-            const lamports = await connection.getMinimumBalanceForRentExemption(StakeProgram.space) + Number(amount) * LAMPORTS_PER_SOL;
+            const lamports = mathjs.bignumber(amount)
+              .mul(LAMPORTS_PER_SOL)
+              .toNumber();
 
             const transaction = StakeProgram.createAccountWithSeed({
               fromPubkey: wallet.publicKey,

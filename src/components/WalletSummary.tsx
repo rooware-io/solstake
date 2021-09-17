@@ -57,10 +57,10 @@ export default function WalletSummary(props: WalletSummaryProps) {
   const [seed, setSeed] = useState('0');
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    getSOLPriceUSD()
-      .then(setSOLPriceUSD);
-  }, []);
+  // useEffect(() => {
+  //   getSOLPriceUSD()
+  //     .then(setSOLPriceUSD);
+  // }, []);
 
   const totalStakedSOL = useMemo(() => {
     const totalLamports = stakeAccountMetas?.reduce((sum, current) => sum + current.lamports, 0);
