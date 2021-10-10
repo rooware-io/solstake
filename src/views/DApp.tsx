@@ -65,7 +65,7 @@ async function onStakeAccountChangeCallback(connection: Connection, keyedAccount
   }
   const newStakeAccount = accountInfoToStakeAccount(parsedAccountInfo);
   if (!newStakeAccount) {
-    console.log(`Could no find parsed data: ${accountId.toBase58()}`);
+    console.log(`Could not find parsed data: ${accountId.toBase58()}`);
     return;
   }
 
@@ -237,18 +237,20 @@ function DApp() {
     <div id="dapp" className="h-full">
       {/* Header */}
       <div className="h-20 flex flex-wrap justify-between px-10 py-4">
-        <div className="h-full xl:w-1/6 w-1/3 pt-2">
+        <div className="h-full w-1/2 md:w-1/3 xl:w-1/6 pt-2">
           <RouterLink to="/">
             <SolstakeLogoSvg />
           </RouterLink>
         </div>
         
         <div>    
-          <ThemeToggler />
-        
-          <IconButton onClick={() => {setOpen(true); }}>
-            <Info />
-          </IconButton>
+          <div className="block md:inline">
+            <ThemeToggler />
+            <IconButton onClick={() => {setOpen(true); }}>
+              <Info />
+            </IconButton>
+          </div>
+          
           <div className="inline-block m-2">
             <Tooltip title="Use known stake account authority">
               <button className="solBtnGray p-0 m-0"

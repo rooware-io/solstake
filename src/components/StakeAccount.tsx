@@ -86,7 +86,20 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
       <div className="solBoxGray dark:bg-solblue-dark rounded-b-none rounded-t-lg w-full bg-white uppercase flex flex-wrap md:justify-between items-center text-center md:text-left" style={{borderBottomLeftRadius: 0, borderBottomRightRadius: 0}}>
         {/* Seed account info */}
         <div className="w-full pb-3 pt-3 md:pt-0 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap">
-          <span className="text-sm leading-6">SEED {stakeAccountMeta.seed}</span><br />
+          <span className="text-sm leading-6">SEED {stakeAccountMeta.seed} </span> 
+          
+          {/* <Tooltip title={'Split'}>
+            <button className="text-solblue-2" style={{direction: 'rtl'}}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 pl-1 mb-0.5 inline-block" stroke="none" viewBox="0 0 24 24" fill="currentColor"><path d="M 6 2.5859375 L 1.2929688 7.2929688 L 2.7070312 8.7070312 L 5 6.4140625 L 5 12 C 5 13.64497 6.3550302 15 8 15 L 10 15 C 10.56503 15 11 15.43497 11 16 L 11 22 L 13 22 L 13 16 C 13 15.43497 13.43497 15 14 15 L 16 15 C 17.64497 15 19 13.64497 19 12 L 19 6.4140625 L 21.292969 8.7070312 L 22.707031 7.2929688 L 18 2.5859375 L 13.292969 7.2929688 L 14.707031 8.7070312 L 17 6.4140625 L 17 12 C 17 12.56503 16.56503 13 16 13 L 14 13 C 13.231416 13 12.533353 13.304125 12 13.787109 C 11.466647 13.304125 10.768584 13 10 13 L 8 13 C 7.4349698 13 7 12.56503 7 12 L 7 6.4140625 L 9.2929688 8.7070312 L 10.707031 7.2929688 L 6 2.5859375 z"></path></svg>
+            </button>
+          </Tooltip>
+          <Tooltip title={'Merge'}>
+            <button className="text-solblue-2" style={{direction: 'rtl'}}>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 pl-1 mb-0.5 inline-block" stroke="none" viewBox="0 0 24 24" fill="currentColor"><path d="M 12 2.5859375 L 6.2929688 8.2929688 L 7.7070312 9.7070312 L 11 6.4140625 L 11 14 C 11 16.773666 8.7736661 19 6 19 L 2 19 L 2 21 L 6 21 C 8.5453672 21 10.774629 19.62391 12 17.582031 C 13.225371 19.62391 15.454633 21 18 21 L 22 21 L 22 19 L 18 19 C 15.226334 19 13 16.773666 13 14 L 13 6.4140625 L 16.292969 9.7070312 L 17.707031 8.2929688 L 12 2.5859375 z"></path></svg>  
+            </button>
+          </Tooltip> */}
+          <br />
+          
           <span className="text-lg font-bold leading-3">{stakeAccountMeta.lamports / LAMPORTS_PER_SOL} SOL</span><br />
           {/* <span className="text-xs leading-none">$X</span> */}
         </div>
@@ -247,12 +260,19 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                 </div>
               </button>
               {/* Dropdown hidden area */}
-              <div className="relative transition-all duration-700 dark:text-solblue">
+              <div className="relative transition-all duration-700 text-solblue-dark dark:text-solblue">
                 <Collapse in={rewardsOpen} timeout="auto" unmountOnExit>
                   <List component="div" disablePadding>
+                    <ListItem className="justify-items text-solacid border-b border-solacid" style={{padding: 1, paddingLeft: 20, paddingRight: 20, paddingTop: 15}}>
+                        <ListItemText className="w-1/3" primary={`Epoch`} />
+                        <ListItemText className="w-1/3" primary={`Reward`} />
+                        <ListItemText className="w-1/3" primary={`Post Balance`} />
+                    </ListItem>
                     {stakeAccountMeta.inflationRewards.map(inflationReward => (
-                      <ListItem style={{paddingLeft: 10}} key={inflationReward.epoch}>
-                        <ListItemText primary={`Epoch: ${inflationReward.epoch}, reward: ${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
+                      <ListItem className="justify-items border-b border-solblue-2 dark:border-solblue-darker" style={{padding: 1, paddingLeft: 20, paddingRight: 20}} key={inflationReward.epoch}>
+                        <ListItemText className="w-1/3" primary={`${inflationReward.epoch}`} />
+                        <ListItemText className="w-1/3" primary={`${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
+                        <ListItemText className="w-1/3" primary={`${inflationReward.postBalance / LAMPORTS_PER_SOL}`} />
                       </ListItem>
                     ))}
                   </List>
