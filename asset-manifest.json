@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/static/css/main.013b8281.chunk.css",
-    "main.js": "/static/js/main.7463cf0f.chunk.js",
-    "main.js.map": "/static/js/main.7463cf0f.chunk.js.map",
+    "main.css": "/static/css/main.2568c1d2.chunk.css",
+    "main.js": "/static/js/main.e797d39d.chunk.js",
+    "main.js.map": "/static/js/main.e797d39d.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.954dca80.js",
     "runtime-main.js.map": "/static/js/runtime-main.954dca80.js.map",
     "static/css/2.c39fcfe6.chunk.css": "/static/css/2.c39fcfe6.chunk.css",
@@ -12,7 +12,7 @@
     "static/js/3.b53a4fae.chunk.js.map": "/static/js/3.b53a4fae.chunk.js.map",
     "index.html": "/index.html",
     "static/css/2.c39fcfe6.chunk.css.map": "/static/css/2.c39fcfe6.chunk.css.map",
-    "static/css/main.013b8281.chunk.css.map": "/static/css/main.013b8281.chunk.css.map",
+    "static/css/main.2568c1d2.chunk.css.map": "/static/css/main.2568c1d2.chunk.css.map",
     "static/js/2.28d36968.chunk.js.LICENSE.txt": "/static/js/2.28d36968.chunk.js.LICENSE.txt",
     "static/media/discord-brands.a6bf2a68.svg": "/static/media/discord-brands.a6bf2a68.svg",
     "static/media/logo-white.3c891f2a.svg": "/static/media/logo-white.3c891f2a.svg"
@@ -21,7 +21,7 @@
     "static/js/runtime-main.954dca80.js",
     "static/css/2.c39fcfe6.chunk.css",
     "static/js/2.28d36968.chunk.js",
-    "static/css/main.013b8281.chunk.css",
-    "static/js/main.7463cf0f.chunk.js"
+    "static/css/main.2568c1d2.chunk.css",
+    "static/js/main.e797d39d.chunk.js"
   ]
 }
