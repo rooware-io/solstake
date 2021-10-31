@@ -25,7 +25,7 @@ export default function Epoch() {
       <div className="p-5">
         <p className='text-3xl uppercase'>Epoch {dashboardEpochInfo?.epochInfo.epoch}</p>
       </div>
-      {/* Progress bar */}
+      {/* Progress bar to show the remaining time for Epoch to finish*/}
       <p className="pb-2 text-xl">{dashboardEpochInfo?.epochProgress && formatPct.format(dashboardEpochInfo.epochProgress)}</p>
       <div className="mx-5 mb-2 bg-white dark:bg-gray-600 rounded-full">
         <div className="shadow dark:shadow-none w-full bg-grey-light">
