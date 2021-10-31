@@ -136,7 +136,7 @@ export default function WalletSummary(props: WalletSummaryProps) {
       }
 
       <div className="w-full mt-3 flex flex-wrap md:justify-between items-center text-center">
-        <div className="w-full pb-3 lg:border-r-4 lg:border-transparent">
+        <div className="w-full pb-3 lg:border-transparent">
           {/* pie chart */}
           <div className="solBoxGray h-44 p-3.5 w-full font-light items-center text-center uppercase flex flex-wrap justify-center">
             {/* pie chart - css from added.css */}
