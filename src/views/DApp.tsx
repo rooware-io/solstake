@@ -283,7 +283,7 @@ function DApp() {
 
           {loading && (
             <div className="pb-3 pt-4 w-full md:pl-5">
-              <CircularProgress color="secondary" />
+              <CircularProgress color="primary" />
             </div>
           )}
           {stakeAccounts && (
