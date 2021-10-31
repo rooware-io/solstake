@@ -54,7 +54,7 @@ module.exports = {
         DEFAULT: '5px 10px 20px 30px rgba(255, 255, 255, 0.05)',
         "solacid": '0px 5px 20px 0 rgba(213, 227, 0, 0.5)',
         "solacidlight": '0px 5px 15px 0 rgba(223, 226, 129, 0.8)',
-        "solaciddark": '0px 5px 15px 0 rgba(166, 170, 0, 0.6)',
+        "solaciddark": '0px 5px 15px 0 rgba(166, 170, 0, 0.5)',
         "solbluelight": '0px 5px 20px 0 rgba(148, 253, 255, 0.5)',
         "solbluelight2": '0px 2px 12px 0 rgba(148, 253, 255, 0.4)',
         "solgray": '0px 5px 20px 0 rgba(30, 30, 30, 0.5)',
