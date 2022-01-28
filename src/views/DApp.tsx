@@ -8,8 +8,7 @@ import { accounInfoToStakeAccount as accountInfoToStakeAccount, findStakeAccount
 import { StakeAccountCard } from '../components/StakeAccount';
 import { ReactComponent as SolstakeLogoSvg } from '../assets/logo-white.svg';
 import { Info } from '@material-ui/icons';
-import { useWallet } from '../contexts/wallet';
-import { ENDPOINTS, useConnection, useConnectionConfig } from '../contexts/connection';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import HelpDialog from '../components/HelpDialog';
 import { STAKE_PROGRAM_ID } from '../utils/ids';
 import { sleep } from '../utils/utils';
@@ -94,27 +93,27 @@ async function onStakeAccountChangeCallback(connection: Connection, keyedAccount
 }
 
 function ClusterSelector() {
-  const { url, setUrl } = useConnectionConfig();
+  // const { url, setUrl } = useConnectionConfig();
 
   return (
     <select
       className="solBtnGray"
-      value={url}
-      onChange={e => setUrl(e.target.value as string)}
+      // value={url}
+      // onChange={e => setUrl(e.target.value as string)}
     >
-      {ENDPOINTS.map(({ name, url }) => (
+      {/* {ENDPOINTS.map(({ name, url }) => (
         <option value={url} key={url}>
           {name}
         </option>
-      ))}
+      ))} */}
     </select>
   );
 }
 
 function DApp() {
-  const connection = useConnection();
-  const { setUrl } = useConnectionConfig();
-  const { wallet, connected, disconnect } = useWallet();
+  const { connection } = useConnection();
+  // const { setUrl } = useConnectionConfig();
+  const { publicKey, disconnect } = useWallet();
   const { manualPublicKey, setManualPublicKeyString } = useContext(AccountsContext);
   const [loading, setLoading] = useState<boolean>(false);
   const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[] | null>(null);
@@ -122,7 +121,7 @@ function DApp() {
 
   useEffect(() => {
     setStakeAccounts(null);
-    const newPublicKey = connected ? wallet?.publicKey : manualPublicKey;
+    const newPublicKey = publicKey || manualPublicKey;
     if (newPublicKey) {
       setLoading(true);
       findStakeAccountMetas(connection, newPublicKey)
@@ -131,7 +130,7 @@ function DApp() {
           setLoading(false);
         });
     }
-  }, [connection, connected, wallet?.publicKey, manualPublicKey]);
+  }, [connection, publicKey, manualPublicKey]);
 
   async function addStakeAccount(stakeAccountPublicKey: PublicKey, seed: string) {
     if (!stakeAccounts) {
@@ -170,10 +169,7 @@ function DApp() {
   }
 
   useEffect(() => {
-    if (!wallet?.publicKey) {
-      return;
-    }
-    let walletPublicKey = wallet.publicKey;
+    if (!publicKey) return;
 
     const subscriptionId = connection.onProgramAccountChange(
       STAKE_PROGRAM_ID,
@@ -183,7 +179,7 @@ function DApp() {
           keyedAccountInfo,
           context,
           stakeAccounts,
-          walletPublicKey,
+          publicKey,
         );
         if (updatedStakeAccounts) {
           setStakeAccounts(updatedStakeAccounts);
@@ -193,7 +189,7 @@ function DApp() {
       [{
         memcmp: {
           offset: 12,
-          bytes: wallet.publicKey.toBase58()
+          bytes: publicKey.toBase58()
         }
       }]
     );
@@ -202,7 +198,7 @@ function DApp() {
       console.log('removeProgramAccountChangeListener');
       connection.removeProgramAccountChangeListener(subscriptionId);
     };
-  }, [connection, wallet, stakeAccounts]);
+  }, [connection, publicKey, stakeAccounts]);
 
   // Unfortunately we need to listen again because closing accounts do not notify above
   // In addition, subscription above is bugged and often drops notifications https://github.com/solana-labs/solana/issues/18587
@@ -256,7 +252,7 @@ function DApp() {
               <button className="solBtnGray p-0 m-0"
                 onClick={() => {
                   disconnect();
-                  setUrl(ENDPOINTS[0].url);
+                  // setUrl(ENDPOINTS[0].url);
                   setManualPublicKeyString(DEMO_PUBLIC_KEY_STRING);
                 }}
               >

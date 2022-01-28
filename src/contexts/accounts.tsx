@@ -1,7 +1,6 @@
-import { AccountInfo, PublicKey } from "@solana/web3.js";
 import React, { useEffect, useMemo, useState } from "react";
-import { useConnection } from "./connection";
-import { useWallet } from "./wallet";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { AccountInfo, PublicKey } from "@solana/web3.js";
 
 interface Accounts {
   systemProgramAccountInfo: AccountInfo<Buffer> | null
@@ -18,7 +17,7 @@ export const AccountsContext = React.createContext<Accounts>({
 });
 
 export function AccountsProvider({ children = null as any }) {
-  const connection = useConnection();
+  const { connection } = useConnection();
   const { publicKey } = useWallet();
   const [manualPublicKeyString, setManualPublicKeyString] = useState<string>('');
 

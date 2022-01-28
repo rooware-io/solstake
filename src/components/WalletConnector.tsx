@@ -1,6 +1,6 @@
+import { useWallet } from '@solana/wallet-adapter-react';
 import { useContext } from 'react';
 import { AccountsContext } from '../contexts/accounts';
-import { useWallet } from '../contexts/wallet';
 
 export default function WalletConnector() {
   const { publicKey, connected, select, disconnect } = useWallet();

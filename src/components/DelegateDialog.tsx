@@ -1,10 +1,8 @@
 import 'react-virtualized/styles.css';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import React, { useContext, useEffect, useState } from "react";
-import { sendTransaction, useSendConnection, useSolanaExplorerUrlSuffix } from '../contexts/connection';
 import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo } from '@solana/web3.js';
 import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress, InputAdornment, Tooltip } from '@material-ui/core';
-import { useWallet } from '../contexts/wallet';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPct, formatPriceNumber, shortenAddress, sleep } from '../utils/utils';
 import { Column, Table, TableHeaderProps, TableCellProps } from 'react-virtualized';
@@ -15,6 +13,8 @@ import { ValidatorsContext } from '../contexts/validators';
 import { useAsyncAbortable } from 'react-async-hook';
 import { useParams } from 'react-router-dom';
 import { ValidatorApy } from '../utils/stakeviewApp';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { useSolanaExplorerUrlSuffix } from '../hooks/useSolanaExplorerUrlSuffix';
 
 const IMG_SRC_DEFAULT = 'placeholder-questionmark.png';
 
@@ -132,8 +132,8 @@ async function batchMatcher(
 
 export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, handleClose: () => void}) {
   const {stakePubkey, open, handleClose} = props;
-  const sendConnection = useSendConnection();
-  const {wallet} = useWallet();
+  const { connection } = useConnection();
+  const { publicKey, sendTransaction } = useWallet();
   const {monitorTransaction, sending} = useMonitorTransaction();
   const urlSuffix = useSolanaExplorerUrlSuffix();
   
@@ -380,22 +380,20 @@ export function DelegateDialog(props: {stakePubkey: PublicKey, open: boolean, ha
         <Button
           disabled={selectedIndex === undefined || sending}
           onClick={async () => {
-            if(!wallet?.publicKey || selectedIndex === undefined || !filteredValidatorMetas[selectedIndex]) {
+            if(!publicKey || selectedIndex === undefined || !filteredValidatorMetas[selectedIndex]) {
               return;
             }
 
             const transaction = StakeProgram.delegate({
               stakePubkey,
-              authorizedPubkey: wallet.publicKey,
+              authorizedPubkey: publicKey,
               votePubkey: new PublicKey(filteredValidatorMetas[selectedIndex].voteAccountInfo.votePubkey)
             });
 
             await monitorTransaction(
               sendTransaction(
-                sendConnection,
-                wallet,
-                transaction.instructions,
-                []
+                transaction,
+                connection
               ),
               {
                 onSuccess: () => {

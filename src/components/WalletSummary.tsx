@@ -1,10 +1,9 @@
 //import { Tooltip } from '@material-ui/core';
 import { parsePriceData } from '@pythnetwork/client';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { AccountsContext } from '../contexts/accounts';
-import { useConnection, useSendConnection } from '../contexts/connection';
-import { useWallet } from '../contexts/wallet';
 import { STAKE_PROGRAM_ID } from '../utils/ids';
 import { StakeAccountMeta } from '../utils/stakeAccounts';
 import { formatPriceNumber } from '../utils/utils';
@@ -48,8 +47,7 @@ export default function WalletSummary(props: WalletSummaryProps) {
   const {stakeAccountMetas, addStakeAccount} = props;
 
   const connection = useConnection();
-  const sendConnection = useSendConnection();
-  const {wallet} = useWallet();
+  const { publicKey } = useWallet();
 
   const {systemProgramAccountInfo} = useContext(AccountsContext);
   const [SOLPriceUSD, setSOLPriceUSD] = useState<number>();
@@ -69,13 +67,13 @@ export default function WalletSummary(props: WalletSummaryProps) {
 
   // Yield first seed sequentially from unused seeds
   useEffect(() => {
-    if(!stakeAccountMetas || !wallet?.publicKey) {
+    if(!stakeAccountMetas || !publicKey) {
       return;
     }
 
-    findFirstAvailableSeed(wallet.publicKey, stakeAccountMetas)
+    findFirstAvailableSeed(publicKey, stakeAccountMetas)
       .then(setSeed);
-  }, [wallet, stakeAccountMetas]);
+  }, [publicKey, stakeAccountMetas]);
 
   const balance = useMemo(() => {
     return systemProgramAccountInfo && (systemProgramAccountInfo.lamports / LAMPORTS_PER_SOL);
@@ -123,7 +121,6 @@ export default function WalletSummary(props: WalletSummaryProps) {
           open={open}
           setOpen={setOpen}
           connection={connection}
-          sendConnection={sendConnection}
           wallet={wallet}
           onSuccess={async () => {
             if (!wallet.publicKey) {
