@@ -3,15 +3,15 @@ import '../App.css';
 import {
   Link
 } from 'react-router-dom';
-import { Box, Button, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, makeStyles, Theme, createStyles, Snackbar, SvgIcon } from '@material-ui/core';
+import { Box, Button, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, Snackbar, SvgIcon } from '@mui/material';
 import { ReactComponent as SolstakeLogoMainSvg } from '../assets/logo-white.svg';
-import { GitHub, Twitter, YouTube } from '@material-ui/icons';
+import { GitHub, Twitter, YouTube } from '@mui/icons-material';
 import { ReactComponent as Discord } from '../assets/discord-brands.svg';
-import { Alert } from '@material-ui/lab';
-import { Color } from '@material-ui/lab/Alert';
+import { Alert, AlertColor } from '@mui/lab';
+import { makeStyles } from '@mui/styles';
 
 const styles = {
-    smallIcon: {
+  smallIcon: {
     fontSize: "1.4em",
     color: "#0C2533"
   },
@@ -25,18 +25,16 @@ const styles = {
   },
 };
 
-const useStyles = makeStyles((theme: Theme) =>
-  createStyles({
-    root: {
-      flexGrow: 1
-    },
-  }),
-);
+const useStyles = makeStyles({
+  root: {
+    flexGrow: 1
+  }
+});
 
 interface Message {
   open: boolean;
   content: string;
-  severity: Color;
+  severity: AlertColor;
 };
 
 export function Landing() {
@@ -44,6 +42,8 @@ export function Landing() {
     const [open, setOpen] = useState(false);
     const [openVideo, setOpenVideo] = useState(false);
   
+    const classes = useStyles();
+
     function handleClose() {
       setOpen(false);
     }
@@ -55,8 +55,6 @@ export function Landing() {
     function handleCloseSnackbar() {
       setMessage({open: false, content: '', severity: 'success'});
     }
-
-    const classes = useStyles();
   
     return (
       <div id="landing">
@@ -64,7 +62,7 @@ export function Landing() {
           <Grid
             container
             alignItems="center"
-            justify="center"
+            // justify="center"
             direction="column"
             style={{minHeight: '100vh', textAlign: 'center', overflow: 'hidden'}}
           >

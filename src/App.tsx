@@ -8,7 +8,7 @@ import {
 import DApp from './views/DApp';
 import { Landing } from './views/Landing';
 import { Wallet } from './contexts/wallet';
-import { ThemeProvider } from '@material-ui/core';
+import { ThemeProvider } from '@mui/material';
 import { theme } from './assets/theme';
 import { EpochProvider } from './contexts/epoch';
 import { AccountsProvider } from './contexts/accounts';

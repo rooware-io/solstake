@@ -2,7 +2,7 @@ import 'react-virtualized/styles.css';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';
 import React, { useContext, useEffect, useState } from "react";
 import { LAMPORTS_PER_SOL, PublicKey, StakeProgram, ValidatorInfo, VoteAccountInfo } from '@solana/web3.js';
-import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress, InputAdornment, Tooltip } from '@material-ui/core';
+import { Button, Typography, Dialog, DialogActions, DialogContent, DialogTitle, Slider, TextField, Link, Box, CircularProgress, InputAdornment, Tooltip } from '@mui/material';
 import { useMonitorTransaction } from '../utils/notifications';
 import { formatPct, formatPriceNumber, shortenAddress, sleep } from '../utils/utils';
 import { Column, Table, TableHeaderProps, TableCellProps } from 'react-virtualized';

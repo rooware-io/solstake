@@ -1,3 +1,4 @@
+import { WalletConnectButton } from '@solana/wallet-adapter-material-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useContext } from 'react';
 import { AccountsContext } from '../contexts/accounts';
@@ -27,14 +28,15 @@ export default function WalletConnector() {
 
           {/* Connect wallet button */}
           <div className="pb-4 pt-2 lg:pt-0 text-center lg:text-right w-full lg:w-1/5">
-            <button className="solBtnGray pb-0.5"
+            {/* <button className="solBtnGray pb-0.5"
               onClick={select}
             >
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mb-0.5 mr-1.5 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
               </svg>
               Connect Wallet
-            </button>
+            </button> */}
+            <WalletConnectButton />
           </div>
         </>
       ) :

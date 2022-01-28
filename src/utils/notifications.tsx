@@ -1,4 +1,4 @@
-import { Button } from '@material-ui/core';
+import { Button } from '@mui/material';
 import { useConnection } from '@solana/wallet-adapter-react';
 import { Connection } from '@solana/web3.js';
 import { useSnackbar } from 'notistack';
@@ -60,11 +60,11 @@ export function useMonitorTransaction() {
       if (onSuccess) {
         onSuccess(signature);
       }
-    } catch (e) {
+    } catch (e: any) {
       closeSnackbar(id);
       setSending(false);
       console.warn(e);
-      enqueueSnackbar(e.message, { variant: 'error' });
+      enqueueSnackbar(e.message as string, { variant: 'error' });
       if (onError) {
         onError(e);
       }
@@ -118,10 +118,10 @@ export function useCallAsync() {
       if (onSuccess) {
         onSuccess(result);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.warn(e);
       closeSnackbar(id);
-      enqueueSnackbar(e.message, { variant: 'error' });
+      enqueueSnackbar(e.message as string, { variant: 'error' });
       if (onError) {
         onError(e);
       }

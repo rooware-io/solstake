@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Button, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, List, ListItem, ListItemText, TextField, Tooltip } from "@material-ui/core";
-//import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
+import { Button, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, List, ListItem, ListItemText, TextField, Tooltip } from "@mui/material";
 import { LAMPORTS_PER_SOL, PublicKey, StakeActivationData, StakeProgram } from "@solana/web3.js";
 import BN from "bn.js";
 import { EpochContext } from "../contexts/epoch";
@@ -176,8 +175,8 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
 
           {publicKey && withdrawOpen && (
             <WithdrawDialog
-              wallet={wallet}
               userPublicKey={publicKey}
+              sendTransaction={sendTransaction}
               stakePubkey={stakeAccountMeta.address}
               stakeAccountLamports={stakeAccountMeta.lamports}
               handleClose={() => {

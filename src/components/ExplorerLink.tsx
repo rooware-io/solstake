@@ -1,7 +1,7 @@
 import React from "react";
 import { shortenAddress } from "../utils/utils";
 import { PublicKey } from "@solana/web3.js";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 
 export function ExplorerLink(props: {
   address: string | PublicKey;

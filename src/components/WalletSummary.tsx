@@ -1,4 +1,3 @@
-//import { Tooltip } from '@material-ui/core';
 import { parsePriceData } from '@pythnetwork/client';
 import { useConnection, useWallet } from '@solana/wallet-adapter-react';
 import { clusterApiUrl, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js';

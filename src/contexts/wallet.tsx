@@ -1,7 +1,7 @@
 import React, { FC, useMemo } from 'react';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
-import { WalletDialogProvider, WalletMultiButton, WalletDisconnectButton } from '@solana/wallet-adapter-material-ui';
+import { WalletDialogProvider } from '@solana/wallet-adapter-material-ui';
 import {
   LedgerWalletAdapter,
   PhantomWalletAdapter,
@@ -12,9 +12,6 @@ import {
   TorusWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
-
-// Default styles that can be overridden by your app
-require('@solana/wallet-adapter-react-ui/styles.css');
 
 export const Wallet: FC = ({ children }) => {
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
@@ -49,9 +46,7 @@ export const Wallet: FC = ({ children }) => {
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
         <WalletDialogProvider>
-          <WalletMultiButton />
-          <WalletDisconnectButton />
-            {children}
+          {children}
         </WalletDialogProvider>
       </WalletProvider>
     </ConnectionProvider>
