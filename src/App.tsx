@@ -1,5 +1,3 @@
-import React from 'react';
-//import logo from './logo.svg';
 import './App.css';
 import {
   HashRouter as Router,
@@ -17,22 +15,22 @@ import { ValidatorsProvider } from './contexts/validators';
 
 function App() {
   return (
-    <Wallet>
-      <AccountsProvider>
-        <EpochProvider>
-          <ValidatorsProvider>
-            <SnackbarProvider maxSnack={5} autoHideDuration={10000}>
-              <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme}>
+      <SnackbarProvider maxSnack={5} autoHideDuration={10000}>
+        <Wallet>
+          <AccountsProvider>
+            <EpochProvider>
+              <ValidatorsProvider>
                 <Router>
                   <Route exact path='/' component={Landing} />
                   <Route path={['/app/validator/:validator', '/app']} component={DApp} />
                 </Router>
-              </ThemeProvider>
-            </SnackbarProvider>
-          </ValidatorsProvider>
-        </EpochProvider>
-      </AccountsProvider>
-    </Wallet>
+              </ValidatorsProvider>
+            </EpochProvider>
+          </AccountsProvider>
+        </Wallet>
+      </SnackbarProvider>
+    </ThemeProvider>
   );
 }
 

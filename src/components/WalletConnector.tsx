@@ -4,7 +4,7 @@ import { useContext } from 'react';
 import { AccountsContext } from '../contexts/accounts';
 
 export default function WalletConnector() {
-  const { publicKey, connected, select, disconnect } = useWallet();
+  const { publicKey, connected, disconnect } = useWallet();
   const { manualPublicKey, manualPublicKeyString, setManualPublicKeyString } = useContext(AccountsContext);
 
   return (
@@ -36,7 +36,7 @@ export default function WalletConnector() {
               </svg>
               Connect Wallet
             </button> */}
-            <WalletConnectButton />
+            {/* <WalletConnectButton /> */}
           </div>
         </>
       ) :

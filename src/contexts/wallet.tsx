@@ -1,6 +1,6 @@
-import React, { FC, useMemo } from 'react';
+import React, { FC, useCallback, useMemo } from 'react';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
-import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
+import { WalletAdapterNetwork, WalletError } from '@solana/wallet-adapter-base';
 import { WalletDialogProvider } from '@solana/wallet-adapter-material-ui';
 import {
   LedgerWalletAdapter,
@@ -12,10 +12,11 @@ import {
   TorusWalletAdapter,
 } from '@solana/wallet-adapter-wallets';
 import { clusterApiUrl } from '@solana/web3.js';
+import { useSnackbar } from 'notistack';
 
 export const Wallet: FC = ({ children }) => {
   // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
-  const network = WalletAdapterNetwork.Testnet;
+  const network = WalletAdapterNetwork.Mainnet;
 
   // You can also provide a custom RPC endpoint.
   const endpoint = useMemo(() => clusterApiUrl(network), [network]);
@@ -36,15 +37,18 @@ export const Wallet: FC = ({ children }) => {
     [network]
   );
 
-  // TODO: Implement wallet error toasts
-  // const onError = useCallback((error: WalletError) => {
-  //   toast.error(error.message ? `${error.name}: ${error.message}` : error.name);
-  //   console.error(error);
-  // }, []);
+  const { enqueueSnackbar } = useSnackbar();
+  const onError = useCallback(
+    (error: WalletError) => {
+      enqueueSnackbar(error.message ? `${error.name}: ${error.message}` : error.name, { variant: 'error' });
+      console.error(error);
+    },
+    [enqueueSnackbar]
+  );
 
   return (
     <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
+      <WalletProvider wallets={wallets} onError={onError} autoConnect>
         <WalletDialogProvider>
           {children}
         </WalletDialogProvider>
