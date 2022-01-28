@@ -8,28 +8,27 @@ import { ReactComponent as SolstakeLogoMainSvg } from '../assets/logo-white.svg'
 import { GitHub, Twitter, YouTube } from '@mui/icons-material';
 import { ReactComponent as Discord } from '../assets/discord-brands.svg';
 import { Alert, AlertColor } from '@mui/lab';
-import { makeStyles } from '@mui/styles';
 
-const styles = {
-  smallIcon: {
-    fontSize: "1.4em",
-    color: "#0C2533"
-  },
-  mediumIcon: {
-    fontSize: "1.5em",
-    color: "#0C2533"
-  },
-  largeIcon: {
-    fontSize: "1.7em",
-    color: "#0C2533"
-  },
-};
+// const styles = {
+//   smallIcon: {
+//     fontSize: "1.4em",
+//     color: "#0C2533"
+//   },
+//   mediumIcon: {
+//     fontSize: "1.5em",
+//     color: "#0C2533"
+//   },
+//   largeIcon: {
+//     fontSize: "1.7em",
+//     color: "#0C2533"
+//   },
+// };
 
-const useStyles = makeStyles({
-  root: {
-    flexGrow: 1
-  }
-});
+// const useStyles = makeStyles({
+//   root: {
+//     flexGrow: 1
+//   }
+// });
 
 interface Message {
   open: boolean;
@@ -42,7 +41,7 @@ export function Landing() {
     const [open, setOpen] = useState(false);
     const [openVideo, setOpenVideo] = useState(false);
   
-    const classes = useStyles();
+    // const classes = useStyles();
 
     function handleClose() {
       setOpen(false);
@@ -58,7 +57,7 @@ export function Landing() {
   
     return (
       <div id="landing">
-        <div className={classes.root}>
+        <div>
           <Grid
             container
             alignItems="center"
@@ -106,18 +105,18 @@ export function Landing() {
                   href="https://github.com/rooware-io/solstake"
                   rel="noopener noreferrer" target="_blank"
                 >
-                  <GitHub style={styles.smallIcon} />
+                  <GitHub />
                 </IconButton>
                 <IconButton
                   onClick={() => setOpenVideo(true)}
                 >
-                  <YouTube style={styles.largeIcon} />
+                  <YouTube />
                 </IconButton>
                 <IconButton
                   href="https://discord.gg/r5fZHdfu"
                   rel="noopener noreferrer" target="_blank"
                 >
-                  <SvgIcon style={styles.smallIcon}>
+                  <SvgIcon>
                     <Discord />
                   </SvgIcon>
                 </IconButton>
@@ -125,7 +124,7 @@ export function Landing() {
                   href="https://twitter.com/solstakeio"
                   rel="noopener noreferrer" target="_blank"
                 >
-                  <Twitter style={styles.mediumIcon} />
+                  <Twitter />
                 </IconButton>
               </div>
             </Grid>
