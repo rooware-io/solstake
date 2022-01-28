@@ -6,31 +6,27 @@ import {
 import DApp from './views/DApp';
 import { Landing } from './views/Landing';
 import { Wallet } from './contexts/wallet';
-import { ThemeProvider } from '@mui/material';
-import { theme } from './assets/theme';
+import { Theme } from './contexts/theme';
 import { EpochProvider } from './contexts/epoch';
 import { AccountsProvider } from './contexts/accounts';
-import { SnackbarProvider } from 'notistack';
 import { ValidatorsProvider } from './contexts/validators';
 
 function App() {
   return (
-    <ThemeProvider theme={theme}>
-      <SnackbarProvider maxSnack={5} autoHideDuration={10000}>
-        <Wallet>
-          <AccountsProvider>
-            <EpochProvider>
-              <ValidatorsProvider>
-                <Router>
-                  <Route exact path='/' component={Landing} />
-                  <Route path={['/app/validator/:validator', '/app']} component={DApp} />
-                </Router>
-              </ValidatorsProvider>
-            </EpochProvider>
-          </AccountsProvider>
-        </Wallet>
-      </SnackbarProvider>
-    </ThemeProvider>
+    <Theme>
+      <Wallet>
+        <AccountsProvider>
+          <EpochProvider>
+            <ValidatorsProvider>
+              <Router>
+                <Route exact path='/' component={Landing} />
+                <Route path={['/app/validator/:validator', '/app']} component={DApp} />
+              </Router>
+            </ValidatorsProvider>
+          </EpochProvider>
+        </AccountsProvider>
+      </Wallet>
+    </Theme>
   );
 }
 
