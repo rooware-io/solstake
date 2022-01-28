@@ -46,8 +46,8 @@ async function findFirstAvailableSeed(userPublicKey: PublicKey, stakeAccountMeta
 export default function WalletSummary(props: WalletSummaryProps) {
   const {stakeAccountMetas, addStakeAccount} = props;
 
-  const connection = useConnection();
-  const { publicKey } = useWallet();
+  const { connection } = useConnection();
+  const { publicKey, sendTransaction } = useWallet();
 
   const {systemProgramAccountInfo} = useContext(AccountsContext);
   const [SOLPriceUSD, setSOLPriceUSD] = useState<number>();
@@ -115,18 +115,17 @@ export default function WalletSummary(props: WalletSummaryProps) {
         </div>
       </div>
 
-      { wallet && open &&
+      { publicKey && open &&
         <CreateStakeAccountDialog
           seed={seed}
           open={open}
           setOpen={setOpen}
           connection={connection}
-          wallet={wallet}
+          userPublicKey={publicKey}
+          sendTransaction={sendTransaction}
           onSuccess={async () => {
-            if (!wallet.publicKey) {
-              return;
-            }
-            const newStakeAccountPubkey = await PublicKey.createWithSeed(wallet.publicKey, seed, STAKE_PROGRAM_ID);
+            if (!publicKey) return;
+            const newStakeAccountPubkey = await PublicKey.createWithSeed(publicKey, seed, STAKE_PROGRAM_ID);
             addStakeAccount(newStakeAccountPubkey, seed);
           }}
         />

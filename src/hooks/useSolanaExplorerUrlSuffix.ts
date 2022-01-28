@@ -10,6 +10,5 @@ export function useSolanaExplorerUrlSuffix() {
   } else if (endpoint === clusterApiUrl('testnet')) {
     return '?cluster=testnet';
   }
-    return '';
-  }
+  return '';
 }

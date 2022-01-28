@@ -1,8 +1,9 @@
 import { Button } from '@material-ui/core';
+import { useConnection } from '@solana/wallet-adapter-react';
 import { Connection } from '@solana/web3.js';
 import { useSnackbar } from 'notistack';
 import React, { useState } from 'react';
-import { useConnection, useSolanaExplorerUrlSuffix } from '../contexts/connection';
+import { useSolanaExplorerUrlSuffix } from '../hooks/useSolanaExplorerUrlSuffix';
 
 async function confirmTransaction(
   connection: Connection,
@@ -27,7 +28,7 @@ export function notify({message, description}: {message: string, description: st
 } 
 
 export function useMonitorTransaction() {
-  const connection = useConnection();
+  const { connection } = useConnection();
   const { enqueueSnackbar, closeSnackbar } = useSnackbar();
   const [sending, setSending] = useState(false);
 
