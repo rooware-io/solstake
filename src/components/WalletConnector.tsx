@@ -1,4 +1,4 @@
-import { WalletConnectButton } from '@solana/wallet-adapter-material-ui';
+//import { WalletConnectButton } from '@solana/wallet-adapter-material-ui';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { useContext } from 'react';
 import { AccountsContext } from '../contexts/accounts';

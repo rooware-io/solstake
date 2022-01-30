@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@mui/material";
 import { shortenAddress } from "../utils/utils";
 import { useWallet } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-material-ui";
+// import { WalletMultiButton } from "@solana/wallet-adapter-material-ui";
 
 function CurrentUserBadge() {
   const { publicKey } = useWallet();
@@ -25,7 +25,7 @@ export function Connector() {
       {connected ? (
         <CurrentUserBadge />
       ) : (
-        <WalletMultiButton />
+        '' // <WalletMultiButton />
       )}
     </>
   );
