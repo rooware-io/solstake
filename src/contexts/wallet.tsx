@@ -56,3 +56,5 @@ export const Wallet: FC<{ children: ReactNode }> = ({ children }) => {
     </ConnectionProvider>
   );
 };
+
+export default Wallet;

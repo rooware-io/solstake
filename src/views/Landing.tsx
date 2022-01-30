@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { FC, useState } from 'react';
 import '../App.css';
 import {
   Link
@@ -36,7 +36,7 @@ interface Message {
   severity: AlertColor;
 };
 
-export function Landing() {
+const Landing: FC = () => {
     const [message, setMessage] = useState<Message>({open: false, content: '', severity: 'success'});
     const [open, setOpen] = useState(false);
     const [openVideo, setOpenVideo] = useState(false);
@@ -68,7 +68,7 @@ export function Landing() {
             <Grid item xs={10}>
               <div className="flex justify-center text-center p-0">
                 <div className="w-10/12 sm:1/4 md:w-3/4 lg:w-2/3 xl:w-1/3 pt-5 md:pt-0">
-                  <SolstakeLogoMainSvg />
+                  {/* <SolstakeLogoMainSvg /> */}
                 </div>
               </div>
               <Typography style={{visibility: 'hidden'}}>
@@ -101,7 +101,7 @@ export function Landing() {
               </div>
   
               <div>
-                <IconButton
+                {/* <IconButton
                   href="https://github.com/rooware-io/solstake"
                   rel="noopener noreferrer" target="_blank"
                 >
@@ -125,7 +125,7 @@ export function Landing() {
                   rel="noopener noreferrer" target="_blank"
                 >
                   <Twitter />
-                </IconButton>
+                </IconButton> */}
               </div>
             </Grid>
           </Grid>
@@ -161,9 +161,6 @@ export function Landing() {
             <iframe width="560" height="315" src="https://www.youtube.com/embed/JUDG6j5ktW4" title="YouTube video player" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen></iframe>
           </div>
         </Dialog>
-        {/* <div id="stars"></div>
-        <div id="stars2"></div>
-        <div id="stars3"></div> */}
         <Snackbar open={message.open} autoHideDuration={10000} onClose={handleCloseSnackbar}>
           <Alert onClose={handleClose} severity={message.severity}>
             {message.content}
@@ -172,3 +169,5 @@ export function Landing() {
       </div>
     );
   }
+
+export default Landing;

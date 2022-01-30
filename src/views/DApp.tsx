@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { FC, useContext, useEffect, useState } from 'react';
 import { CircularProgress, IconButton, Tooltip } from '@mui/material';
 import { AccountInfo, Connection, Context, KeyedAccountInfo, ParsedAccountData, PublicKey } from '@solana/web3.js';
 import {
@@ -110,7 +110,7 @@ function ClusterSelector() {
   );
 }
 
-function DApp() {
+const DApp: FC = () => {
   const { connection } = useConnection();
   // const { setUrl } = useConnectionConfig();
   const { publicKey, disconnect } = useWallet();
@@ -235,7 +235,7 @@ function DApp() {
       <div className="h-20 flex flex-wrap justify-between px-10 py-4">
         <div className="h-full w-1/2 md:w-1/3 xl:w-1/6 pt-2">
           <RouterLink to="/">
-            <SolstakeLogoSvg />
+            {/* <SolstakeLogoSvg /> */}
           </RouterLink>
         </div>
         
