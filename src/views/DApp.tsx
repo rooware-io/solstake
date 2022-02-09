@@ -17,6 +17,7 @@ import WalletSummary from '../components/WalletSummary';
 import WalletConnector from '../components/WalletConnector';
 import { ThemeToggler } from '../components/ThemeToggler';
 import { AccountsContext } from '../contexts/accounts';
+import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 const DEMO_PUBLIC_KEY_STRING = 'EYgykDCkNafefvJ6bJpST5LVRPpB3CkTjBSUmffM9Ejs';
 
 function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[]}) {
@@ -93,19 +94,19 @@ async function onStakeAccountChangeCallback(connection: Connection, keyedAccount
 }
 
 function ClusterSelector() {
-  // const { url, setUrl } = useConnectionConfig();
+  //const { cluster, setCluster } = useCluster();
 
   return (
     <select
       className="solBtnGray"
-      // value={url}
-      // onChange={e => setUrl(e.target.value as string)}
+      // value={cluster}
+      // onChange={e => setCluster(e.target.value as string)}
     >
-      {/* {ENDPOINTS.map(({ name, url }) => (
-        <option value={url} key={url}>
-          {name}
+      {Object.values(WalletAdapterNetwork).map((network) => (
+        <option value={network} key={network}>
+          {network}
         </option>
-      ))} */}
+      ))}
     </select>
   );
 }

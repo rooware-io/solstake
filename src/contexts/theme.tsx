@@ -9,26 +9,12 @@ import { grey, lightBlue } from '@mui/material/colors';
 
 const theme = createTheme({
   palette: {
-    primary: lightBlue,
+    secondary: {
+      main: '#3D96A0'
+    },
     grey: {
       900: grey[400] // LOL, to change the color in the already styled WalletMultiButton
     }
-  },
-  components: {
-    MuiList: {
-      styleOverrides: {
-        root: {
-          background: 'white',
-        },
-      }
-    },
-    MuiButton: {
-      styleOverrides: {
-        root: {
-          color: 'white'
-        }
-      }
-    },
   },
   typography: {
     fontFamily: '"Red Hat Display", sans-serif',
