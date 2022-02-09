@@ -21,7 +21,7 @@
     "@solana/web3.js": "^1.32.0",
     "humanize-duration-ts": "^2.1.1",
     "mathjs": "^9.4.5",
-    "node-sass": "5.*",
+    "node-sass": "^7.0.1",
     "notistack": "^2.0.3",
     "parcel": "^2.2.1",
     "react": "^17.0.2",
@@ -48,9 +48,10 @@
   },
   "browserslist": {
     "production": [
-      ">0.2%",
+      ">0.5%",
       "not dead",
-      "not op_mini all"
+      "not op_mini all",
+      "not ios_saf < 13"
     ],
     "development": [
       "last 1 chrome version",
