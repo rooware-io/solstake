@@ -1,19 +1,38 @@
-import React, { FC, ReactNode } from 'react';
-import { createTheme, StyledEngineProvider, ThemeProvider } from '@mui/material';
+import { FC, ReactNode } from 'react';
+import {
+  createTheme,
+  StyledEngineProvider,
+  ThemeProvider,
+} from '@mui/material';
 import { SnackbarProvider } from 'notistack';
+import { grey, lightBlue } from '@mui/material/colors';
 
 const theme = createTheme({
   palette: {
-    primary: {
-      main: '#FFFFFF',
-    },
-    secondary: {
-      main: '#3D96A0'
+    primary: lightBlue,
+    grey: {
+      900: grey[400] // LOL, to change the color in the already styled WalletMultiButton
     }
   },
+  components: {
+    MuiList: {
+      styleOverrides: {
+        root: {
+          background: 'white',
+        },
+      }
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          color: 'white'
+        }
+      }
+    },
+  },
   typography: {
-    fontFamily: '"Red Hat Display", sans-serif'
-  }
+    fontFamily: '"Red Hat Display", sans-serif',
+  },
 });
 
 export const Theme: FC<{ children: ReactNode }> = ({ children }) => {

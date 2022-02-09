@@ -4,7 +4,7 @@ import {
   Link
 } from 'react-router-dom';
 import { Box, Button, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, Snackbar, SvgIcon } from '@mui/material';
-import { ReactComponent as SolstakeLogoMainSvg } from '../assets/logo-white.svg';
+import SolstakeLogoMainSvg from '../assets/logo-white.svg';
 import { GitHub, Twitter, YouTube } from '@mui/icons-material';
 import { ReactComponent as Discord } from '../assets/discord-brands.svg';
 import { Alert, AlertColor } from '@mui/lab';
@@ -68,7 +68,7 @@ const Landing: FC = () => {
             <Grid item xs={10}>
               <div className="flex justify-center text-center p-0">
                 <div className="w-10/12 sm:1/4 md:w-3/4 lg:w-2/3 xl:w-1/3 pt-5 md:pt-0">
-                  {/* <SolstakeLogoMainSvg /> */}
+                  <SolstakeLogoMainSvg />
                 </div>
               </div>
               <Typography style={{visibility: 'hidden'}}>

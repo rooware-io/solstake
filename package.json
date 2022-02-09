@@ -63,6 +63,7 @@
   },
   "devDependencies": {
     "@parcel/packager-raw-url": "^2.2.1",
+    "@parcel/transformer-svg-react": "^2.2.1",
     "@parcel/transformer-webmanifest": "^2.2.1",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
