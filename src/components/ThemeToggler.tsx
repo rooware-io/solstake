@@ -1,5 +1,5 @@
-import { Brightness6 } from "@material-ui/icons";
-import { IconButton } from "@material-ui/core";
+import { Brightness6 } from "@mui/icons-material";
+import { IconButton } from "@mui/material";
 import { useDarkMode } from "../hooks/useDarkMode";
 
 export function ThemeToggler() {

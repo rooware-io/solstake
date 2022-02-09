@@ -1,10 +1,10 @@
+import { useConnection } from '@solana/wallet-adapter-react';
 import { useEffect, useState } from 'react';
-import { useConnection } from '../contexts/connection';
 import { DashboardEpochInfo, getDashboardEpochInfo } from '../utils/epoch';
 import { formatPct, humanizeDuration } from '../utils/utils';
 
 export default function Epoch() {
-  const connection = useConnection();
+  const { connection } = useConnection();
   const [dashboardEpochInfo, setDashboardEpochInfo] = useState<DashboardEpochInfo | null>();
 
   useEffect(() => {

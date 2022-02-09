@@ -1,23 +1,22 @@
-import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, TextField, Typography } from "@material-ui/core";
+import { Button, CircularProgress, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, TextField, Typography } from "@mui/material";
 import { Authorized, Connection, LAMPORTS_PER_SOL, PublicKey, StakeProgram } from "@solana/web3.js";
 import { useContext, useEffect, useState } from "react";
 import { AccountsContext } from "../contexts/accounts";
-import { sendTransaction } from "../contexts/connection";
 import { useMonitorTransaction } from "../utils/notifications";
-import { WalletAdapter } from "../wallet-adapters/walletAdapter";
 import * as mathjs from "mathjs";
+import { WalletContextState } from "@solana/wallet-adapter-react";
 
 interface CreateStakeAccountProps {
   seed: string;
   open: boolean;
   setOpen: (open: boolean) => void;
-  wallet: WalletAdapter;
+  userPublicKey: PublicKey;
+  sendTransaction: WalletContextState['sendTransaction']
   connection: Connection;
-  sendConnection: Connection;
   onSuccess: () => void;
 };
   
-export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connection, sendConnection, onSuccess}: CreateStakeAccountProps) {
+export function CreateStakeAccountDialog({seed, open, setOpen, userPublicKey, sendTransaction, connection, onSuccess}: CreateStakeAccountProps) {
   const {monitorTransaction, sending} = useMonitorTransaction();
   const {systemProgramAccountInfo} = useContext(AccountsContext);
 
@@ -75,11 +74,9 @@ export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connectio
         <Button
           disabled={sending || Number(amount) === 0 || !!error}
           onClick={async () => {
-            if(!wallet.publicKey) {
-              return;
-            }
+            if(!userPublicKey) return;
             const stakePubkey = await PublicKey.createWithSeed(
-              wallet.publicKey,
+              userPublicKey,
               seed,
               StakeProgram.programId,
             );
@@ -88,23 +85,21 @@ export function CreateStakeAccountDialog({seed, open, setOpen, wallet, connectio
               .toNumber();
 
             const transaction = StakeProgram.createAccountWithSeed({
-              fromPubkey: wallet.publicKey,
+              fromPubkey: userPublicKey,
               stakePubkey,
-              basePubkey: wallet.publicKey,
+              basePubkey: userPublicKey,
               seed,
               authorized: new Authorized(
-                wallet.publicKey,
-                wallet.publicKey
+                userPublicKey,
+                userPublicKey
               ),
               lamports
             });
 
             await monitorTransaction(
               sendTransaction(
-                sendConnection,
-                wallet,
-                transaction.instructions,
-                []
+                transaction,
+                connection,
               ),
               {
                 onSuccess: () => {

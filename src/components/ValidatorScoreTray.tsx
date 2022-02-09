@@ -1,4 +1,4 @@
-import { Tooltip, Typography } from "@material-ui/core";
+import { Tooltip, Typography } from "@mui/material";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCircle, faMinusCircle } from '@fortawesome/free-solid-svg-icons';
 import { ValidatorScore } from '../utils/validatorsApp';

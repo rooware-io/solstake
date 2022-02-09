@@ -1,4 +1,4 @@
-import { Dialog, Box, Button, DialogActions, DialogContent, DialogTitle, Typography, Link } from "@material-ui/core";
+import { Dialog, Box, Button, DialogActions, DialogContent, DialogTitle, Typography, Link } from "@mui/material";
 
 
 export default function HelpDialog(props: {open: boolean, handleClose: () => void}) {
