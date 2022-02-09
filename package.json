@@ -38,10 +38,7 @@
   },
   "scripts": {
     "start": "parcel src/index.html",
-    "build": "craco build",
-    "test": "craco test",
-    "eject": "react-scripts eject",
-    "deploy": "gh-pages -d build"
+    "build": "parcel build src/index.html"
   },
   "eslintConfig": {
     "extends": [

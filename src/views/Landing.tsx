@@ -1,34 +1,28 @@
-import React, { FC, useState } from 'react';
+import { FC, useState } from 'react';
 import '../App.css';
 import {
   Link
 } from 'react-router-dom';
-import { Box, Button, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, Snackbar, SvgIcon } from '@mui/material';
+import { Box, Button, Typography, IconButton, Grid, Dialog, DialogTitle, DialogActions, DialogContent, Snackbar, SvgIcon, makeStyles } from '@mui/material';
 import SolstakeLogoMainSvg from '../assets/logo-white.svg';
 import { GitHub, Twitter, YouTube } from '@mui/icons-material';
-import { ReactComponent as Discord } from '../assets/discord-brands.svg';
+import Discord from '../assets/discord-brands.svg';
 import { Alert, AlertColor } from '@mui/lab';
 
-// const styles = {
-//   smallIcon: {
-//     fontSize: "1.4em",
-//     color: "#0C2533"
-//   },
-//   mediumIcon: {
-//     fontSize: "1.5em",
-//     color: "#0C2533"
-//   },
-//   largeIcon: {
-//     fontSize: "1.7em",
-//     color: "#0C2533"
-//   },
-// };
-
-// const useStyles = makeStyles({
-//   root: {
-//     flexGrow: 1
-//   }
-// });
+const styles = {
+  smallIcon: {
+    fontSize: "1.4em",
+    color: "#0C2533"
+  },
+  mediumIcon: {
+    fontSize: "1.5em",
+    color: "#0C2533"
+  },
+  largeIcon: {
+    fontSize: "1.7em",
+    color: "#0C2533"
+  },
+};
 
 interface Message {
   open: boolean;
@@ -40,8 +34,6 @@ const Landing: FC = () => {
     const [message, setMessage] = useState<Message>({open: false, content: '', severity: 'success'});
     const [open, setOpen] = useState(false);
     const [openVideo, setOpenVideo] = useState(false);
-  
-    // const classes = useStyles();
 
     function handleClose() {
       setOpen(false);
@@ -56,7 +48,7 @@ const Landing: FC = () => {
     }
   
     return (
-      <div id="landing">
+      <div id="landing" className="grow">
         <div>
           <Grid
             container
@@ -101,22 +93,23 @@ const Landing: FC = () => {
               </div>
   
               <div>
-                {/* <IconButton
+                <IconButton
                   href="https://github.com/rooware-io/solstake"
                   rel="noopener noreferrer" target="_blank"
                 >
-                  <GitHub />
+                  <GitHub fontSize="large" />
                 </IconButton>
                 <IconButton
+                  size="medium"
                   onClick={() => setOpenVideo(true)}
                 >
-                  <YouTube />
+                  <YouTube fontSize="large" />
                 </IconButton>
                 <IconButton
                   href="https://discord.gg/r5fZHdfu"
                   rel="noopener noreferrer" target="_blank"
                 >
-                  <SvgIcon>
+                  <SvgIcon fontSize="large">
                     <Discord />
                   </SvgIcon>
                 </IconButton>
@@ -124,8 +117,8 @@ const Landing: FC = () => {
                   href="https://twitter.com/solstakeio"
                   rel="noopener noreferrer" target="_blank"
                 >
-                  <Twitter />
-                </IconButton> */}
+                  <Twitter fontSize="large" />
+                </IconButton>
               </div>
             </Grid>
           </Grid>
