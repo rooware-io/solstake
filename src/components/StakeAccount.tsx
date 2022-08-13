@@ -77,7 +77,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   const voteAccountAddress = useMemo(() => {
     return stakeAccountMeta.stakeAccount.info.stake?.delegation.voter
   }, [stakeAccountMeta])
-  
+
   return (
     <div className="bg-transparent w-full font-light pb-3">
       <div className="solBoxGray dark:bg-solblue-dark rounded-b-none rounded-t-lg w-full bg-white uppercase flex flex-wrap md:justify-between items-center text-center md:text-left" style={{borderBottomLeftRadius: 0, borderBottomRightRadius: 0}}>
@@ -243,7 +243,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                   <span>
                     <span className="ml-4">Rewards </span>
                     <span className="font-normal">{totalRewards / LAMPORTS_PER_SOL} SOL </span>
-                    <span className="text-xs">{(APR && formatPct.format(APR)) || '-'} APR </span>
+                    {/* <span className="text-xs">{(APR && formatPct.format(APR)) || '-'} APR </span> */}
                   </span>
                   <span className="ico-plus" hidden={stakeAccountMeta.inflationRewards.length === 0}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -261,13 +261,16 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                         <ListItemText className="w-1/3" primary={`Reward`} />
                         <ListItemText className="w-1/3" primary={`Post Balance`} />
                     </ListItem>
-                    {stakeAccountMeta.inflationRewards.map(inflationReward => (
+                    {stakeAccountMeta.inflationRewards.map((inflationReward) => (
                       <ListItem className="justify-items border-b border-solblue-2 dark:border-solblue-darker" style={{padding: 1, paddingLeft: 20, paddingRight: 20}} key={inflationReward.epoch}>
                         <ListItemText className="w-1/3" primary={`${inflationReward.epoch}`} />
                         <ListItemText className="w-1/3" primary={`${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
                         <ListItemText className="w-1/3" primary={`${inflationReward.postBalance / LAMPORTS_PER_SOL}`} />
                       </ListItem>
                     ))}
+                    <ListItem className="justify-items border-b border-solblue-2 dark:border-solblue-darker" style={{padding: 1, paddingLeft: 20, paddingRight: 20}} key={'Disclaimer'}>
+                      <ListItemText className="w-1/3" primary={`Truncated to last 5 epochs`} />
+                    </ListItem>
                   </List>
                 </Collapse>
               </div>

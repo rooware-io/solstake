@@ -1,10 +1,20 @@
 import React, { FC, useContext, useEffect, useState } from 'react';
 import { CircularProgress, IconButton, Tooltip } from '@mui/material';
-import { AccountInfo, Connection, Context, KeyedAccountInfo, ParsedAccountData, PublicKey } from '@solana/web3.js';
 import {
-  Link as RouterLink
-} from 'react-router-dom';
-import { accounInfoToStakeAccount as accountInfoToStakeAccount, findStakeAccountMetas, sortStakeAccountMetas, StakeAccountMeta } from '../utils/stakeAccounts';
+  AccountInfo,
+  Connection,
+  Context,
+  KeyedAccountInfo,
+  ParsedAccountData,
+  PublicKey,
+} from '@solana/web3.js';
+import { Link as RouterLink } from 'react-router-dom';
+import {
+  accounInfoToStakeAccount as accountInfoToStakeAccount,
+  findStakeAccountMetas,
+  sortStakeAccountMetas,
+  StakeAccountMeta,
+} from '../utils/stakeAccounts';
 import { StakeAccountCard } from '../components/StakeAccount';
 import SolstakeLogoSvg from '../assets/logo-white.svg';
 import { Info } from '@mui/icons-material';
@@ -20,14 +30,16 @@ import { AccountsContext } from '../contexts/accounts';
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base';
 const DEMO_PUBLIC_KEY_STRING = 'EYgykDCkNafefvJ6bJpST5LVRPpB3CkTjBSUmffM9Ejs';
 
-function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta[]}) {
+function StakeAccounts({
+  stakeAccountMetas,
+}: {
+  stakeAccountMetas: StakeAccountMeta[];
+}) {
   if (stakeAccountMetas.length === 0) {
     return (
       <div className="solBoxGray w-full font-light flex flex-wrap md:justify-between items-center text-center">
         <div className="pb-3 pt-4 w-full md:pl-5">
-          <p>
-            No stake account found
-          </p>
+          <p>No stake account found</p>
         </div>
       </div>
     );
@@ -35,26 +47,40 @@ function StakeAccounts({stakeAccountMetas}: {stakeAccountMetas: StakeAccountMeta
 
   return (
     <>
-      {stakeAccountMetas.map(
-        meta => <StakeAccountCard key={meta.address.toBase58()} stakeAccountMeta={meta} />
-      )}
+      {stakeAccountMetas.map((meta) => (
+        <StakeAccountCard
+          key={meta.address.toBase58()}
+          stakeAccountMeta={meta}
+        />
+      ))}
     </>
   );
 }
 
-async function onStakeAccountChangeCallback(connection: Connection, keyedAccountInfo: KeyedAccountInfo, _context: Context, stakeAccounts: StakeAccountMeta[] | null, walletPublicKey: PublicKey): Promise<StakeAccountMeta[] | undefined> {
-  const {accountId, accountInfo} = keyedAccountInfo;
+async function onStakeAccountChangeCallback(
+  connection: Connection,
+  keyedAccountInfo: KeyedAccountInfo,
+  _context: Context,
+  stakeAccounts: StakeAccountMeta[] | null,
+  walletPublicKey: PublicKey
+): Promise<StakeAccountMeta[] | undefined> {
+  const { accountId, accountInfo } = keyedAccountInfo;
   console.log(`StakeAccount update for ${accountId.toBase58()}`);
 
-  const index = stakeAccounts?.findIndex(extistingStakeAccountMeta =>
-    extistingStakeAccountMeta.address.equals(accountId)
-  ) ?? -1;
+  const index =
+    stakeAccounts?.findIndex((extistingStakeAccountMeta) =>
+      extistingStakeAccountMeta.address.equals(accountId)
+    ) ?? -1;
   let updatedStakeAccounts = stakeAccounts ? [...stakeAccounts] : [];
 
   // Ideally we should just subscribe as jsonParsed, but that isn't available through web3.js
-  const {value} = await connection.getParsedAccountInfo(accountId);
+  const { value } = await connection.getParsedAccountInfo(accountId);
   const parsedAccountInfo = value;
-  console.log(accountInfo.lamports, accountInfo.data, accountInfo.owner.toBase58());
+  console.log(
+    accountInfo.lamports,
+    accountInfo.data,
+    accountInfo.owner.toBase58()
+  );
   if (!parsedAccountInfo) {
     // The account can no longer be found, it has been closed
     if (index > -1) {
@@ -70,22 +96,32 @@ async function onStakeAccountChangeCallback(connection: Connection, keyedAccount
   }
 
   if (index === -1) {
-    console.log(`Could not find existing stake account for address, adding: ${stakeAccounts?.length} ${newStakeAccount}`);
-    const naturalStakeAccountSeedPubkeys = await Promise.all(Array.from(Array(20).keys()).map(async i => {
-      const seed = `${i}`;
-      return PublicKey.createWithSeed(walletPublicKey, seed, STAKE_PROGRAM_ID).then(pubkey => ({seed, pubkey}));
-    }));
+    console.log(
+      `Could not find existing stake account for address, adding: ${stakeAccounts?.length} ${newStakeAccount}`
+    );
+    const naturalStakeAccountSeedPubkeys = await Promise.all(
+      Array.from(Array(20).keys()).map(async (i) => {
+        const seed = `${i}`;
+        return PublicKey.createWithSeed(
+          walletPublicKey,
+          seed,
+          STAKE_PROGRAM_ID
+        ).then((pubkey) => ({ seed, pubkey }));
+      })
+    );
 
-    const seed = naturalStakeAccountSeedPubkeys.find(element => element.pubkey.equals(accountId))?.seed ?? 'N.A.';
+    const seed =
+      naturalStakeAccountSeedPubkeys.find((element) =>
+        element.pubkey.equals(accountId)
+      )?.seed ?? 'N.A.';
     updatedStakeAccounts.push({
       address: accountId,
       seed,
       lamports: parsedAccountInfo.lamports,
       stakeAccount: newStakeAccount,
-      inflationRewards: [] // In 99.999% of cases this should be correct
+      inflationRewards: [], // In 99.999% of cases this should be correct
     });
-  }
-  else {
+  } else {
     updatedStakeAccounts[index].stakeAccount = newStakeAccount;
   }
 
@@ -94,7 +130,7 @@ async function onStakeAccountChangeCallback(connection: Connection, keyedAccount
 }
 
 function ClusterSelector() {
-  //const { cluster, setCluster } = useCluster();
+  // const { cluster, setCluster } = useCluster();
 
   return (
     <select
@@ -103,7 +139,11 @@ function ClusterSelector() {
       // onChange={e => setCluster(e.target.value as string)}
     >
       {Object.values(WalletAdapterNetwork).map((network) => (
-        <option value={network} key={network}>
+        <option
+          value={network}
+          key={network}
+          disabled={network !== 'mainnet-beta'}
+        >
           {network}
         </option>
       ))}
@@ -115,9 +155,12 @@ const DApp: FC = () => {
   const { connection } = useConnection();
   // const { setUrl } = useConnectionConfig();
   const { publicKey, disconnect } = useWallet();
-  const { manualPublicKey, setManualPublicKeyString } = useContext(AccountsContext);
+  const { manualPublicKey, setManualPublicKeyString } =
+    useContext(AccountsContext);
   const [loading, setLoading] = useState<boolean>(false);
-  const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[] | null>(null);
+  const [stakeAccounts, setStakeAccounts] = useState<StakeAccountMeta[] | null>(
+    null
+  );
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -125,28 +168,34 @@ const DApp: FC = () => {
     const newPublicKey = publicKey || manualPublicKey;
     if (newPublicKey) {
       setLoading(true);
-      findStakeAccountMetas(connection, newPublicKey)
-        .then(newStakeAccounts => {
+      findStakeAccountMetas(connection, newPublicKey).then(
+        (newStakeAccounts) => {
           setStakeAccounts(newStakeAccounts);
           setLoading(false);
-        });
+        }
+      );
     }
   }, [connection, publicKey, manualPublicKey]);
 
-  async function addStakeAccount(stakeAccountPublicKey: PublicKey, seed: string) {
+  async function addStakeAccount(
+    stakeAccountPublicKey: PublicKey,
+    seed: string
+  ) {
     if (!stakeAccounts) {
       return;
     }
     let newStakeAccounts = [...stakeAccounts];
 
     // Try a few times with standoff
-    let parsedAccountInfo: AccountInfo<Buffer | ParsedAccountData> | null = null;
-    for (let i = 0;i < 5;i++) {
-      parsedAccountInfo = (await connection.getParsedAccountInfo(stakeAccountPublicKey)).value;
+    let parsedAccountInfo: AccountInfo<Buffer | ParsedAccountData> | null =
+      null;
+    for (let i = 0; i < 5; i++) {
+      parsedAccountInfo = (
+        await connection.getParsedAccountInfo(stakeAccountPublicKey)
+      ).value;
       if (parsedAccountInfo) {
         break;
-      }
-      else {
+      } else {
         await sleep(600);
       }
     }
@@ -163,7 +212,7 @@ const DApp: FC = () => {
       seed,
       lamports: parsedAccountInfo.lamports,
       stakeAccount,
-      inflationRewards: []
+      inflationRewards: [],
     });
     sortStakeAccountMetas(newStakeAccounts);
     setStakeAccounts(newStakeAccounts);
@@ -180,19 +229,21 @@ const DApp: FC = () => {
           keyedAccountInfo,
           context,
           stakeAccounts,
-          publicKey,
+          publicKey
         );
         if (updatedStakeAccounts) {
           setStakeAccounts(updatedStakeAccounts);
         }
       },
       connection.commitment,
-      [{
-        memcmp: {
-          offset: 12,
-          bytes: publicKey.toBase58()
-        }
-      }]
+      [
+        {
+          memcmp: {
+            offset: 12,
+            bytes: publicKey.toBase58(),
+          },
+        },
+      ]
     );
 
     return () => {
@@ -204,29 +255,32 @@ const DApp: FC = () => {
   // Unfortunately we need to listen again because closing accounts do not notify above
   // In addition, subscription above is bugged and often drops notifications https://github.com/solana-labs/solana/issues/18587
   useEffect(() => {
-    const subscriptionIds = stakeAccounts?.map(stakeAccountMeta => {
-      return connection.onAccountChange(stakeAccountMeta.address, async (accountInfo, context) => {
-        const updatedStakeAccounts = await onStakeAccountChangeCallback(
-          connection,
-          {
-            accountId: stakeAccountMeta.address,
-            accountInfo
-          },
-          context,
-          stakeAccounts,
-          PublicKey.default,
-        );
-        if (updatedStakeAccounts) {
-          setStakeAccounts(updatedStakeAccounts);
+    const subscriptionIds = stakeAccounts?.map((stakeAccountMeta) => {
+      return connection.onAccountChange(
+        stakeAccountMeta.address,
+        async (accountInfo, context) => {
+          const updatedStakeAccounts = await onStakeAccountChangeCallback(
+            connection,
+            {
+              accountId: stakeAccountMeta.address,
+              accountInfo,
+            },
+            context,
+            stakeAccounts,
+            PublicKey.default
+          );
+          if (updatedStakeAccounts) {
+            setStakeAccounts(updatedStakeAccounts);
+          }
         }
-      });
+      );
     });
 
     // Necessary subscription cleanup
     return () => {
-      subscriptionIds?.forEach(id => {
+      subscriptionIds?.forEach((id) => {
         connection.removeAccountChangeListener(id);
-      })
+      });
     };
   }, [connection, stakeAccounts]);
 
@@ -239,18 +293,23 @@ const DApp: FC = () => {
             <SolstakeLogoSvg />
           </RouterLink>
         </div>
-        
-        <div>    
+
+        <div>
           <div className="block md:inline">
             <ThemeToggler />
-            <IconButton onClick={() => {setOpen(true); }}>
+            <IconButton
+              onClick={() => {
+                setOpen(true);
+              }}
+            >
               <Info />
             </IconButton>
           </div>
-          
+
           <div className="inline-block m-2">
             <Tooltip title="Use known stake account authority">
-              <button className="solBtnGray p-0 m-0"
+              <button
+                className="solBtnGray p-0 m-0"
                 onClick={() => {
                   disconnect();
                   // setUrl(ENDPOINTS[0].url);
@@ -267,7 +326,6 @@ const DApp: FC = () => {
 
       {/* Main flex wrapper */}
       <div className="h-full p-10 text-center">
-
         <div className="leading-none flex flex-wrap md:inline-flex sm:w-full md:w-11/12 lg:w-11/12 xl:w-4/5 max-w-screen-xl">
           <Epoch />
 
@@ -283,19 +341,13 @@ const DApp: FC = () => {
               <CircularProgress color="primary" />
             </div>
           )}
-          {stakeAccounts && (
-            <StakeAccounts stakeAccountMetas={stakeAccounts} />
-          )}
-
+          {stakeAccounts && <StakeAccounts stakeAccountMetas={stakeAccounts} />}
         </div>
       </div>
 
-      <HelpDialog
-        open={open}
-        handleClose={() => setOpen(false)}
-      />
+      <HelpDialog open={open} handleClose={() => setOpen(false)} />
     </div>
   );
-}
+};
 
 export default DApp;
