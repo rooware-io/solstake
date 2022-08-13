@@ -1,10 +1,9 @@
 import { Connection, PublicKey, ValidatorInfo, VoteAccountInfo } from "@solana/web3.js";
 import { createContext, useEffect, useState } from "react";
 import { ValidatorScore } from "../utils/validatorsApp";
-import { useConnection, useConnectionConfig } from "./connection";
-import { useWallet } from "./wallet";
 import { getValidatorScores } from '../utils/validatorsApp'
 import { getStakeviewApys, ValidatorApy } from "../utils/stakeviewApp";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 
 const CONFIG_PROGRAM_ID = new PublicKey('Config1111111111111111111111111111111111111');
 
@@ -41,8 +40,8 @@ export function ValidatorsProvider({ children = null as any }) {
   const [validatorApys, setValidatorApys] = useState<ValidatorApy[]>([]);
   const [totalActivatedStake, setTotalActivatedStake] = useState(0);
 
-  const connection = useConnection();
-  const { cluster } = useConnectionConfig();
+  const { connection } = useConnection();
+  const cluster = 'mainnet-beta'; // useConnectionConfig();
   const { connected } = useWallet();
   
   useEffect(() => {

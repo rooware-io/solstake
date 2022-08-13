@@ -1,7 +1,7 @@
+import { useConnection } from "@solana/wallet-adapter-react";
 import { EpochInfo, EpochSchedule } from "@solana/web3.js";
 import React, { useEffect, useState } from "react";
 import { getFirstBlockTime } from "../utils/block";
-import { useConnection } from "./connection";
 
 interface EpochConfig {
   epochInfo: EpochInfo | undefined;
@@ -16,7 +16,7 @@ export const EpochContext = React.createContext<EpochConfig>({
 });
 
 export function EpochProvider({ children = undefined as any }) {
-  const connection = useConnection();
+  const { connection } = useConnection();
   const [epochInfo, setEpochInfo] = useState<EpochInfo>();
   const [epochSchedule, setEpochSchedule] = useState<EpochSchedule>();
   const [epochStartTime, setEpochStartTime] = useState<number>();

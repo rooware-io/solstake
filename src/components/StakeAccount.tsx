@@ -1,27 +1,24 @@
-import { Button, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, List, ListItem, ListItemText, TextField, Tooltip } from "@material-ui/core";
-//import { ExpandLess, ExpandMore, OpenInNew } from "@material-ui/icons";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { Button, CircularProgress, Collapse, Dialog, DialogActions, DialogContent, DialogTitle, InputAdornment, List, ListItem, ListItemText, TextField, Tooltip } from "@mui/material";
 import { LAMPORTS_PER_SOL, PublicKey, StakeActivationData, StakeProgram } from "@solana/web3.js";
 import BN from "bn.js";
-import React, { useContext, useEffect, useMemo, useState } from "react";
-import { sendTransaction, useConnection, useSendConnection, useSolanaExplorerUrlSuffix } from "../contexts/connection";
 import { EpochContext } from "../contexts/epoch";
-import { useWallet } from "../contexts/wallet";
 import { getFirstBlockTime } from "../utils/block";
 import { useMonitorTransaction } from "../utils/notifications";
 import { StakeAccountMeta } from "../utils/stakeAccounts";
 import { formatPct, shortenAddress } from "../utils/utils";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import { DelegateDialog } from "./DelegateDialog";
-import { WalletAdapter } from "../wallet-adapters/walletAdapter";
+import { useConnection, useWallet, WalletContextState } from '@solana/wallet-adapter-react';
 import * as mathjs from "mathjs";
+import { useSolanaExplorerUrlSuffix } from "../hooks/useSolanaExplorerUrlSuffix";
 
 const MAX_EPOCH = new BN(2).pow(new BN(64)).sub(new BN(1));
 
 export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAccountMeta}) {
-  const connection = useConnection();
-  const sendConnection = useSendConnection();
-  const {wallet, connected} = useWallet();
-  const {monitorTransaction} = useMonitorTransaction();
+  const { connection } = useConnection();
+  const { publicKey, connected, sendTransaction } = useWallet();
+  const { monitorTransaction } = useMonitorTransaction();
   const urlSuffix = useSolanaExplorerUrlSuffix();
   const { epochSchedule, epochStartTime } = useContext(EpochContext);
 
@@ -80,7 +77,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
   const voteAccountAddress = useMemo(() => {
     return stakeAccountMeta.stakeAccount.info.stake?.delegation.voter
   }, [stakeAccountMeta])
-  
+
   return (
     <div className="bg-transparent w-full font-light pb-3">
       <div className="solBoxGray dark:bg-solblue-dark rounded-b-none rounded-t-lg w-full bg-white uppercase flex flex-wrap md:justify-between items-center text-center md:text-left" style={{borderBottomLeftRadius: 0, borderBottomRightRadius: 0}}>
@@ -141,21 +138,17 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                 className="solBtnGray whitespace-nowrap"
                 hidden={stakeActivationData?.state === "inactive" || stakeActivationData?.state === "deactivating"}
                 onClick={async () => {
-                  if(!wallet?.publicKey) {
-                    return;
-                  }
+                  if(!publicKey) return;
 
                   const transaction = StakeProgram.deactivate({
                     stakePubkey: stakeAccountMeta.address,
-                    authorizedPubkey: wallet.publicKey,
+                    authorizedPubkey: publicKey,
                   });
 
                   await monitorTransaction(
                     sendTransaction(
-                      sendConnection,
-                      wallet,
-                      transaction.instructions,
-                      []
+                      transaction,
+                      connection,
                     ),
                     {
                       onSuccess: () => {},
@@ -180,10 +173,10 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
             </>
           }
 
-          {wallet?.publicKey && withdrawOpen && (
+          {publicKey && withdrawOpen && (
             <WithdrawDialog
-              wallet={wallet}
-              userPublicKey={wallet.publicKey}
+              userPublicKey={publicKey}
+              sendTransaction={sendTransaction}
               stakePubkey={stakeAccountMeta.address}
               stakeAccountLamports={stakeAccountMeta.lamports}
               handleClose={() => {
@@ -250,7 +243,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                   <span>
                     <span className="ml-4">Rewards </span>
                     <span className="font-normal">{totalRewards / LAMPORTS_PER_SOL} SOL </span>
-                    <span className="text-xs">{(APR && formatPct.format(APR)) || '-'} APR </span>
+                    {/* <span className="text-xs">{(APR && formatPct.format(APR)) || '-'} APR </span> */}
                   </span>
                   <span className="ico-plus" hidden={stakeAccountMeta.inflationRewards.length === 0}>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -268,13 +261,16 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
                         <ListItemText className="w-1/3" primary={`Reward`} />
                         <ListItemText className="w-1/3" primary={`Post Balance`} />
                     </ListItem>
-                    {stakeAccountMeta.inflationRewards.map(inflationReward => (
+                    {stakeAccountMeta.inflationRewards.map((inflationReward) => (
                       <ListItem className="justify-items border-b border-solblue-2 dark:border-solblue-darker" style={{padding: 1, paddingLeft: 20, paddingRight: 20}} key={inflationReward.epoch}>
                         <ListItemText className="w-1/3" primary={`${inflationReward.epoch}`} />
                         <ListItemText className="w-1/3" primary={`${inflationReward.amount / LAMPORTS_PER_SOL} SOL`} />
                         <ListItemText className="w-1/3" primary={`${inflationReward.postBalance / LAMPORTS_PER_SOL}`} />
                       </ListItem>
                     ))}
+                    <ListItem className="justify-items border-b border-solblue-2 dark:border-solblue-darker" style={{padding: 1, paddingLeft: 20, paddingRight: 20}} key={'Disclaimer'}>
+                      <ListItemText className="w-1/3" primary={`Truncated to last 5 epochs`} />
+                    </ListItem>
                   </List>
                 </Collapse>
               </div>
@@ -287,16 +283,16 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
 }
 
 interface WithdrawDialogProps {
-  wallet: WalletAdapter;
   userPublicKey: PublicKey;
+  sendTransaction: WalletContextState['sendTransaction'];
   stakePubkey: PublicKey;
   stakeAccountLamports: number;
   handleClose: () => void;
 };
 
-function WithdrawDialog({wallet, userPublicKey, stakePubkey, stakeAccountLamports, handleClose}: WithdrawDialogProps) {
-  const sendConnection = useSendConnection();
-  const {monitorTransaction, sending} = useMonitorTransaction();
+function WithdrawDialog({userPublicKey, sendTransaction, stakePubkey, stakeAccountLamports, handleClose}: WithdrawDialogProps) {
+  const { connection } = useConnection();
+  const { monitorTransaction, sending } = useMonitorTransaction();
 
   const [amount, setAmount] = useState('');
   const max = useMemo(() => {
@@ -344,19 +340,18 @@ function WithdrawDialog({wallet, userPublicKey, stakePubkey, stakeAccountLamport
         <Button
           disabled={sending}
           onClick={async () => {
+            const withdrawTransaction = StakeProgram.withdraw({
+              stakePubkey,
+              authorizedPubkey: userPublicKey,
+              toPubkey: userPublicKey,
+              lamports: mathjs.bignumber(amount)
+                .mul(LAMPORTS_PER_SOL)
+                .toNumber(),
+            });
             await monitorTransaction(
               sendTransaction(
-                sendConnection,
-                wallet,
-                StakeProgram.withdraw({
-                  stakePubkey,
-                  authorizedPubkey: userPublicKey,
-                  toPubkey: userPublicKey,
-                  lamports: mathjs.bignumber(amount)
-                    .mul(LAMPORTS_PER_SOL)
-                    .toNumber(),
-                }).instructions,
-                []
+                withdrawTransaction,
+                connection
               ),
               {
                 onSuccess: () => {
