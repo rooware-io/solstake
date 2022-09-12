@@ -80,10 +80,11 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
 
   return (
     <div className="bg-transparent w-full font-light pb-3">
-      <div className="solBoxGray dark:bg-solblue-dark rounded-b-none rounded-t-lg w-full bg-white uppercase flex flex-wrap md:justify-between items-center text-center md:text-left" style={{borderBottomLeftRadius: 0, borderBottomRightRadius: 0}}>
+      <div className="solBoxGray dark:bg-solblue-dark rounded-b-none rounded-t-lg w-full bg-white flex flex-wrap md:justify-between items-center text-center md:text-left" style={{borderBottomLeftRadius: 0, borderBottomRightRadius: 0}}>
         {/* Seed account info */}
-        <div className="w-full pb-3 pt-3 md:pt-0 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap">
-          <span className="text-sm leading-6">SEED {stakeAccountMeta.seed} </span> 
+        <div className="w-full pb-3 pt-3 md:pt-0 md:pb-0 md:w-auto md:pl-5 whitespace-nowrap">
+          <p className="text-md leading-3 uppercase font-bold"> {stakeAccountMeta.seed} </p>
+          <span className="text-xs leading-6">Seed</span> 
           
           {/* <Tooltip title={'Split'}>
             <button className="text-solblue-2" style={{direction: 'rtl'}}>
@@ -97,32 +98,52 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
           </Tooltip> */}
           <br />
           
-          <span className="text-lg font-bold leading-3">{stakeAccountMeta.lamports / LAMPORTS_PER_SOL} SOL</span><br />
+          <span className="text-lg font-bold leading-6">{stakeAccountMeta.lamports / LAMPORTS_PER_SOL} SOL</span><br />
           {/* <span className="text-xs leading-none">$X</span> */}
         </div>
-        <div className="w-full pb-3 md:pb-0 md:w-2/12 md:pl-5 whitespace-nowrap leading-5">
-          <p>State: <span className="font-bold">{stakeActivationData?.state}</span></p>
-          <p>Type: <span className="font-bold">{stakeAccountMeta.stakeAccount.type}</span></p>
+        <div className="w-full pb-3 md:pb-0 md:w-auto md:pl-2 whitespace-nowrap leading-5">
+          <p className="text-md leading-3 uppercase font-bold pt-2"> {stakeActivationData?.state} </p>
+          <span className="text-xs leading-6">State</span> 
+          <p className="text-md leading-3 uppercase font-bold pt-2"> {stakeAccountMeta.stakeAccount.type} </p>
+          <span className="text-xs leading-6">Type</span> 
         </div>
-        <div className="w-full m-2 pb-6 md:pb-0 md:w-3/12 md:pl-5 whitespace-nowrap leading-5">
+        <div className="w-full pb-3 md:pb-0 md:w-auto md:flex justify-center">
+          <div className="w-full pb-3 md:pb-0 md:pl-2 md:w-auto">
+            <p className="leading-3 pt-2 items-center text-center flex justify-center">
+              <img src="https://s3.amazonaws.com/keybase_processed_uploads/c0f254a3c6c17885a61cd7ef1f2d3205_360_360.jpg" alt="Validator Logo" width="72" height="72"></img>
+            </p>
+          </div>
+          <div className="w-full pb-3 md:pb-0 md:w-auto md:pl-3 whitespace-nowrap leading-5">
+            <p className="text-md leading-3 uppercase font-bold pt-2">Genisis Validator 0% Fee ...</p>
+            <span className="text-xs leading-6">Validator</span> 
+            {stakeAccountMeta.stakeAccount.info.stake && (
+              <>
+                <p className="text-md leading-3 uppercase font-bold pt-2">
+                  <a
+                    href={`https://explorer.solana.com/address/${voteAccountAddress?.toBase58()}${urlSuffix}`}
+                    rel="noopener noreferrer" target="_blank"
+                    className="font-bold leading-3"
+                  >
+                    {shortenAddress(voteAccountAddress?.toBase58() ?? '')}
+                  </a>
+                </p>
+                <span className="text-xs leading-6">Validator Address</span>
+              </>
+            )}
+          </div>
+        </div>
+        <div className="w-full m-2 pb-6 md:pb-0 md:w-auto md:pl-2 whitespace-nowrap leading-5">
           {stakeAccountMeta.stakeAccount.info.stake && (
             <>
-              <p>Validator:{' '}
-                <a
-                  href={`https://explorer.solana.com/address/${voteAccountAddress?.toBase58()}${urlSuffix}`}
-                  rel="noopener noreferrer" target="_blank"
-                  className="font-bold"
-                >
-                  {shortenAddress(voteAccountAddress?.toBase58() ?? '')}
-                </a>
-              </p>
-              <p>Activation Epoch: <span className="font-bold">{formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.activationEpoch)}</span></p>
-              <p>Deactivation Epoch: <span className="font-bold">{formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.deactivationEpoch)}</span></p>
+              <p className="text-md leading-3 uppercase font-bold pt-2"> {formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.activationEpoch)} </p>
+              <span className="text-xs leading-6">Activation Epoch</span> 
+              <p className="text-md leading-3 uppercase font-bold pt-2"> {formatEpoch(stakeAccountMeta.stakeAccount.info.stake.delegation.deactivationEpoch)} </p>
+              <span className="text-xs leading-6">Deactivation Epoch</span>
             </>
           )}
         </div>
         {/* Stake accounts - always visible */}
-        <div className="w-full pb-5 md:pb-2 md:pt-2 md:w-3/12 md:pr-10 md:text-right">
+        <div className="w-full pb-5 md:pb-2 md:pt-2 md:w-1/4 md:pr-10 md:text-right">
           {connected &&
             <>
               <button
@@ -133,7 +154,7 @@ export function StakeAccountCard({stakeAccountMeta}: {stakeAccountMeta: StakeAcc
               >
                 {stakeActivationData?.state === "activating" && "Re-"}Delegate
               </button>
-
+              {' '}
               <button
                 className="solBtnGray whitespace-nowrap"
                 hidden={stakeActivationData?.state === "inactive" || stakeActivationData?.state === "deactivating"}
