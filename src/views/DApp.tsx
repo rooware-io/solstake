@@ -135,8 +135,8 @@ function ClusterSelector() {
   return (
     <select
       className="solBtnGray"
-      // value={cluster}
-      // onChange={e => setCluster(e.target.value as string)}
+    // value={cluster}
+    // onChange={e => setCluster(e.target.value as string)}
     >
       {Object.values(WalletAdapterNetwork).map((network) => (
         <option
@@ -154,7 +154,7 @@ function ClusterSelector() {
 const DApp: FC = () => {
   const { connection } = useConnection();
   // const { setUrl } = useConnectionConfig();
-  const { publicKey, disconnect } = useWallet();
+  const { publicKey, wallet, disconnect } = useWallet();
   const { manualPublicKey, setManualPublicKeyString } =
     useContext(AccountsContext);
   const [loading, setLoading] = useState<boolean>(false);
@@ -312,6 +312,7 @@ const DApp: FC = () => {
                 className="solBtnGray p-0 m-0"
                 onClick={() => {
                   disconnect();
+
                   // setUrl(ENDPOINTS[0].url);
                   setManualPublicKeyString(DEMO_PUBLIC_KEY_STRING);
                 }}

@@ -41,7 +41,6 @@ export default function WalletConnector() {
           <div className="pb-4 pt-2 lg:pt-0 text-center lg:text-right w-full lg:w-1/5">
             <WalletMultiButton className="solBtnGray pb-0.5">
               <SvgIcon><WalletIcon /></SvgIcon>
-              
               <p>Connect Wallet</p>
             </WalletMultiButton>
           </div>
